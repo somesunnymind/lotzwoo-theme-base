@@ -80,17 +80,36 @@ Tags: block-theme, full-site-editing, e-commerce
   max-width: none;
 }
 
-/* Die Kontextleiste des Shops klebt oben. Ohne diese Zeile klebt sie
-   unter der Admin-Bar fest, und im eingeloggten Zustand — also immer,
-   denn ohne Anmeldung gibt es keinen B2B-Shop — verdeckt die Leiste
-   die erste Tabellenzeile. */
-body.admin-bar {
-  --lotzapp-offset-top: 32px;
+/* Die Kontextleiste des Shops klebt oben, und die WordPress-Admin-Bar
+   liegt fest darüber. Ohne Versatz verschwindet die Leiste unter ihr —
+   und mit ihr der Matrix-Spaltenkopf, der sich an ihrer Unterkante
+   ausrichtet.
+
+   Der Name ist der des Plugins. Die erste Fassung dieser Datei erfand
+   `--lotzapp-offset-top`, das nichts liest; das Plugin rechnet mit
+   `--lwb-sticky-top`, deklariert auf seinen beiden Wurzeln. Ein Token
+   umzubenennen heißt hier, ihn abzuschalten.
+
+   Die drei Stufen sind die der Admin-Bar selbst: 32px im Normalfall,
+   46px darunter — und unter 600px gar keiner, weil sie dort
+   `position: absolute` wird und mitscrollt. Ein Versatz für eine Leiste,
+   die nicht mehr steht, wäre ein Loch über der Tabelle. */
+body.admin-bar .lotzwoo-b2b-shop,
+body.admin-bar .lotzwoo-reorder {
+  --lwb-sticky-top: 32px;
 }
 
 @media screen and (max-width: 782px) {
-  body.admin-bar {
-    --lotzapp-offset-top: 46px;
+  body.admin-bar .lotzwoo-b2b-shop,
+  body.admin-bar .lotzwoo-reorder {
+    --lwb-sticky-top: 46px;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  body.admin-bar .lotzwoo-b2b-shop,
+  body.admin-bar .lotzwoo-reorder {
+    --lwb-sticky-top: 0px;
   }
 }
 
