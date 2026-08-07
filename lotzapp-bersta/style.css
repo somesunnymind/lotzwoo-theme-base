@@ -1,0 +1,21 @@
+/*
+Theme Name: LotzApp B2B — Bersta
+Template: lotzapp-base
+Author: somesunnymind.com
+Description: Kundenspezifisches Kindtheme für Bersta. Trägt Farben, Schriften und Logo in theme.json — sonst nichts. Was hier landet, ist per Definition kundenspezifisch; alles andere gehört ins Basis-Theme.
+Version: 0.1.0
+Requires PHP: 8.1
+License: GNU General Public License v2 or later
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
+Text Domain: lotzapp-bersta
+*/
+
+/* Absichtlich leer.
+
+   Eine Regel, die hier steht, ist eine Regel, die im nächsten Kundentheme
+   fehlt oder kopiert werden muss. Farbe, Schrift und Abstand gehören in
+   theme.json daneben — von dort erreichen sie sowohl die Blöcke als auch,
+   über die Brücke im Basis-Theme, die B2B-Oberflächen des Plugins.
+
+   Wenn hier doch einmal etwas stehen muss, ist die erste Frage, ob es nicht
+   ins Basis-Theme gehört. */

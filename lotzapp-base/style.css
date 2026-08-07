@@ -1,0 +1,122 @@
+/*
+Theme Name: LotzApp B2B Base
+Theme URI: https://somesunnymind.com/
+Author: somesunnymind.com
+Description: Minimales Block-Theme für B2B-Großhandelsshops auf WooCommerce. Trägt das Design-System in theme.json und sonst so wenig wie möglich — Kopfbereich, Fußbereich, ein Seiten-Template über die volle Breite. Alles Kundenspezifische gehört in ein Kindtheme.
+Version: 0.1.0
+Requires at least: 6.5
+Tested up to: 7.0
+Requires PHP: 8.1
+License: GNU General Public License v2 or later
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
+Text Domain: lotzapp-base
+Tags: block-theme, full-site-editing, e-commerce
+*/
+
+/* ==================================================================
+   Die Brücke zwischen theme.json und den B2B-Oberflächen.
+
+   Das Plugin bringt sein eigenes Design-System mit (`b2b-tokens.css`,
+   65 Custom Properties, auf `.lotzwoo-b2b-shop` und `.lotzwoo-reorder`
+   gescopet). Das ist richtig so: das Plugin muss in jedem Theme
+   funktionieren, auch in einem, das nichts von ihm weiß.
+
+   Dieses Theme weiß von ihm. Also übersetzt es hier die
+   theme.json-Presets in die Token des Plugins — genau an der Stelle,
+   die der Kommentar in `b2b-tokens.css` dafür vorsieht: "Wo eine Site
+   übernehmen soll, genügt es, den Token auf einer der Wurzeln zu
+   überschreiben."
+
+   Die Richtung ist Absicht. Stünde die Abhängigkeit im Plugin, hinge
+   das Plugin am Theme. So hängt das Theme am Plugin, und wer das Theme
+   wechselt, bekommt wieder die Standardwerte statt einer kaputten
+   Oberfläche. Der Fallback hinter jedem `var()` ist derselbe Wert, den
+   das Plugin ohnehin mitbringt.
+
+   Ein Kindtheme ändert nur theme.json. Diese Datei bleibt unberührt.
+   ================================================================== */
+
+.lotzwoo-b2b-shop,
+.lotzwoo-reorder {
+  --lwb-brand-50:  var(--wp--preset--color--brand-50,  #eaf6f1);
+  --lwb-brand-100: var(--wp--preset--color--brand-100, #cfe9de);
+  --lwb-brand-200: var(--wp--preset--color--brand-200, #a3d5c2);
+  --lwb-brand-300: var(--wp--preset--color--brand-300, #6bbb9f);
+  --lwb-brand-400: var(--wp--preset--color--brand-400, #349a7a);
+  --lwb-brand-500: var(--wp--preset--color--brand-500, #157d5f);
+  --lwb-brand-600: var(--wp--preset--color--brand-600, #0f6b51);
+  --lwb-brand-700: var(--wp--preset--color--brand-700, #0b5641);
+  --lwb-brand-800: var(--wp--preset--color--brand-800, #084132);
+  --lwb-brand-900: var(--wp--preset--color--brand-900, #062f25);
+
+  --lwb-ink-900: var(--wp--preset--color--ink-900, #0d1520);
+  --lwb-ink-700: var(--wp--preset--color--ink-700, #263243);
+  --lwb-ink-500: var(--wp--preset--color--ink-500, #5a6879);
+  --lwb-ink-400: var(--wp--preset--color--ink-400, #8592a3);
+  --lwb-ink-200: var(--wp--preset--color--ink-200, #dbe1e8);
+  --lwb-ink-100: var(--wp--preset--color--ink-100, #f1f4f7);
+  --lwb-ink-50:  var(--wp--preset--color--ink-50,  #f7f9fb);
+
+  --lwb-ok-500:   var(--wp--preset--color--ok-500,   #17794a);
+  --lwb-warn-500: var(--wp--preset--color--warn-500, #a86a08);
+  --lwb-err-500:  var(--wp--preset--color--err-500,  #b42318);
+  --lwb-info-500: var(--wp--preset--color--info-500, #1e5eb8);
+
+  --lwb-font-sans: var(--wp--preset--font-family--sans, "Inter", "Segoe UI", system-ui, sans-serif);
+  --lwb-font-num:  var(--wp--preset--font-family--mono, ui-monospace, Consolas, monospace);
+}
+
+/* ==================================================================
+   Was ein B2B-Portal vom Theme braucht und was ein Blog-Theme nicht
+   mitbringt.
+   ================================================================== */
+
+/* Der Katalog ist eine dichte Tabelle. Ein Inhaltsbereich von 960px
+   quetscht sie unlesbar zusammen — dokumentiert im Deploy-Runbook als
+   die Falle, in die jede neue Installation einmal tritt. Die Seite mit
+   dem Shortcode nimmt deshalb das Full-Width-Template, und dort gibt
+   das Theme die Breite frei, statt sie zu begrenzen. */
+.lotzwoo-page-full-width .wp-block-post-content > * {
+  max-width: none;
+}
+
+/* Die Kontextleiste des Shops klebt oben. Ohne diese Zeile klebt sie
+   unter der Admin-Bar fest, und im eingeloggten Zustand — also immer,
+   denn ohne Anmeldung gibt es keinen B2B-Shop — verdeckt die Leiste
+   die erste Tabellenzeile. */
+body.admin-bar {
+  --lotzapp-offset-top: 32px;
+}
+
+@media screen and (max-width: 782px) {
+  body.admin-bar {
+    --lotzapp-offset-top: 46px;
+  }
+}
+
+/* Screenreader-Text: das Skip-Link im Kopfbereich braucht ihn und
+   Block-Themes bringen ihn nicht von sich aus mit. */
+.screen-reader-text {
+  border: 0;
+  clip-path: inset(50%);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}
+
+.screen-reader-text:focus {
+  background-color: var(--wp--preset--color--white, #fff);
+  clip-path: none;
+  color: var(--wp--preset--color--ink-900, #0d1520);
+  display: block;
+  height: auto;
+  left: 8px;
+  padding: 12px 20px;
+  top: 8px;
+  width: auto;
+  z-index: 100000;
+}
