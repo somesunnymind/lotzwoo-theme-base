@@ -146,7 +146,12 @@ main#wp--skip-link--target:has(.lwb-contextbar) {
    eine Regel, die aussieht, als griffe sie.
    ================================================================== */
 
-/* Der Kopf hält eine feste Höhe, wie der Prototyp mit --header-h: 60px.
+/* Der Kopf hält die Höhe des Prototyps: --header-h ist dort 60px.
+
+   36px, nicht 60: der <header> legt oben und unten je 12px Innenabstand
+   dazu, macht 60 plus die Trennlinie. Die erste Fassung setzte hier 60 und
+   ergab damit einen 84px hohen Kopf — die Innenabstände waren mitgezählt,
+   ohne dass sie in der Rechnung standen.
 
    Die Höhe hängt an der inneren Reihe, nicht am <header>. Der Header ist ein
    Constrained-Layout: gäbe man ihm display: flex, würden seine Kinder zu
@@ -157,7 +162,19 @@ main#wp--skip-link--target:has(.lwb-contextbar) {
    min-height, nicht height: sobald die Reihe auf schmalen Fenstern umbricht,
    müsste eine feste Höhe den Inhalt abschneiden. */
 .lotzwoo-header-row {
-  min-height: 60px;
+  min-height: 36px;
+}
+
+/* Das Logo muss sich der Zeile fügen, nicht umgekehrt. Der Block schreibt
+   Breite und Höhe als Attribute ans <img> — bersta.png ist fast quadratisch,
+   bei den 140px des Blocks also 126px hoch und damit doppelt so hoch wie der
+   ganze Kopf. Begrenzt wird die Höhe, nicht die Breite: ein breiter
+   Schriftzug als Logo bliebe so lesbar, während eine feste Breite ihn auf
+   Briefmarkengröße brächte. */
+.wp-block-site-logo img {
+  max-height: 36px;
+  width: auto;
+  height: auto;
 }
 
 header .wp-block-site-title a {
@@ -249,9 +266,17 @@ header .current-menu-item > .wp-block-navigation-item__content {
   text-decoration: none;
 }
 
+/* Icon und Text stehen zueinander zentriert, nicht auf der Schriftlinie.
+   Gilt fuer beide Schaltflaechen und fuer das getauschte Lucide-Konto-Icon. */
 .lotzwoo-header-actions svg {
   display: block;
   flex: none;
+}
+
+.lotzwoo-header-actions .label,
+.lotzwoo-header-actions .wc-block-mini-cart__quantity-badge {
+  display: flex;
+  align-items: center;
 }
 
 /* Die Zahl am Warenkorb: Markenfarbe statt Themefarbe, und ein weißer

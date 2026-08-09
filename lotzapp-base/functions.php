@@ -123,3 +123,29 @@ add_filter('render_block_core/site-logo', static function (string $content): str
         . esc_html(function_exists('mb_strtoupper') ? mb_strtoupper($initial) : strtoupper($initial))
         . '</div>';
 }, 10, 1);
+
+/**
+ * Lucide `circle-user` statt WooCommerces eigenem Konto-Icon.
+ *
+ * Der Block bringt ein gefülltes Personen-Symbol in einem eigenen viewBox
+ * (`-5 -5 25 25`) mit. Es steht neben Lucide-Strichicons und fällt dort auf:
+ * andere Strichstärke, andere Anmutung, andere Kantenrundung.
+ *
+ * Ersetzt wird nur das `<svg>`, nicht der Link und nicht die Beschriftung —
+ * ein Block-Filter, der mehr anfasst als nötig, bricht beim nächsten
+ * WooCommerce-Update an einer Stelle, die niemand mit ihm in Verbindung
+ * bringt. Findet sich kein `<svg>`, bleibt alles, wie es war.
+ *
+ * Lucide (https://lucide.dev), ISC-Lizenz.
+ */
+add_filter('render_block_woocommerce/customer-account', static function (string $content): string {
+    $lucide = '<svg class="icon lotzwoo-ico" width="20" height="20" viewBox="0 0 24 24"'
+        . ' fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"'
+        . ' stroke-linejoin="round" aria-hidden="true" focusable="false">'
+        . '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="10" r="3"/>'
+        . '<path d="M7 20.662V19a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1.662"/></svg>';
+
+    $replaced = preg_replace('#<svg\b.*?</svg>#is', $lucide, $content, 1);
+
+    return is_string($replaced) ? $replaced : $content;
+}, 10, 1);
