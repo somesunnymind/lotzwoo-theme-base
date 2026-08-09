@@ -113,6 +113,111 @@ body.admin-bar .lotzwoo-reorder {
   }
 }
 
+/* Die klebende Leiste sitzt ganz oben im Inhalt. Das Seiten-Template gibt
+   `<main>` einen Innenabstand nach oben — richtig für Fließtext, falsch
+   hier: der Abstand liegt zwischen Kopfbereich und Leiste und sieht aus wie
+   ein Loch, das beim Scrollen zuklappt.
+
+   Die Bedingung ist die Leiste selbst, nicht das Template und nicht die
+   Seiten-ID: `:has()` fragt genau das, was gemeint ist — hat dieser
+   Inhaltsbereich eine klebende Kontextleiste? Abgemeldet rendert der
+   Shortcode nur seinen Login-Hinweis und gar keine Leiste, und dann bleibt
+   der Abstand, wo er hingehört.
+
+   `!important` ist hier nicht Bequemlichkeit: Block-Templates schreiben
+   ihre Abstände als Inline-Style an das Element, und den schlägt eine
+   externe Regel sonst nicht. */
+main#wp--skip-link--target:has(.lwb-contextbar) {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+/* ==================================================================
+   Kopfbereich.
+
+   Gegen `docs/mockups/prototype/` im Plugin-Repo gelegt: dort trägt der
+   Kopf links Logo und Navigation, rechts eine Reihe Icon-Schaltflächen.
+   Die Struktur steht in `parts/header.html`; hier stehen nur die Zustände,
+   die ein Block-Theme nicht aus theme.json bekommt.
+
+   Die Klassennamen der beiden WooCommerce-Blöcke sind abgelesen, nicht
+   geraten — `do_blocks()` über die Template-Datei, dann die Klassen aus
+   der Ausgabe. Ein Selektor auf einen Namen, den Woo nicht vergibt, wäre
+   eine Regel, die aussieht, als griffe sie.
+   ================================================================== */
+
+header .wp-block-site-title a {
+  letter-spacing: -.02em;
+  text-decoration: none;
+}
+
+/* Navigationslinks: der Prototyp gibt ihnen eine Fläche, keinen
+   Unterstrich, und markiert die aktuelle Seite farbig statt fett. */
+header .wp-block-navigation-item__content {
+  padding: var(--wp--preset--spacing--20) var(--wp--preset--spacing--30);
+  border-radius: 6px;
+  color: var(--wp--preset--color--ink-500);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+header .wp-block-navigation-item__content:hover,
+header .wp-block-navigation-item__content:focus-visible {
+  background: var(--wp--preset--color--ink-100);
+  color: var(--wp--preset--color--ink-900);
+  text-decoration: none;
+}
+
+header .current-menu-item > .wp-block-navigation-item__content {
+  background: var(--wp--preset--color--brand-50);
+  color: var(--wp--preset--color--brand-600);
+}
+
+/* Konto und Warenkorb sind im Prototyp Schaltflächen mit einer Fläche
+   beim Überfahren. Beide Woo-Blöcke bringen ihr eigenes Icon mit — das
+   ist der Grund, sie zu nehmen statt Icons von Hand zu setzen: die Zahl
+   am Warenkorb ist dann echt und nicht gemalt. */
+.lotzwoo-header-actions {
+  align-items: center;
+}
+
+.lotzwoo-header-actions .wc-block-customer-account__link,
+.lotzwoo-header-actions .wc-block-mini-cart__button {
+  display: flex;
+  align-items: center;
+  gap: var(--wp--preset--spacing--20);
+  padding: 6px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--wp--preset--color--ink-500);
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.lotzwoo-header-actions .wc-block-customer-account__link:hover,
+.lotzwoo-header-actions .wc-block-customer-account__link:focus-visible,
+.lotzwoo-header-actions .wc-block-mini-cart__button:hover,
+.lotzwoo-header-actions .wc-block-mini-cart__button:focus-visible {
+  background: var(--wp--preset--color--ink-100);
+  color: var(--wp--preset--color--ink-900);
+  text-decoration: none;
+}
+
+.lotzwoo-header-actions svg {
+  display: block;
+  flex: none;
+}
+
+/* Die Zahl am Warenkorb: Markenfarbe statt Themefarbe, und ein weißer
+   Rand, damit sie sich vom Icon abhebt, über dem sie sitzt. */
+.lotzwoo-header-actions .wc-block-mini-cart__badge {
+  border: 2px solid var(--wp--preset--color--white);
+  background: var(--wp--preset--color--brand-500);
+  color: var(--wp--preset--color--white);
+  font-weight: 700;
+}
+
 /* Screenreader-Text: das Skip-Link im Kopfbereich braucht ihn und
    Block-Themes bringen ihn nicht von sich aus mit. */
 .screen-reader-text {
