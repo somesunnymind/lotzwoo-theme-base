@@ -146,9 +146,39 @@ main#wp--skip-link--target:has(.lwb-contextbar) {
    eine Regel, die aussieht, als griffe sie.
    ================================================================== */
 
+/* Der Kopf hält eine feste Höhe, wie der Prototyp mit --header-h: 60px.
+
+   Die Höhe hängt an der inneren Reihe, nicht am <header>. Der Header ist ein
+   Constrained-Layout: gäbe man ihm display: flex, würden seine Kinder zu
+   Flex-Elementen und verlören die Auto-Margins, mit denen dieses Layout
+   zentriert und begrenzt — die Breitenbegrenzung wäre weg. Die innere Reihe
+   ist ohnehin schon flex und zentriert dort auch vertikal.
+
+   min-height, nicht height: sobald die Reihe auf schmalen Fenstern umbricht,
+   müsste eine feste Höhe den Inhalt abschneiden. */
+.lotzwoo-header-row {
+  min-height: 60px;
+}
+
 header .wp-block-site-title a {
   letter-spacing: -.02em;
   text-decoration: none;
+}
+
+/* Die Kachel steht nur, solange kein Logo hochgeladen ist — siehe den
+   Filter in functions.php. Maße und Verlauf sind die des Prototyps. */
+.lotzwoo-logomark {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: linear-gradient(140deg, var(--wp--preset--color--brand-400), var(--wp--preset--color--brand-700));
+  color: var(--wp--preset--color--white);
+  font-size: var(--wp--preset--font-size--md);
+  font-weight: 700;
+  line-height: 1;
 }
 
 /* Navigationslinks: der Prototyp gibt ihnen eine Fläche, keinen
@@ -181,18 +211,33 @@ header .current-menu-item > .wp-block-navigation-item__content {
   align-items: center;
 }
 
+/* Zwei Formen, nicht eine — so trennt der Prototyp sie auch. Der
+   Warenkorb ist eine quadratische Schaltfläche von 36px, weil er nur ein
+   Icon trägt; das Konto ist ein Chip mit Text daneben. Beide dieselbe
+   Fläche beim Überfahren, damit sie als eine Reihe lesbar bleiben. */
 .lotzwoo-header-actions .wc-block-customer-account__link,
 .lotzwoo-header-actions .wc-block-mini-cart__button {
   display: flex;
   align-items: center;
-  gap: var(--wp--preset--spacing--20);
-  padding: 6px 10px;
   border: 0;
   border-radius: 8px;
   background: transparent;
   color: var(--wp--preset--color--ink-500);
   cursor: pointer;
   text-decoration: none;
+}
+
+.lotzwoo-header-actions .wc-block-mini-cart__button {
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+}
+
+.lotzwoo-header-actions .wc-block-customer-account__link {
+  gap: var(--wp--preset--spacing--20);
+  padding: 5px 10px;
+  min-height: 36px;
 }
 
 .lotzwoo-header-actions .wc-block-customer-account__link:hover,

@@ -81,3 +81,45 @@ add_filter('body_class', static function (array $classes): array {
 
     return $classes;
 });
+
+/**
+ * Eine Logokachel, solange kein Logo hochgeladen ist.
+ *
+ * Der Prototyp setzt links ein 28px-Quadrat mit Farbverlauf und einem
+ * Buchstaben darin. Das ist der Teil, der einen Kopfbereich fertig aussehen
+ * lässt — und ohne ihn steht dort nur der Website-Titel in Fließtext.
+ *
+ * Der Buchstabe kommt aus dem Website-Titel und ist nicht fest verdrahtet.
+ * Ein hart eingetragenes „L" wäre im Basis-Theme falsch: es trägt jedes
+ * Kundentheme, und der Kunde heißt selten LotzApp.
+ *
+ * Der Block rendert leer, wenn kein Logo gesetzt ist — genau dann greift
+ * das hier. Sobald jemand eines hochlädt, liefert der Block Markup und die
+ * Kachel verschwindet von selbst. Ein Platzhalter, der neben dem echten
+ * Logo stehen bliebe, wäre schlimmer als keiner.
+ *
+ * `aria-hidden`, weil der Website-Titel direkt daneben dasselbe sagt.
+ *
+ * Der Hook heißt `render_block_core/site-logo` — mit Schrägstrich, wie der
+ * Blockname. `render_block_core_site_logo` sieht genauso plausibel aus, ist
+ * aber der Name der Render-Funktion in WordPress und kein Filter: er lässt
+ * sich ohne Fehler registrieren und feuert nie. Erste Fassung dieser Datei
+ * hatte genau den, und nur der Blick auf die Ausgabe hat es gezeigt.
+ */
+add_filter('render_block_core/site-logo', static function (string $content): string {
+    if (trim($content) !== '') {
+        return $content;
+    }
+
+    $name = trim((string) get_bloginfo('name'));
+
+    if ($name === '') {
+        return $content;
+    }
+
+    $initial = function_exists('mb_substr') ? mb_substr($name, 0, 1) : substr($name, 0, 1);
+
+    return '<div class="lotzwoo-logomark" aria-hidden="true">'
+        . esc_html(function_exists('mb_strtoupper') ? mb_strtoupper($initial) : strtoupper($initial))
+        . '</div>';
+}, 10, 1);
