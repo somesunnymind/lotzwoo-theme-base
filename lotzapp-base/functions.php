@@ -23,10 +23,17 @@ add_action('after_setup_theme', static function (): void {
         'flex-width' => true,
     ]);
 
-    // WooCommerce renders its cart and checkout as blocks on this site, but the
-    // account pages and the order-received screen still go through templates it
-    // ships. Declaring support is what stops it from loading its own fallback
-    // stylesheet over ours.
+    // WooCommerce renders its cart, checkout and account through templates it
+    // ships, and this declaration does *not* change what it loads: measured on
+    // 2026-08-10, `woocommerce.css` is enqueued on every page either way.
+    // `WC_Frontend_Scripts::get_styles()` never consults the support flag, and
+    // the "unsupported theme" compatibility layer is already off because this
+    // is a block theme. The line the comment used to carry — that declaring
+    // support stops Woo's fallback stylesheet — was simply wrong.
+    //
+    // It stays for now because it is the documented way to say "this theme
+    // handles Woo itself", and third-party extensions do read it. Whether it
+    // earns its place is a question for the template cut, not for a comment.
     add_theme_support('woocommerce');
 
     load_theme_textdomain('lotzapp-base', get_template_directory() . '/languages');

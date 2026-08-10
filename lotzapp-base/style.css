@@ -17,7 +17,7 @@ Tags: block-theme, full-site-editing, e-commerce
    Die Brücke zwischen theme.json und den B2B-Oberflächen.
 
    Das Plugin bringt sein eigenes Design-System mit (`b2b-tokens.css`,
-   65 Custom Properties, auf `.lotzwoo-b2b-shop` und `.lotzwoo-reorder`
+   54 Custom Properties, auf `.lotzwoo-b2b-shop` und `.lotzwoo-reorder`
    gescopet). Das ist richtig so: das Plugin muss in jedem Theme
    funktionieren, auch in einem, das nichts von ihm weiß.
 
