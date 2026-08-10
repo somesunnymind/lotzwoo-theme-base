@@ -158,6 +158,92 @@ add_filter('render_block_woocommerce/customer-account', static function (string 
 }, 10, 1);
 
 /**
+ * Der eigene Kopfbereich auf der Kasse.
+ *
+ * WooCommerces `page-checkout.html` zieht einen Kopf-Part, der fest auf
+ * `woocommerce/woocommerce` verdrahtet ist — Website-Titel und ein
+ * Warenkorb-Link, sonst nichts. Es ist die einzige Seite des Kaufwegs ohne
+ * Navigation und ohne Mini-Warenkorb: der Kunde verlässt an der teuersten
+ * Stelle sichtbar den Shop. Alle anderen Woo-Templates schreiben
+ * `{"slug":"header"}` ohne `theme` und bekommen die Teile dieses Themes von
+ * allein.
+ *
+ * Geliefert wird **derselbe** `parts/header.html` wie überall. Ein eigener
+ * Kassen-Kopf entsteht nicht, und Woos Kassen-Template wird nicht
+ * überschrieben — AD-1 lässt den Inhalt der Kasse bei WooCommerce.
+ *
+ * Einen **Fuß** gibt es auf der Kasse weiterhin nicht. Woos Template hat gar
+ * keinen Fuß-Part; einen hineinzubekommen hieße, das Template zu übernehmen.
+ *
+ * ## Warum dieser Hebel und kein anderer
+ *
+ * - `parts/checkout-header.html` im Theme greift **nicht**, doppelt gesperrt:
+ *   der Kern bricht bei fremdem `theme`-Attribut ab
+ *   (`wp-includes/blocks/template-part.php`, `get_stylesheet() === $theme`),
+ *   und WooCommerce ersetzt zusätzlich den Render-Callback von
+ *   `core/template-part` und löst stur gegen seine eigene Plugin-Datei auf
+ *   (`BlockTemplatesController::render_woocommerce_template_part()`).
+ * - `pre_get_block_file_template` ginge, aber dort hängt Woo selbst mit
+ *   Priorität 10. `get_block_template` läuft nach Woos Auflösung.
+ *
+ * ## Zwei Eigenschaften des Kerns, auf denen das hier ruht
+ *
+ * `get_block_template()` gibt **früh** zurück, sobald es zu dieser Kennung
+ * einen `wp_template_part`-Beitrag in der Datenbank gibt — dieser Filter läuft
+ * dann gar nicht. Eine bewusste Anpassung im Website-Editor gewinnt also von
+ * selbst, und der Filter kann sie nicht stillschweigend überschreiben.
+ *
+ * `get_stylesheet() . '//header'` löst über das Kindtheme auf und fällt auf die
+ * Datei des Elternthemes zurück. Ein fest eingetragenes `lotzwoo-theme-base`
+ * wäre falsch: es überginge einen Kopf, den ein Kindtheme mitbringt.
+ *
+ * ## Wie es bricht, wenn WooCommerce den Part umbenennt
+ *
+ * Dann trifft die Kennung nicht mehr, der Filter tut nichts, und auf der Kasse
+ * steht wieder Woos eigener Kopf. Das ist **sichtbar** und liefert nichts
+ * Falsches — der Grund, warum die Prüfung auf die vollständige Kennung geht und
+ * nicht auf ein Muster, das auch den nächsten Namen noch fangen würde.
+ */
+add_filter('get_block_template', static function ($block_template, $id, $template_type) {
+    if ($template_type !== 'wp_template_part' || $id !== 'woocommerce/woocommerce//checkout-header') {
+        return $block_template;
+    }
+
+    // Ohne Woos Part gibt es nichts zu ersetzen. Der Kopf dieses Themes an
+    // eine Stelle zu setzen, an der WooCommerce selbst nichts mehr erwartet,
+    // wäre geraten und nicht gefiltert.
+    if (!$block_template instanceof WP_Block_Template) {
+        return $block_template;
+    }
+
+    // Der eigene Kopf wird über dieselbe Funktion geholt, in deren Filter wir
+    // gerade stehen. Die Kennung ist eine andere, die Bedingung oben greift
+    // also nicht — der Riegel steht trotzdem, weil ein Rekursionsschutz, den
+    // man erst braucht, wenn er fehlt, zu spät kommt.
+    static $running = false;
+
+    if ($running) {
+        return $block_template;
+    }
+
+    $running = true;
+    $own = get_block_template(get_stylesheet() . '//header', 'wp_template_part');
+    $running = false;
+
+    if (!$own instanceof WP_Block_Template || trim((string) $own->content) === '') {
+        return $block_template;
+    }
+
+    // Kopie, nicht Mutation: was hier hereinkommt, kann aus einem Cache des
+    // Kerns stammen, und ein verändertes Objekt darin verändert jeden
+    // späteren Aufruf mit.
+    $checkout_header = clone $block_template;
+    $checkout_header->content = $own->content;
+
+    return $checkout_header;
+}, 10, 3);
+
+/**
  * Updates über GitHub, ohne einen eigenen Updater mitzuschleppen.
  *
  * Seit WordPress 6.1 genügt der `Update URI`-Header plus ein Filter, dessen
