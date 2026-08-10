@@ -74,10 +74,42 @@ Tags: block-theme, full-site-editing, e-commerce
 /* Der Katalog ist eine dichte Tabelle. Ein Inhaltsbereich von 960px
    quetscht sie unlesbar zusammen — dokumentiert im Deploy-Runbook als
    die Falle, in die jede neue Installation einmal tritt. Die Seite mit
-   dem Shortcode nimmt deshalb das Full-Width-Template, und dort gibt
-   das Theme die Breite frei, statt sie zu begrenzen. */
+   dem Shortcode nimmt deshalb das Full-Width-Template, und dort hebt
+   das Theme die 960px auf.
+
+   Freigegeben ist die Breite trotzdem nicht: ohne Obergrenze zieht die
+   Matrix auf einem 34-Zoll-Schirm über die volle Fensterbreite, und der
+   Weg von der Artikelnummer links zur Menge rechts wird länger als ein
+   Blick. 1920px ist dieselbe Schale, in der auch der Kopfbereich steht —
+   die Zahl steht dort in `parts/header.html` als `wideSize`, und wer eine
+   der beiden ändert, muss die andere mitnehmen. Sonst hängt die
+   Navigation sichtbar neben der Tabelle darunter.
+
+   `margin-inline: auto` ist der Teil, der überhaupt zentriert; die
+   Obergrenze allein ließe alles links kleben.
+
+   Warum der Deckel auf der Plugin-Wurzel sitzt und nicht auf dem Block
+   darüber: der Block trägt seine 16px als *Innen*abstand. Ein `max-width`
+   dort rechnet sie mit ein und lässt 1888px Inhalt übrig — während die
+   Kopfzeile ihre 1920px voll ausnutzt, weil ihre 16px außen am `<header>`
+   hängen. Unter 1920px fällt das nicht auf: dort greift kein Deckel und
+   beide laufen auf `vw − 32`. Erst auf einem Ultrawide standen Navigation
+   und Tabelle 16px versetzt. Eine Ebene tiefer gedeckelt, ist der Aufbau
+   auf beiden Seiten derselbe — 1920px ohne Innenabstand in einem Elternteil
+   mit 16px — und die Flucht stimmt in jeder Breite.
+
+   Der Selektor greift die beiden Wurzeln des Plugins, nicht `> *`: die
+   Blockstruktur der Seite kann sich ändern, `.lotzwoo-b2b-shop` und
+   `.lotzwoo-reorder` nicht. Es sind dieselben beiden, auf denen oben schon
+   die Token-Brücke steht. */
 .lotzwoo-page-full-width .wp-block-post-content > * {
   max-width: none;
+}
+
+.lotzwoo-page-full-width .lotzwoo-b2b-shop,
+.lotzwoo-page-full-width .lotzwoo-reorder {
+  max-width: 1920px;
+  margin-inline: auto;
 }
 
 /* Die Kontextleiste des Shops klebt oben, und die WordPress-Admin-Bar
