@@ -70,7 +70,8 @@ jobs:
             'lotzapp-base/scripts/*' \
             'lotzapp-base/README.md' \
             'lotzapp-base/AGENTS.md' \
-            'lotzapp-base/package.json'; do
+            'lotzapp-base/package.json' \
+            'lotzapp-base/package-lock.json'; do
             if unzip -l lotzapp-base.zip "$excluded" > /dev/null 2>&1; then
               echo "Gehoert nicht ins ZIP: $excluded" >&2
               exit 1
