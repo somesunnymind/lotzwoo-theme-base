@@ -3,7 +3,7 @@
 Minimales Block-Theme für B2B-Großhandelsshops auf WooCommerce. Es trägt das Design-System in
 `theme.json` und sonst so wenig wie möglich: Kopfbereich, Fußbereich, ein Seiten-Template über die
 volle Breite. **Alles Kundenspezifische gehört in ein Kindtheme** — das erste ist
-[`lotzapp-bersta`](https://github.com/somesunnymind/lotzapp-bersta).
+[`lotzwoo-theme-bersta`](https://github.com/somesunnymind/lotzwoo-theme-bersta).
 
 ## Die Arbeitsteilung, in einem Absatz
 
@@ -75,7 +75,7 @@ Zwei Dinge, die dabei leicht falsch verstanden werden:
   geht, hängt am selben Filter; der Callback prüft deshalb zuerst Stylesheet und `UpdateURI`.
 
 **Das Kindtheme aktualisiert sich nicht mit.** Der Kern führt jedes Stylesheet einzeln.
-`lotzapp-bersta` hat bewusst keinen Update-Kanal und wird per Deploy-Skript ausgeliefert — so liegt
+`lotzwoo-theme-bersta` hat bewusst keinen Update-Kanal und wird per Deploy-Skript ausgeliefert — so liegt
 in keiner Kundeninstallation ein Token.
 
 ## Der Blockname, der zwei Repos verbindet

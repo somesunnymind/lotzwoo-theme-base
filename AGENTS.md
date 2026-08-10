@@ -1,4 +1,4 @@
-# Agenten-Kontext — lotzapp-base
+# Agenten-Kontext — lotzwoo-theme-base
 
 Dieses Repo trägt **nur** das Basis-Theme. Alles Planerische — Wayfinder-Karten, `AD-*`-Entscheidungen,
 Befunde, Runbooks — liegt im Plugin-Repo `somesunnymind/lotzapp-for-woocommerce`.

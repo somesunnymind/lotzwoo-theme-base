@@ -1,7 +1,7 @@
 /*
 Theme Name: LotzApp B2B Theme
 Theme URI: https://somesunnymind.com/
-Update URI: https://github.com/somesunnymind/lotzapp-base
+Update URI: https://github.com/somesunnymind/lotzwoo-theme-base
 Author: LotzApp Solutions
 Description: Minimales Block-Theme für B2B-Großhandelsshops auf WooCommerce. Trägt das Design-System in theme.json und sonst so wenig wie möglich — Kopfbereich, Fußbereich, ein Seiten-Template über die volle Breite. Alles Kundenspezifische gehört in ein Kindtheme.
 Version: 0.2.0
@@ -10,7 +10,7 @@ Tested up to: 7.0
 Requires PHP: 8.1
 License: GNU General Public License v2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
-Text Domain: lotzapp-base
+Text Domain: lotzwoo-theme-base
 Tags: block-theme, full-site-editing, e-commerce
 */
 

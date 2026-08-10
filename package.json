@@ -1,5 +1,5 @@
 {
-  "name": "lotzapp-base",
+  "name": "lotzwoo-theme-base",
   "private": true,
   "description": "Nur Werkzeug fuer die CI-Pruefungen. Das Theme selbst braucht kein Node.",
   "scripts": {

@@ -36,7 +36,7 @@ add_action('after_setup_theme', static function (): void {
     // earns its place is a question for the template cut, not for a comment.
     add_theme_support('woocommerce');
 
-    load_theme_textdomain('lotzapp-base', get_template_directory() . '/languages');
+    load_theme_textdomain('lotzwoo-theme-base', get_template_directory() . '/languages');
 });
 
 /**
@@ -50,7 +50,7 @@ add_action('wp_enqueue_scripts', static function (): void {
     $parent = get_template_directory() . '/style.css';
 
     wp_enqueue_style(
-        'lotzapp-base',
+        'lotzwoo-theme-base',
         get_template_directory_uri() . '/style.css',
         [],
         is_readable($parent) ? (string) filemtime($parent) : null
@@ -67,9 +67,9 @@ add_action('wp_enqueue_scripts', static function (): void {
     }
 
     wp_enqueue_style(
-        'lotzapp-child',
+        'lotzwoo-theme-child',
         get_stylesheet_uri(),
-        ['lotzapp-base'],
+        ['lotzwoo-theme-base'],
         (string) filemtime($child)
     );
 });
@@ -181,25 +181,25 @@ add_filter('render_block_woocommerce/customer-account', static function (string 
  * stillschweigend verworfen.
  */
 add_filter('update_themes_github.com', static function ($update, array $theme_data, string $theme_stylesheet) {
-    if ($theme_stylesheet !== 'lotzapp-base') {
+    if ($theme_stylesheet !== 'lotzwoo-theme-base') {
         return $update;
     }
 
     $uri = $theme_data['UpdateURI'] ?? '';
 
-    if (!is_string($uri) || !str_starts_with($uri, 'https://github.com/somesunnymind/lotzapp-base')) {
+    if (!is_string($uri) || !str_starts_with($uri, 'https://github.com/somesunnymind/lotzwoo-theme-base')) {
         return $update;
     }
 
     $installed = $theme_data['Version'] ?? '0';
 
     $response = wp_remote_get(
-        'https://api.github.com/repos/somesunnymind/lotzapp-base/releases/latest',
+        'https://api.github.com/repos/somesunnymind/lotzwoo-theme-base/releases/latest',
         [
             'timeout' => 10,
             'headers' => [
                 'Accept' => 'application/vnd.github+json',
-                'User-Agent' => 'lotzapp-base/' . $installed,
+                'User-Agent' => 'lotzwoo-theme-base/' . $installed,
             ],
         ]
     );
@@ -225,7 +225,7 @@ add_filter('update_themes_github.com', static function ($update, array $theme_da
     $package = '';
 
     foreach ($release['assets'] ?? [] as $asset) {
-        if (($asset['name'] ?? '') === 'lotzapp-base.zip') {
+        if (($asset['name'] ?? '') === 'lotzwoo-theme-base.zip') {
             $package = (string) ($asset['browser_download_url'] ?? '');
             break;
         }
@@ -233,7 +233,7 @@ add_filter('update_themes_github.com', static function ($update, array $theme_da
 
     // Ohne Paket kein Update. Die Quell-Archive, die GitHub automatisch
     // beilegt, taugen nicht: ihr einziges Unterverzeichnis heisst
-    // `lotzapp-base-<tag>` und nicht `lotzapp-base`, und WordPress würde das
+    // `lotzwoo-theme-base-<tag>` und nicht `lotzwoo-theme-base`, und WordPress würde das
     // Theme unter diesem Namen installieren — womit das Kindtheme sein
     // Elterntheme verliert.
     if ($package === '') {
@@ -241,7 +241,7 @@ add_filter('update_themes_github.com', static function ($update, array $theme_da
     }
 
     return [
-        'theme' => 'lotzapp-base',
+        'theme' => 'lotzwoo-theme-base',
         'new_version' => $latest,
         'url' => (string) ($release['html_url'] ?? $uri),
         'package' => $package,

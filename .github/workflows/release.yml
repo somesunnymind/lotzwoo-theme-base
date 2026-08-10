@@ -40,13 +40,13 @@ jobs:
       # Das Praefix ist nicht Kosmetik: `Theme_Upgrader::check_package()`
       # verlangt `style.css` im *einen* Unterverzeichnis des ZIP, und der
       # Verzeichnisname wird zum Stylesheet-Namen. Heisst er anders als
-      # `lotzapp-base`, verliert das Kindtheme sein Elterntheme.
+      # `lotzwoo-theme-base`, verliert das Kindtheme sein Elterntheme.
       - name: ZIP bauen
         run: |
           mkdir -p build
           git archive --format=zip \
-            --prefix=lotzapp-base/ \
-            -o build/lotzapp-base.zip \
+            --prefix=lotzwoo-theme-base/ \
+            -o build/lotzwoo-theme-base.zip \
             HEAD
 
       # Torwaechter 2: die check_package-Bedingungen, gegen das Paket, das
@@ -54,43 +54,43 @@ jobs:
       - name: Gebautes ZIP gegen check_package pruefen
         run: |
           cd build
-          unzip -l lotzapp-base.zip
+          unzip -l lotzwoo-theme-base.zip
 
           for required in \
-            lotzapp-base/style.css \
-            lotzapp-base/theme.json \
-            lotzapp-base/functions.php \
-            lotzapp-base/templates/index.html; do
-            unzip -l lotzapp-base.zip "$required" > /dev/null \
+            lotzwoo-theme-base/style.css \
+            lotzwoo-theme-base/theme.json \
+            lotzwoo-theme-base/functions.php \
+            lotzwoo-theme-base/templates/index.html; do
+            unzip -l lotzwoo-theme-base.zip "$required" > /dev/null \
               || { echo "Fehlt im ZIP: $required" >&2; exit 1; }
           done
 
           for excluded in \
-            'lotzapp-base/.github/*' \
-            'lotzapp-base/scripts/*' \
-            'lotzapp-base/README.md' \
-            'lotzapp-base/AGENTS.md' \
-            'lotzapp-base/package.json' \
-            'lotzapp-base/package-lock.json'; do
-            if unzip -l lotzapp-base.zip "$excluded" > /dev/null 2>&1; then
+            'lotzwoo-theme-base/.github/*' \
+            'lotzwoo-theme-base/scripts/*' \
+            'lotzwoo-theme-base/README.md' \
+            'lotzwoo-theme-base/AGENTS.md' \
+            'lotzwoo-theme-base/package.json' \
+            'lotzwoo-theme-base/package-lock.json'; do
+            if unzip -l lotzwoo-theme-base.zip "$excluded" > /dev/null 2>&1; then
               echo "Gehoert nicht ins ZIP: $excluded" >&2
               exit 1
             fi
           done
 
           # Genau ein Unterverzeichnis in der Wurzel des ZIP.
-          roots=$(unzip -Z1 lotzapp-base.zip | cut -d/ -f1 | sort -u | wc -l)
+          roots=$(unzip -Z1 lotzwoo-theme-base.zip | cut -d/ -f1 | sort -u | wc -l)
           if [ "$roots" -ne 1 ]; then
             echo "ZIP hat $roots Wurzelverzeichnisse, check_package verlangt eines" >&2
             exit 1
           fi
 
           # Theme Name darf nicht leer sein.
-          unzip -p lotzapp-base.zip lotzapp-base/style.css \
+          unzip -p lotzwoo-theme-base.zip lotzwoo-theme-base/style.css \
             | grep -qE '^[[:space:]]*Theme Name:[[:space:]]*\S' \
             || { echo "Leerer 'Theme Name' im ZIP" >&2; exit 1; }
 
       - name: ZIP an das Release haengen
         uses: softprops/action-gh-release@v2
         with:
-          files: build/lotzapp-base.zip
+          files: build/lotzwoo-theme-base.zip

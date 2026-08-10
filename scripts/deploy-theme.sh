@@ -24,7 +24,7 @@
 
 set -euo pipefail
 
-SLUG="lotzapp-base"
+SLUG="lotzwoo-theme-base"
 THEMES_DIR="${1:-/var/www/b2b/wp-content/themes}"
 TARGET="$THEMES_DIR/$SLUG"
 
