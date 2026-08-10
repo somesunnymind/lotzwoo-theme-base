@@ -1,0 +1,95 @@
+name: Build Theme Release
+
+# Kein Tag-Praefix: ein Repo, ein Theme, ein Namensraum.
+on:
+  push:
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build release ZIP
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Torwaechter 1. Ein Tag, der dem Header widerspricht, liefert ein Update
+      # aus, das jede Installation sieht und nie erfuellt: der Kern vergleicht
+      # die Release-Version gegen den installierten Header, also laesst ein Tag
+      # 9.9.9 auf `Version: 0.2.0` jede Site dauerhaft "Update verfuegbar"
+      # melden. Genau dieses Loch hatte das Plugin-Repo bis 2026-08-10.
+      - name: Tag gegen den Theme-Header pruefen
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          header=$(sed -n 's/^[[:space:]]*Version:[[:space:]]*\([0-9][^[:space:]]*\).*/\1/p' \
+            style.css | head -n 1)
+          if [ -z "$header" ]; then
+            echo "Kein 'Version:'-Header in style.css" >&2
+            exit 1
+          fi
+          if [ "$tag" != "$header" ]; then
+            echo "Tag '$tag' passt nicht zu 'Version: $header'" >&2
+            exit 1
+          fi
+          echo "Tag und Header stimmen ueberein: $header"
+
+      # Das Praefix ist nicht Kosmetik: `Theme_Upgrader::check_package()`
+      # verlangt `style.css` im *einen* Unterverzeichnis des ZIP, und der
+      # Verzeichnisname wird zum Stylesheet-Namen. Heisst er anders als
+      # `lotzapp-base`, verliert das Kindtheme sein Elterntheme.
+      - name: ZIP bauen
+        run: |
+          mkdir -p build
+          git archive --format=zip \
+            --prefix=lotzapp-base/ \
+            -o build/lotzapp-base.zip \
+            HEAD
+
+      # Torwaechter 2: die check_package-Bedingungen, gegen das Paket, das
+      # tatsaechlich ausgeliefert wird.
+      - name: Gebautes ZIP gegen check_package pruefen
+        run: |
+          cd build
+          unzip -l lotzapp-base.zip
+
+          for required in \
+            lotzapp-base/style.css \
+            lotzapp-base/theme.json \
+            lotzapp-base/functions.php \
+            lotzapp-base/templates/index.html; do
+            unzip -l lotzapp-base.zip "$required" > /dev/null \
+              || { echo "Fehlt im ZIP: $required" >&2; exit 1; }
+          done
+
+          for excluded in \
+            'lotzapp-base/.github/*' \
+            'lotzapp-base/scripts/*' \
+            'lotzapp-base/README.md' \
+            'lotzapp-base/AGENTS.md' \
+            'lotzapp-base/package.json'; do
+            if unzip -l lotzapp-base.zip "$excluded" > /dev/null 2>&1; then
+              echo "Gehoert nicht ins ZIP: $excluded" >&2
+              exit 1
+            fi
+          done
+
+          # Genau ein Unterverzeichnis in der Wurzel des ZIP.
+          roots=$(unzip -Z1 lotzapp-base.zip | cut -d/ -f1 | sort -u | wc -l)
+          if [ "$roots" -ne 1 ]; then
+            echo "ZIP hat $roots Wurzelverzeichnisse, check_package verlangt eines" >&2
+            exit 1
+          fi
+
+          # Theme Name darf nicht leer sein.
+          unzip -p lotzapp-base.zip lotzapp-base/style.css \
+            | grep -qE '^[[:space:]]*Theme Name:[[:space:]]*\S' \
+            || { echo "Leerer 'Theme Name' im ZIP" >&2; exit 1; }
+
+      - name: ZIP an das Release haengen
+        uses: softprops/action-gh-release@v2
+        with:
+          files: build/lotzapp-base.zip

@@ -1,0 +1,17 @@
+{
+  "name": "lotzapp-base",
+  "private": true,
+  "description": "Nur Werkzeug fuer die CI-Pruefungen. Das Theme selbst braucht kein Node.",
+  "scripts": {
+    "check:theme-json": "node scripts/check-theme-json.mjs",
+    "check:headers": "node scripts/check-headers.mjs",
+    "check:blocks": "node scripts/check-block-markup.mjs",
+    "check": "npm run check:theme-json && npm run check:headers && npm run check:blocks"
+  },
+  "devDependencies": {
+    "@wordpress/block-serialization-default-parser": "^5.0.0",
+    "ajv": "^8.17.1",
+    "ajv-draft-04": "^1.0.0",
+    "ajv-formats": "^3.0.1"
+  }
+}

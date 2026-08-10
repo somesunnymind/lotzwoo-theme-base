@@ -1,0 +1,21 @@
+# Ensure text files stay UTF-8 with LF endings.
+* text=auto eol=lf
+
+# Force binary for media/assets
+*.{png,jpg,jpeg,gif,svg,ico,webp} binary
+*.{woff,woff2,ttf,eot} binary
+
+# Was nicht auf einen Kundenserver gehoert.
+#
+# `git archive` beachtet diese Marken, und der Release-Workflow baut damit.
+# Der Ort ist der Punkt: wer eine Datei anlegt, die nicht ausgeliefert werden
+# soll, entscheidet das hier neben der Datei — und nicht in einer Ausschluss-
+# liste in einem YAML, das er nie aufmacht. Genau daran hat das Plugin-Repo
+# jahrelang `docs/` und `.hermes/` mitgeliefert.
+/.github        export-ignore
+/scripts        export-ignore
+/.gitattributes export-ignore
+/.gitignore     export-ignore
+/README.md      export-ignore
+/AGENTS.md      export-ignore
+/package.json   export-ignore

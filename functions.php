@@ -156,3 +156,96 @@ add_filter('render_block_woocommerce/customer-account', static function (string 
 
     return is_string($replaced) ? $replaced : $content;
 }, 10, 1);
+
+/**
+ * Updates über GitHub, ohne einen eigenen Updater mitzuschleppen.
+ *
+ * Seit WordPress 6.1 genügt der `Update URI`-Header plus ein Filter, dessen
+ * Name aus dem Hostnamen dieses Headers gebildet wird. Der Kern übernimmt
+ * damit Versionsvergleich, `no_update`-Pflege und den Kollisionsschutz — gut
+ * 500 der 545 Zeilen, die der `GitHub_Updater` des Plugins dafür selbst
+ * mitbringt und die hier kein zweites Mal gepflegt werden.
+ *
+ * Der Kern ruft die URL im Header **nie** ab. Sie ist Kennung, nicht Endpunkt:
+ * das Paket kommt aus `package` im Rückgabewert dieses Filters. Deshalb darf
+ * dort etwas stehen, das ein Mensch aufmachen kann.
+ *
+ * `update_themes_github.com` ist ein **geteilter** Namensraum — jedes andere
+ * Theme, das denselben Weg geht, hängt am selben Filter. Der Callback prüft
+ * darum zuerst, ob er überhaupt gemeint ist, und gibt sonst unverändert
+ * zurück, was er bekommen hat.
+ *
+ * Der Rückgabewert ist ein **Array**, kein Objekt: Themes laufen über
+ * `update_themes` statt `update_plugins`, und dort erwartet der Kern ein
+ * Array mit `theme`, `new_version`, `url` und `package`. Ein Objekt wird
+ * stillschweigend verworfen.
+ */
+add_filter('update_themes_github.com', static function ($update, array $theme_data, string $theme_stylesheet) {
+    if ($theme_stylesheet !== 'lotzapp-base') {
+        return $update;
+    }
+
+    $uri = $theme_data['UpdateURI'] ?? '';
+
+    if (!is_string($uri) || !str_starts_with($uri, 'https://github.com/somesunnymind/lotzapp-base')) {
+        return $update;
+    }
+
+    $installed = $theme_data['Version'] ?? '0';
+
+    $response = wp_remote_get(
+        'https://api.github.com/repos/somesunnymind/lotzapp-base/releases/latest',
+        [
+            'timeout' => 10,
+            'headers' => [
+                'Accept' => 'application/vnd.github+json',
+                'User-Agent' => 'lotzapp-base/' . $installed,
+            ],
+        ]
+    );
+
+    if (is_wp_error($response) || wp_remote_retrieve_response_code($response) !== 200) {
+        return $update;
+    }
+
+    $release = json_decode(wp_remote_retrieve_body($response), true);
+
+    if (!is_array($release) || empty($release['tag_name'])) {
+        return $update;
+    }
+
+    $latest = ltrim((string) $release['tag_name'], 'v');
+
+    // Der Kern vergleicht selbst noch einmal. Die Prüfung hier spart nur den
+    // Fall, in dem wir ein Paket anbieten, das gar keines ist.
+    if (version_compare($latest, (string) $installed, '<=')) {
+        return $update;
+    }
+
+    $package = '';
+
+    foreach ($release['assets'] ?? [] as $asset) {
+        if (($asset['name'] ?? '') === 'lotzapp-base.zip') {
+            $package = (string) ($asset['browser_download_url'] ?? '');
+            break;
+        }
+    }
+
+    // Ohne Paket kein Update. Die Quell-Archive, die GitHub automatisch
+    // beilegt, taugen nicht: ihr einziges Unterverzeichnis heisst
+    // `lotzapp-base-<tag>` und nicht `lotzapp-base`, und WordPress würde das
+    // Theme unter diesem Namen installieren — womit das Kindtheme sein
+    // Elterntheme verliert.
+    if ($package === '') {
+        return $update;
+    }
+
+    return [
+        'theme' => 'lotzapp-base',
+        'new_version' => $latest,
+        'url' => (string) ($release['html_url'] ?? $uri),
+        'package' => $package,
+        'requires' => $theme_data['RequiresWP'] ?? '',
+        'requires_php' => $theme_data['RequiresPHP'] ?? '',
+    ];
+}, 10, 3);

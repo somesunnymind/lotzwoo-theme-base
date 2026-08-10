@@ -1,0 +1,47 @@
+name: Checks
+
+# Fuenf Pruefungen, alle **ohne** WordPress. Absichtlich kein Theme Check per
+# `wp-env`: das faehrt ein ganzes WordPress in Docker hoch, um Regeln zu
+# pruefen, die fuer ein Verzeichnis gelten, in das dieses Theme nie eingereicht
+# wird.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  checks:
+    name: Theme-Pruefungen
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Werkzeug installieren
+        run: npm install --no-audit --no-fund
+
+      # 1 + 2: theme.json gegen das versionierte Kernschema.
+      - name: theme.json gegen das Kernschema
+        run: npm run check:theme-json
+
+      # 3: Header-Vollstaendigkeit, plus die Klammer zwischen
+      #    theme.json-Version und "Requires at least".
+      - name: Theme-Header
+        run: npm run check:headers
+
+      # 4: PHP-Syntax. Eine Datei, aber sie laedt auf jeder Seite.
+      - name: PHP-Syntax
+        run: |
+          shopt -s globstar nullglob
+          for file in **/*.php; do
+            php -l "$file"
+          done
+
+      # 5: Blockmarkup wohlgeformt.
+      - name: Blockmarkup
+        run: npm run check:blocks
