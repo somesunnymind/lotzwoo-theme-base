@@ -81,23 +81,34 @@ Tags: block-theme, full-site-editing, e-commerce
    Freigegeben ist die Breite trotzdem nicht: ohne Obergrenze zieht die
    Matrix auf einem 34-Zoll-Schirm über die volle Fensterbreite, und der
    Weg von der Artikelnummer links zur Menge rechts wird länger als ein
-   Blick. 1920px ist dieselbe Schale, in der auch der Kopfbereich steht —
-   die Zahl steht dort in `parts/header.html` als `wideSize`, und wer eine
-   der beiden ändert, muss die andere mitnehmen. Sonst hängt die
-   Navigation sichtbar neben der Tabelle darunter.
+   Blick. Es ist dieselbe Schale, in der auch der Kopfbereich steht — und
+   deshalb steht die Zahl hier nicht. Sie steht als
+   `settings.layout.wideSize` in `theme.json`, WordPress veröffentlicht sie
+   als `--wp--style--global--wide-size`, und Kopf wie Deckel lesen von dort.
+   Wer die Breite ändert, ändert genau eine Zahl an genau einer Stelle.
+
+   Der Kopfbereich holt sie sich über `alignwide` auf `.lotzwoo-header-row`,
+   nicht über eine eigene `wideSize` im Blockmarkup. Das ist kein Geschmack:
+   ein Block, der nur `wideSize` und kein `contentSize` deklariert, bekommt
+   von WordPress die Regel
+   `> :where(:not(.alignleft):not(.alignright):not(.alignfull))` mit genau
+   diesem Wert — die Inline-Angabe wirkt dann als *Inhalts*breite. Ersatzlos
+   entfernt, fiele der Kopf auf 960px zusammen. Der Ausrichtungsweg erbt
+   dagegen sauber aus `theme.json`.
 
    `margin-inline: auto` ist der Teil, der überhaupt zentriert; die
-   Obergrenze allein ließe alles links kleben.
+   Obergrenze allein ließe alles links kleben. Im Kopf erledigt das die
+   Layout-Regel des Kerns, deren `:where(:not(…))` auch `.alignwide` trifft.
 
    Warum der Deckel auf der Plugin-Wurzel sitzt und nicht auf dem Block
    darüber: der Block trägt seine 16px als *Innen*abstand. Ein `max-width`
-   dort rechnet sie mit ein und lässt 1888px Inhalt übrig — während die
-   Kopfzeile ihre 1920px voll ausnutzt, weil ihre 16px außen am `<header>`
-   hängen. Unter 1920px fällt das nicht auf: dort greift kein Deckel und
-   beide laufen auf `vw − 32`. Erst auf einem Ultrawide standen Navigation
-   und Tabelle 16px versetzt. Eine Ebene tiefer gedeckelt, ist der Aufbau
-   auf beiden Seiten derselbe — 1920px ohne Innenabstand in einem Elternteil
-   mit 16px — und die Flucht stimmt in jeder Breite.
+   dort rechnet sie mit ein und lässt 32px weniger Inhalt übrig — während die
+   Kopfzeile ihr Maß voll ausnutzt, weil ihre 16px außen am `<header>`
+   hängen. Unterhalb der Grenze fällt das nicht auf: dort greift kein Deckel
+   und beide laufen auf `vw − 32`. Erst auf einem Ultrawide standen
+   Navigation und Tabelle 16px versetzt. Eine Ebene tiefer gedeckelt, ist der
+   Aufbau auf beiden Seiten derselbe — dasselbe Maß ohne Innenabstand in
+   einem Elternteil mit 16px — und die Flucht stimmt in jeder Breite.
 
    Der Selektor greift die beiden Wurzeln des Plugins, nicht `> *`: die
    Blockstruktur der Seite kann sich ändern, `.lotzwoo-b2b-shop` und
@@ -109,7 +120,7 @@ Tags: block-theme, full-site-editing, e-commerce
 
 .lotzwoo-page-full-width .lotzwoo-b2b-shop,
 .lotzwoo-page-full-width .lotzwoo-reorder {
-  max-width: 1920px;
+  max-width: var(--wp--style--global--wide-size);
   margin-inline: auto;
 }
 
