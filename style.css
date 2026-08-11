@@ -194,15 +194,15 @@ Tags: block-theme, full-site-editing, e-commerce
    schwer genug, um `elements.link` aus theme.json zu schlagen (das braucht
    sie, sonst bliebe der Link farbig), leicht genug, damit jede Plugin-Regel
    mit zwei Klassen sie schlägt. */
-main a:not(.wp-element-button):not(:where(.wp-block-navigation-item__content, .lotzwoo-b2b-shop a, .lotzwoo-reorder a)) {
+main a:not(.wp-element-button):not(:where(.wp-block-navigation-item__content, .wc-block-components-button, .lotzwoo-b2b-shop a, .lotzwoo-reorder a)) {
   color: var(--wp--preset--color--ink-900);
   text-decoration-color: var(--wp--preset--color--brand-500);
   text-decoration-thickness: 1.5px;
   text-underline-offset: .18em;
 }
 
-main a:not(.wp-element-button):not(:where(.wp-block-navigation-item__content, .lotzwoo-b2b-shop a, .lotzwoo-reorder a)):hover,
-main a:not(.wp-element-button):not(:where(.wp-block-navigation-item__content, .lotzwoo-b2b-shop a, .lotzwoo-reorder a)):focus-visible {
+main a:not(.wp-element-button):not(:where(.wp-block-navigation-item__content, .wc-block-components-button, .lotzwoo-b2b-shop a, .lotzwoo-reorder a)):hover,
+main a:not(.wp-element-button):not(:where(.wp-block-navigation-item__content, .wc-block-components-button, .lotzwoo-b2b-shop a, .lotzwoo-reorder a)):focus-visible {
   color: var(--wp--preset--color--brand-500);
 }
 
