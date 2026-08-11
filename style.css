@@ -52,19 +52,84 @@ Tags: block-theme, full-site-editing, e-commerce
 
   --lwb-ink-900: var(--wp--preset--color--ink-900, #0d1520);
   --lwb-ink-700: var(--wp--preset--color--ink-700, #263243);
+  --lwb-ink-600: var(--wp--preset--color--ink-600, #3a4759);
   --lwb-ink-500: var(--wp--preset--color--ink-500, #5a6879);
   --lwb-ink-400: var(--wp--preset--color--ink-400, #8592a3);
+  --lwb-ink-300: var(--wp--preset--color--ink-300, #b9c2cd);
   --lwb-ink-200: var(--wp--preset--color--ink-200, #dbe1e8);
   --lwb-ink-100: var(--wp--preset--color--ink-100, #f1f4f7);
   --lwb-ink-50:  var(--wp--preset--color--ink-50,  #f7f9fb);
 
+  /* Die größte Fläche der Oberfläche. Sie heißt im Plugin `white`, meint aber
+     die Rolle „Karte, Tabelle, Eingabefeld" — 32 Regeln. Ein Kundentheme auf
+     Creme würde sonst weiße Kästen auf getöntem Grund zeigen. Die Rolle ist
+     deshalb `surface`, nicht das Preset `white`: Weiß muss Weiß bleiben
+     können, dort wo es wörtlich gemeint ist (der Rand am Warenkorb-Zähler
+     weiter unten ist so eine Stelle). */
+  --lwb-white: var(--wp--preset--color--surface, #fff);
+
+  --lwb-ok-50:    var(--wp--preset--color--ok-50,    #e8f6ee);
   --lwb-ok-500:   var(--wp--preset--color--ok-500,   #17794a);
+  --lwb-warn-50:  var(--wp--preset--color--warn-50,  #fdf3e3);
   --lwb-warn-500: var(--wp--preset--color--warn-500, #a86a08);
+  --lwb-err-50:   var(--wp--preset--color--err-50,   #fdecec);
   --lwb-err-500:  var(--wp--preset--color--err-500,  #b42318);
+  --lwb-err-700:  var(--wp--preset--color--err-700,  #8a1a12);
+  --lwb-info-50:  var(--wp--preset--color--info-50,  #eaf1fc);
   --lwb-info-500: var(--wp--preset--color--info-500, #1e5eb8);
 
-  --lwb-font-sans: var(--wp--preset--font-family--sans, "Inter", "Segoe UI", system-ui, sans-serif);
-  --lwb-font-num:  var(--wp--preset--font-family--mono, ui-monospace, Consolas, monospace);
+  /* Der Fokusring ist eine Zustandsanzeige und trägt die Marke. Im Plugin
+     steht er als fertiger Schatten mit eingebautem Grün; ohne diese Zeile
+     leuchtete er auf einer roten Seite grün — von allen Lücken der Brücke
+     die, die am stärksten nach Fehler aussieht.
+
+     Zusammengesetzter Wert, also keine bloße Weiterreichung: `color-mix`
+     rührt ihn aus der Markenfarbe selbst an. Damit folgt der Ring jedem
+     Kundentheme, ohne dass hier eine zweite Farbe stünde.
+
+     Zwei Ringe, nicht einer. Die Fassung des Plugins ist eine einzelne
+     durchscheinende Fläche mit 28 % Deckung; nachgerechnet sind das gegen
+     Creme 1.53:1, gegen Weiß kaum mehr. WCAG 2.1 verlangt für die
+     Fokusanzeige 3:1 gegen die Umgebung (1.4.11), und mit einer Deckung
+     erreicht man das nicht — selbst 55 % kommen nur auf 2.45:1. Innen liegt
+     deshalb ein deckender Ring von 2px, der die 3:1 trägt (gegen Creme
+     5.53:1); der weiche Saum außen bleibt, weil er den Ring auf getönten und
+     dunklen Flächen ablöst. */
+  --lwb-focus:
+    0 0 0 2px var(--wp--preset--color--brand-500, #157d5f),
+    0 0 0 5px color-mix(in srgb, var(--wp--preset--color--brand-500, #157d5f) 25%, transparent);
+
+  /* Nicht überschrieben: --lwb-sh-sm/md/lg. Die drei Schatten sind
+     zusammengesetzte Werte auf rgba(13,21,32,…) — neutral genug, um sie dem
+     Plugin zu lassen. Ein Schatten, der die Marke trägt, ist eine eigene
+     Entscheidung und keine Lücke. */
+}
+
+/* Die Schrift der B2B-Oberflächen.
+
+   Hier stand einmal die Brücke `--lwb-font-sans`/`--lwb-font-num` auf die
+   Presets `sans` und `mono`. Die Presets gibt es, die Token liest das Plugin
+   aber nirgends — es erbt seine Schrift schlicht von `<body>`. Zwei Zeilen,
+   die eine Verbindung behaupteten, die es nicht gab.
+
+   Ersetzt durch die Fassung, die wirklich wirkt: die Familie steht auf den
+   beiden Wurzeln. Der Grund, das überhaupt zu sagen statt weiter zu erben,
+   ist das Kindtheme — sobald eines eine Serife für Überschriften setzt, holt
+   sich `styles.elements.heading` aus theme.json auch die Überschriften des
+   Shops. Ein Sortimentskopf in der Website-Serife über einer Bestellmatrix
+   ist nicht gemeint; die Matrix ist eine Oberfläche, keine Drucksache.
+
+   Die Ziffernschrift der Matrix (tabellarische Ziffern auf Preis-, Mengen-
+   und Artikelnummernspalten) bleibt offen und gehört ins Plugin-Repo — sie
+   braucht die Zellen, nicht die Wurzel. */
+.lotzwoo-b2b-shop,
+.lotzwoo-reorder {
+  font-family: var(--wp--preset--font-family--sans, "Inter", "Segoe UI", system-ui, sans-serif);
+}
+
+.lotzwoo-b2b-shop :is(h1, h2, h3),
+.lotzwoo-reorder :is(h1, h2, h3) {
+  font-family: inherit;
 }
 
 /* ==================================================================
