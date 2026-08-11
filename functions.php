@@ -306,6 +306,35 @@ add_filter('render_block_core/button', static function (string $content, array $
  * pauschales 404 auf jedes `?s=` ließe `product-search-results.html` nie zum
  * Zug kommen.
  *
+ * ## Und die Website-Suche lässt sich zurückholen
+ *
+ * `lotzwoo_theme_site_search_enabled` — Standardwert `false`, also das Verhalten
+ * dieses Absatzes. Eine Installation, die redaktionelle Inhalte trägt, setzt den
+ * Filter auf `true` und bekommt ihre Suche zurück, ohne dass jemand hier eine
+ * Bedingung herausoperiert und dabei die Autoren- und Datumsabschaltung
+ * mitnimmt.
+ *
+ * **Warum ein Filter und kein Schalter im Kindtheme:** AD-8 hält Kindthemes bei
+ * `style.css` und `theme.json` — kein PHP, keine Templates. Ein Schalter dort
+ * bräche die Form, die das Basis-Theme über alle Kunden hinweg trägt. Der
+ * natürliche Aufrufer ist das kundeneigene Site-Plugin.
+ *
+ * **Warum nicht „hängt davon ab, ob `search.html` existiert":** Verhalten an
+ * Dateiexistenz zu koppeln ist unsichtbare Magie. Irgendwann legt jemand das
+ * Template nur an, um etwas zu gestalten, und öffnet dabei stillschweigend eine
+ * Fläche, über die niemand entschieden hat.
+ *
+ * **Autoren- und Datumsarchive sind bewusst *nicht* schaltbar.** Sie zählen
+ * Benutzernamen auf und nützen keinem B2B-Portal — das ist eine Eigenschaft
+ * dieses Produkts und keine Kundenentscheidung.
+ *
+ * Ein Template braucht der Rückweg nicht: `templates/index.html` trägt eine
+ * Beitragsschleife mit `inherit`, die auch eine Suche bedient. Sie sieht nicht
+ * gut aus, aber sie funktioniert. `search.html`, `home.html` und `archive.html`
+ * entstehen, wenn ein Kunde redaktionelle Inhalte wirklich mitbringt — gegen
+ * eine echte Gestaltung statt gegen eine Vermutung. Notiert im Nebelabschnitt
+ * der Karte `theme-templates-und-repo`.
+ *
  * Die Bedingung dafür ist **wörtlich dieselbe**, die WooCommerce selbst
  * benutzt, um dieses Template vorzuziehen (`ProductSearchResultsTemplate`:
  * `is_search() && is_post_type_archive('product')`). Das ist der Grund, sie so
@@ -337,7 +366,17 @@ add_action('template_redirect', static function (): void {
         return;
     }
 
-    $unwanted = is_author() || is_date() || (is_search() && !is_post_type_archive('product'));
+    /**
+     * Ob die Website-Suche jenseits der Produktsuche bedient wird.
+     *
+     * @param bool $enabled Standardwert `false` — jede Suche ohne
+     *                      `post_type=product` antwortet 404.
+     */
+    $site_search = (bool) apply_filters('lotzwoo_theme_site_search_enabled', false);
+
+    $unwanted = is_author()
+        || is_date()
+        || (!$site_search && is_search() && !is_post_type_archive('product'));
 
     if (!$unwanted) {
         return;

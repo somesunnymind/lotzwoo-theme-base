@@ -103,6 +103,35 @@ Nachbarn um eine Lücke.
 Der Blockname ist die einzige harte Kopplung zwischen Theme- und Plugin-Repo. Er steht deshalb in
 beiden READMEs. Wer ihn ändert, ändert beide.
 
+## Flächen, die dieses Theme abschaltet
+
+Ein B2B-Portal ist kein Blog. Das Theme schaltet drei Flächen ab, die WordPress sonst bedient:
+
+| Fläche | Zustand | schaltbar? |
+|---|---|---|
+| Autorenarchiv (`/author/…`, `?author=1`) | 404 | **nein** — zählt Benutzernamen auf |
+| Datumsarchiv (`/2026/08/`, `?m=202608`) | 404 | **nein** |
+| Website-Suche ohne `post_type=product` | 404 | **ja**, siehe unten |
+
+Die Produktsuche bleibt und bekommt `templates/product-search-results.html`.
+
+**Ein Kunde mit redaktionellen Inhalten holt sich die Website-Suche zurück:**
+
+```php
+add_filter('lotzwoo_theme_site_search_enabled', '__return_true');
+```
+
+Standardwert ist `false`. Der Filter gehört ins Site-Plugin des Kunden, nicht ins Kindtheme — dort
+liegen nach AD-8 nur `style.css` und `theme.json`, kein PHP.
+
+Ein eigenes Template braucht der Rückweg nicht: `templates/index.html` trägt eine Beitragsschleife
+mit `inherit`, die auch eine Suche bedient. `search.html`, `home.html` und `archive.html` entstehen,
+wenn ein Kunde redaktionelle Inhalte wirklich mitbringt.
+
+Nicht abgeschaltet und deshalb hier nicht aufgeführt: Beitragsindex, Kategorie- und
+Schlagwortarchiv. Sie laufen heute schon über `templates/index.html` — unauffällig, aber
+funktionsfähig.
+
 ## Wo die Entscheidungen stehen
 
 Karten, Architekturentscheidungen (`AD-*`) und Befunde liegen im Plugin-Repo
