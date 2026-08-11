@@ -494,13 +494,29 @@ add_filter('update_themes_github.com', static function ($update, array $theme_da
         return $update;
     }
 
+    // `$theme_data` traegt nur acht Felder — Name, Title, Version, Author,
+    // Author URI, UpdateURI, Template, Stylesheet (`wp_update_themes()`).
+    // `RequiresWP` und `RequiresPHP` sind **nicht** darunter; die frueheren
+    // `$theme_data['RequiresWP'] ?? ''` lieferten deshalb immer die leere
+    // Zeichenkette, und `is_wp_version_compatible('')` gibt true zurueck: die
+    // Vertraeglichkeitspruefung in der Themes-Uebersicht lief leer. Gemessen am
+    // 2026-08-11 an der echten Aktualisierungszeile.
+    //
+    // Was hier steht, ist die Anforderung der **installierten** Fassung, nicht
+    // die der angebotenen — die stuende in der `style.css` des Tags und kostete
+    // einen zweiten Abruf bei jeder Update-Pruefung. Solange die Anforderung
+    // zwischen zwei Versionen steigt, ist das eine Naeherung; sie ist immer noch
+    // besser als der leere Wert, der gar nichts prueft. Steigt sie einmal
+    // wirklich, gehoert der zweite Abruf hierher.
+    $installed_theme = wp_get_theme($theme_stylesheet);
+
     return [
         'theme' => 'lotzwoo-theme-base',
         'version' => $latest,
         'new_version' => $latest,
         'url' => (string) ($release['html_url'] ?? $uri),
         'package' => $package,
-        'requires' => $theme_data['RequiresWP'] ?? '',
-        'requires_php' => $theme_data['RequiresPHP'] ?? '',
+        'requires' => (string) $installed_theme->get('RequiresWP'),
+        'requires_php' => (string) $installed_theme->get('RequiresPHP'),
     ];
 }, 10, 3);
