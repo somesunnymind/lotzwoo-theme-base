@@ -249,11 +249,29 @@ main a:not(.wp-element-button):not(:where(.wp-block-navigation-item__content, .w
    nachgesehen), und daran haengt in aelteren Kernfassungen eine Deckung von
    0.4. Eine Linie, die schon zart ist, darf nicht auch noch halb da sein. */
 .wp-block-separator:not(.is-style-dots) {
-  width: 100%;
   border: 0;
   border-top: 1px solid currentColor;
   color: var(--wp--preset--color--ink-200);
   opacity: 1;
+}
+
+/* Die Breite braucht einen eigenen, schwereren Selektor — nachgemessen, nicht
+   vorsorglich. Die 100px stehen nicht im Blockstylesheet, sondern in
+   `blocks/separator/theme.min.css`, das erst durch
+   `add_theme_support('wp-block-styles')` geladen wird:
+
+     .wp-block-separator:not(.is-style-wide):not(.is-style-dots){width:100px}
+
+   Das sind drei Klassen Gewicht. Die Regel darueber wiegt zwei, und die erste
+   Fassung dieser Datei hat deshalb Farbe und Staerke gesetzt, die Breite aber
+   nicht — im Browser gemessen: `1px solid rgb(228, 218, 202)` bei weiterhin
+   100px. Ein `hr` davor bringt ein Element mehr und gewinnt, ohne dass hier ein
+   `!important` stuende. Der Block rendert immer ein `hr`.
+
+   `is-style-wide` bleibt ausgenommen wie beim Kern — diese Variante ist ohnehin
+   schon voll breit, und der Selektor bliebe sonst hinter dem des Kerns. */
+hr.wp-block-separator:not(.is-style-wide):not(.is-style-dots) {
+  width: 100%;
 }
 
 /* Die Tabelle — und die Spalte, deren Verschwinden eine Rechtsfolge hat.
