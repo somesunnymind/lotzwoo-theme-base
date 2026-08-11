@@ -145,12 +145,19 @@ Tags: block-theme, full-site-editing, e-commerce
    und Artikelnummernspalten) bleibt offen und gehört ins Plugin-Repo — sie
    braucht die Zellen, nicht die Wurzel. */
 .lotzwoo-b2b-shop,
-.lotzwoo-reorder {
+.lotzwoo-reorder,
+.lotzwoo-heldback {
   font-family: var(--wp--preset--font-family--sans, "Inter", "Segoe UI", system-ui, sans-serif);
 }
 
+/* `.lotzwoo-heldback` steht hier aus genau dem Grund, den der Absatz oben
+   nennt, und er ist am 2026-08-12 im Browser sichtbar geworden: die
+   Überschrift der Sektion kam in der Serife des Kundenthemes: Bersta setzt
+   `styles.elements.heading`, und die Sektion ist keine Drucksache, sondern
+   eine Bedienbeschriftung im Warenkorb. */
 .lotzwoo-b2b-shop :is(h2, h3, h4, h5, h6),
-.lotzwoo-reorder :is(h2, h3, h4, h5, h6) {
+.lotzwoo-reorder :is(h2, h3, h4, h5, h6),
+.lotzwoo-heldback :is(h2, h3, h4, h5, h6) {
   font-family: inherit;
 }
 
@@ -319,7 +326,8 @@ Tags: block-theme, full-site-editing, e-commerce
    Wichtigste an der Zeile nach der Bezeichnung. Er steht als Plakette, damit er
    nicht als Fließtext neben den Knöpfen untergeht. */
 .lotzwoo-heldback__reason {
-  flex: 1 1 100%;
+  flex: 0 1 auto;
+  max-width: 100%;
   border-radius: 999px;
   background: var(--lwb-white);
   padding: 2px 10px;
