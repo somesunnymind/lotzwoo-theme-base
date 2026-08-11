@@ -226,59 +226,31 @@ add_filter('render_block_core/navigation-link', static function (string $content
     return $tags->get_updated_html();
 }, 10, 2);
 
-/**
- * Der Weg ins Sortiment im Kopfbereich.
+/*
+ * Der Weg ins Sortiment im Kopfbereich — und warum hier kein Filter mehr steht.
  *
- * Der Knopf steht in `parts/header.html` mit `href="/shop/"`. Das ist der
- * Rückfall, nicht die Antwort: welchen Slug die Shop-Seite trägt, entscheidet
- * jede Installation für sich, und `/shop/` ist nur der Standard einer frischen
- * WooCommerce-Einrichtung. Hier wird er durch die tatsächliche Adresse ersetzt.
+ * `2debf23` hat den Knopf `.lotzwoo-shop-link` per `render_block_core/button`
+ * auf `wc_get_page_permalink('shop')` umgeschrieben, mit einem guten Argument:
+ * welchen Slug Woos Shop-Seite trägt, entscheidet jede Installation für sich,
+ * und sie steht wenigstens in einer Option — die Adresse der Seite mit dem
+ * Kurzcode `[lotzwoo_b2b_shop]` steht nirgends.
  *
- * **Warum Woos Shop-Seite und nicht die Sortiment-Seite selbst.** Die Seite mit
- * dem Kurzcode `[lotzwoo_b2b_shop]` ist die, die der Kunde sehen soll. Ihre
- * Adresse kennt das Theme nicht: sie steht in keiner Option, sondern nur im
- * Inhalt irgendeiner Seite, und danach zu suchen hieße, bei jedem Seitenaufbau
- * die Beitragstabelle zu durchsuchen. Woos Shop-Seite dagegen gibt es in jeder
- * Installation, sie steht in einer Option, und Ticket 04 dieser Karte hat
- * bereits entschieden, dass Woos Katalogseiten aufs Sortiment geroutet werden.
- * Der Knopf zeigt also auf die Stelle, die zum Sortiment führen **soll**.
+ * Der Auftraggeber hat am 2026-08-11 anders entschieden: **der Knopf zeigt
+ * auf `/`.** Der Grund ist der Zwischenstand, den das Argument in Kauf nahm.
+ * Woos Shop-Seite trägt seit Ticket 12 den Hinweis „Kein Katalog an dieser
+ * Stelle"; der Weg ins Sortiment endete also bei der Auskunft, dass es hier
+ * keinen gibt — und zwar so lange, bis das Archiv-Routing im Plugin steht
+ * (Nachbarkarte). Ein Knopf, der auf eine Absage führt, ist teurer als eine
+ * Annahme, die stimmt, solange die Startseite das Sortiment ist.
  *
- * Solange dieses Routing im Plugin fehlt (Block K der Nachbarkarte), landet er
- * auf `templates/archive-product.html` — dem Hinweis „Kein Katalog an dieser
- * Stelle" samt Weg weiter. Ein Zwischenstand, der sichtbar ist und nichts
- * Falsches behauptet. Die Alternative wäre ein fest verdrahtetes `/` gewesen:
- * das stimmt genau so lange, bis jemand `page_on_front` umstellt, und zeigt
- * danach lautlos auf die Startseite.
+ * Der Einwand gegen `/` bleibt richtig und ist nicht widerlegt: stellt jemand
+ * `page_on_front` um, zeigt der Knopf lautlos auf die neue Startseite. Er steht
+ * dafür in einer Datei, die im Website-Editor änderbar ist, und dieselbe
+ * Adresse steht schon in den drei Archiv-Templates hinter „Zum Sortiment" —
+ * alle vier sagen jetzt dasselbe.
  *
- * Ohne WooCommerce bleibt stehen, was in der Datei steht.
+ * Sobald das Routing steht, ist der Filter drei Zeilen entfernt wieder da.
  */
-add_filter('render_block_core/button', static function (string $content, array $block): string {
-    $classes = $block['attrs']['className'] ?? '';
-
-    if (!is_string($classes) || !str_contains($classes, 'lotzwoo-shop-link')) {
-        return $content;
-    }
-
-    if (!function_exists('wc_get_page_permalink')) {
-        return $content;
-    }
-
-    $url = wc_get_page_permalink('shop');
-
-    if (!is_string($url) || $url === '') {
-        return $content;
-    }
-
-    $tags = new WP_HTML_Tag_Processor($content);
-
-    if (!$tags->next_tag('a')) {
-        return $content;
-    }
-
-    $tags->set_attribute('href', $url);
-
-    return $tags->get_updated_html();
-}, 10, 2);
 
 /**
  * Autoren- und Datumsarchive und die Seitensuche gibt es hier nicht.
