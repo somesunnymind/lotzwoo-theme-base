@@ -405,8 +405,34 @@ add_filter('get_block_template', static function ($block_template, $id, $templat
  *
  * Der Rückgabewert ist ein **Array**, kein Objekt: Themes laufen über
  * `update_themes` statt `update_plugins`, und dort erwartet der Kern ein
- * Array mit `theme`, `new_version`, `url` und `package`. Ein Objekt wird
- * stillschweigend verworfen.
+ * Array mit `theme`, `url` und `package`. Ein Objekt wird stillschweigend
+ * verworfen.
+ *
+ * ## `version` **und** `new_version`, und warum das kein Gürtel-und-Hosenträger ist
+ *
+ * `wp_update_themes()` prüft die Antwort dieses Filters so:
+ *
+ * ```php
+ * // Is it valid? We require at least a version.
+ * if ( ! isset( $update->version ) ) { continue; }
+ * // WordPress needs the version field specified as 'new_version'.
+ * if ( ! isset( $update->new_version ) ) { $update->new_version = $update->version; }
+ * ```
+ *
+ * Der Schlüssel, über den entschieden wird, heißt **`version`**. `new_version`
+ * leitet der Kern daraus ab — es ist der *abgeleitete* Name, nicht der
+ * geforderte. Eine Antwort mit nur `new_version` fällt durch das `continue`
+ * und wird **stillschweigend** verworfen: kein Fehler, kein Eintrag im
+ * Transienten, in der Themes-Übersicht schlicht kein Update.
+ *
+ * Genau das ist am 2026-08-11 passiert. Installiert `0.2.0`, veröffentlicht
+ * `0.3.0`, der Filter feuerte und gab das richtige Paket zurück — und
+ * `update_themes->response` blieb leer. Die Read-only-Probe aus Ticket 07 hat
+ * geprüft, dass der Filter ein Array liefert, aber nicht, dass der Kern es
+ * annimmt. Das ist der Unterschied zwischen „geprüft" und „gelaufen".
+ *
+ * `new_version` bleibt trotzdem stehen: der Kern setzt es sonst selbst, und
+ * die Stelle liest sich besser, wenn dort steht, was ankommt.
  */
 add_filter('update_themes_github.com', static function ($update, array $theme_data, string $theme_stylesheet) {
     if ($theme_stylesheet !== 'lotzwoo-theme-base') {
@@ -470,6 +496,7 @@ add_filter('update_themes_github.com', static function ($update, array $theme_da
 
     return [
         'theme' => 'lotzwoo-theme-base',
+        'version' => $latest,
         'new_version' => $latest,
         'url' => (string) ($release['html_url'] ?? $uri),
         'package' => $package,
