@@ -132,6 +132,80 @@ Tags: block-theme, full-site-editing, e-commerce
   font-family: inherit;
 }
 
+/* Die Rahmen der Bedienelemente — ein Provisorium mit Verfallsdatum.
+
+   WCAG 1.4.11 verlangt 3:1 für das, was ein Bedienelement als Bedienelement
+   kenntlich macht. Das Plugin zieht diese Rahmen aus `--lwb-ink-200` — und
+   aus derselben Variable auch die Kanten von Karten, Tabellen und Panels.
+   Für eine Trennlinie ist ein zarter Strich richtig und ausdrücklich
+   ausgenommen; für ein Auswahlfeld ist er es nicht. Ein Token, zwei Rollen:
+   über die Token-Brücke ist das nicht zu trennen, egal welchen Wert man
+   einsetzt. Zarte Linie heißt unsichtbare Felder, sichtbare Felder heißt
+   eine Oberfläche aus lauter Kästen.
+
+   Deshalb hier, ausnahmsweise, über Klassennamen des Plugins statt über
+   Token. Es ist die dritte Kopplung zwischen den Repos und die einzige, die
+   nicht bleiben soll: sobald `b2b-tokens.css` eine eigene Rolle für den
+   Rahmen eines Bedienelements hat, ist dieser Block ersatzlos zu löschen.
+   Bis dahin ist die Alternative, eine bekannte Barriere auszuliefern.
+
+   Es ist kein Nachbau: keine dieser Regeln bringt eine Gestalt mit, jede
+   ändert genau eine Farbe an einem Element, das es schon gibt.
+
+   Der Befund ist älter als die Umfärbung — `#dbe1e8` auf Weiß sind 1.32:1 —
+   und überlebt sie, weil auch die warme Linie bei 1.30:1 liegt. */
+.lotzwoo-b2b-shop :is(.lwb-input, .lwb-select, .lwb-qty, .lwb-viewswitch, .lwb-pill, .lwb-scantoggle, .lwb-btn--secondary),
+.lotzwoo-reorder :is(.lotzwoo-reorder__all, .lotzwoo-reorder__termin),
+.lotzwoo-reorder__pager .button {
+  border-color: var(--wp--preset--color--ink-350, #808d9d);
+}
+
+/* ==================================================================
+   Systemregeln des Entwurfs.
+
+   Was hier steht, gilt für jedes Kundentheme. Eine Regel, die nur für einen
+   Kunden gilt, gehört ins Kindtheme — die Frage ist bei jeder neuen Zeile
+   zuerst zu stellen.
+   ================================================================== */
+
+/* Zurückhaltung beim Rot: Fließtext-Links tragen Tinte mit farbigem
+   Unterstrich und nehmen die Markenfarbe erst beim Überfahren an.
+
+   Der Grund, warum die Regel hier steht und nicht in theme.json: `elements.link`
+   kennt `color.text` und `typography.textDecoration`, aber kein
+   `text-decoration-color` — in keiner Schemaversion. Die Regel ist dort nicht
+   formulierbar.
+
+   Der Grund, warum sie ins Basistheme gehört und nicht ins Kindtheme: sie ist
+   eine Eigenschaft des Entwurfssystems, nicht einer Marke. Jeder Kunde mit
+   einer kräftigen Markenfarbe will sie — ein Fließtext, in dem jeder Link
+   farbig leuchtet, ist unruhig, und bei den meisten Markenfarben ist er
+   zugleich der Kontrastfehler.
+
+   Bewusst schwach gehalten: kein `!important`, keine ID. Wer sie nicht will,
+   überschreibt `elements.link` im eigenen theme.json und gewinnt.
+
+   Nur in `main`: Kopf- und Fußbereich haben ihre eigenen Zustände.
+
+   Und ausdrücklich nicht in den B2B-Oberflächen. Sie liegen mit im `<main>`,
+   sind aber keine Drucksache: dort sind Links Knöpfe, Reiter und Zeilen mit
+   eigenen Zuständen aus `b2b-shop.css`. Die Ausnahmen stehen in `:where()`
+   und wiegen deshalb nichts — das hält die Regel bei einer Klasse Gewicht:
+   schwer genug, um `elements.link` aus theme.json zu schlagen (das braucht
+   sie, sonst bliebe der Link farbig), leicht genug, damit jede Plugin-Regel
+   mit zwei Klassen sie schlägt. */
+main a:not(.wp-element-button):not(:where(.wp-block-navigation-item__content, .lotzwoo-b2b-shop a, .lotzwoo-reorder a)) {
+  color: var(--wp--preset--color--ink-900);
+  text-decoration-color: var(--wp--preset--color--brand-500);
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: .18em;
+}
+
+main a:not(.wp-element-button):not(:where(.wp-block-navigation-item__content, .lotzwoo-b2b-shop a, .lotzwoo-reorder a)):hover,
+main a:not(.wp-element-button):not(:where(.wp-block-navigation-item__content, .lotzwoo-b2b-shop a, .lotzwoo-reorder a)):focus-visible {
+  color: var(--wp--preset--color--brand-500);
+}
+
 /* ==================================================================
    Was ein B2B-Portal vom Theme braucht und was ein Blog-Theme nicht
    mitbringt.
@@ -292,7 +366,14 @@ header .wp-block-site-title a {
 }
 
 /* Die Kachel steht nur, solange kein Logo hochgeladen ist — siehe den
-   Filter in functions.php. Maße und Verlauf sind die des Prototyps. */
+   Filter in functions.php. Maße sind die des Prototyps.
+
+   Der Verlauf lief von `brand-400` nach `brand-700`; der Buchstabe stand am
+   hellen Ende bei 4.15:1 gegen Weiß und verfehlte die 4.5. Bersta hat ein
+   Logo hochgeladen, die Kachel greift dort nicht — beim nächsten Kunden ohne
+   Logo greift sie wieder. Eine Stufe tiefer angesetzt (`brand-500`) trägt
+   denselben Verlauf und hält die Schwelle in jeder Palette, weil `500` die
+   Stufe ist, auf der ohnehin der Primärknopf mit weißer Schrift steht. */
 .lotzwoo-logomark {
   display: grid;
   place-items: center;
@@ -300,7 +381,7 @@ header .wp-block-site-title a {
   width: 28px;
   height: 28px;
   border-radius: 8px;
-  background: linear-gradient(140deg, var(--wp--preset--color--brand-400), var(--wp--preset--color--brand-700));
+  background: linear-gradient(140deg, var(--wp--preset--color--brand-500), var(--wp--preset--color--brand-800));
   color: var(--wp--preset--color--white);
   font-size: var(--wp--preset--font-size--md);
   font-weight: 700;
