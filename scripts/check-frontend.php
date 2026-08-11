@@ -75,7 +75,7 @@ const LANDKARTE = [
     'index' => ['theme', 'Grundgerüst: der Rückfall des Kerns gehört dem Theme'],
     'order-confirmation' => ['plugin', 'Ticket 05: kein eigenes Template — die Bestätigung ist Woos Store-API-Fläche'],
     'page' => ['theme', 'Grundgerüst, und zugleich das gesamte Konto: alle neun Woo-Endpunkte plus `nachbestellen` laufen hierüber (Ticket 01)'],
-    'page-cart' => ['plugin', 'Ticket 05: kein eigenes Template — Ticket 01 hat die Annahme widerlegt, auf der AD-1 an dieser Stelle stand'],
+    'page-cart' => ['theme', 'Ticket 15: doch ein eigenes Template — der Warenkorb-Slot muss zwischen Positionen und Summen stehen, und dafür führt die Datei den Cart-Block inline statt über `wp:post-content`'],
     'page-checkout' => ['plugin', 'AD-1: der Austritt aus der Store API kostet die Zahlungsarten-Registrierung. Die Hülle kommt trotzdem von hier — siehe Kopplung 1'],
     'page-full-width' => ['theme', 'Das Sortiment (Seite mit dem Kurzcode) läuft hierüber'],
     'page-no-title' => ['theme', 'E1: die Überschrift lebt im Inhalt. Für redaktionelle Seiten, die ihre H1 selbst mitbringen — `page.html` behält `post-title`, weil es auch das Sortiment trägt'],
@@ -234,7 +234,7 @@ foreach ($gefunden as $slug => $template) {
 // 2. Die Teile und die zwei stillen Kopplungen.
 // ---------------------------------------------------------------------------
 
-$abschnitt('Kopf, Fuß und die zwei Kopplungen nach außen');
+$abschnitt('Kopf, Fuß und die Kopplungen nach außen');
 
 $teile = [];
 
@@ -306,6 +306,51 @@ if (!WP_Block_Type_Registry::get_instance()->is_registered('lotzwoo/header-slot'
     $zeile('ok', 'Einhängestelle: `lotzwoo/header-slot` registriert und im Kopf verbaut (Ticket 10)');
 }
 
+/**
+ * Kopplung 3: der Anker im Warenkorb — und warum es hier **drei** Prüfungen sind.
+ *
+ * Der Kopf-Slot führt eine Zeichenkette: den Blocknamen. Der Warenkorb-Slot
+ * führt zwei — den Blocknamen **und** die Div-ID `lotzwoo-cart-slot`, auf die
+ * `MOUNT_ID` in `assets/js/b2b-cart.js` zeigt (Ticket 15, Frage 1 und 6). Zwei
+ * Namen brauchen zwei Prüfungen, plus die, dass der Block überhaupt registriert
+ * ist.
+ *
+ * Die dritte Prüfung ruft den `render_callback` auf, statt die Datei nach der
+ * ID zu durchsuchen: die ID steht in PHP-Code, nicht in einem Template, und
+ * eine Textsuche in `functions.php` fände sie auch in einem Kommentar.
+ *
+ * Wird eine der beiden Zeichenketten umbenannt, ohne die Gegenseite
+ * nachzuziehen, bleibt die Seite **heil** — das JS legt sich sein eigenes Div
+ * neben den Cart-Block, wie vor Ticket 15. Genau darum braucht es diese
+ * Prüfung: das Symptom ist eine Sektion an der falschen Stelle, und die sieht
+ * niemand, der sie nicht sucht.
+ */
+$slot_typ = WP_Block_Type_Registry::get_instance()->get_registered('lotzwoo/cart-slot');
+$warenkorb_template = $gefunden['page-cart'] ?? null;
+
+if (!$slot_typ instanceof WP_Block_Type) {
+    $zeile('fehler', 'Warenkorb-Slot: der Block `lotzwoo/cart-slot` ist nicht registriert (Ticket 15)');
+} else {
+    $zeile('ok', 'Warenkorb-Slot: `lotzwoo/cart-slot` registriert (Ticket 15)');
+}
+
+if (!$warenkorb_template instanceof WP_Block_Template
+    || !str_contains((string) $warenkorb_template->content, 'wp:lotzwoo/cart-slot')) {
+    $zeile('fehler', 'Warenkorb-Slot: der Block steht nicht in `templates/page-cart.html`. Das Plugin hängt seine Sektion dann wieder unter den Bestellknopf (Posten 6 der Nachbarkarte)');
+} else {
+    $zeile('ok', 'Warenkorb-Slot: im Cart-Template verbaut, zwischen Positionen und Summen (Ticket 15, Frage 3)');
+}
+
+$slot_ausgabe = $slot_typ instanceof WP_Block_Type && is_callable($slot_typ->render_callback)
+    ? (string) call_user_func($slot_typ->render_callback, [], '', null)
+    : '';
+
+if (!str_contains($slot_ausgabe, 'id="lotzwoo-cart-slot"')) {
+    $zeile('fehler', 'Warenkorb-Slot: der `render_callback` liefert kein `id="lotzwoo-cart-slot"` — `MOUNT_ID` in b2b-cart.js findet den Anker nicht (Ticket 15, Frage 6)');
+} else {
+    $zeile('ok', 'Warenkorb-Slot: der `render_callback` liefert den Anker `id="lotzwoo-cart-slot"` — dieselbe Zeichenkette wie `MOUNT_ID` im Plugin');
+}
+
 // ---------------------------------------------------------------------------
 // 3. Was der Kunde wirklich bekommt.
 // ---------------------------------------------------------------------------
@@ -338,7 +383,7 @@ $abrufe = [
     ['/', 'Startseite — hier das Sortiment (page-full-width)', true],
     [wp_make_link_relative(wc_get_page_permalink('shop')), 'Woos Shop-Seite (archive-product)', false],
     ['/?s=apfel&post_type=product', 'Produktsuche (product-search-results)', false],
-    [wp_make_link_relative(wc_get_page_permalink('cart')), 'Warenkorb (Woos Template, mit unserem Kopf und Fuß)', true],
+    [wp_make_link_relative(wc_get_page_permalink('cart')), 'Warenkorb (eigenes Template mit dem Slot; Ticket 15)', true],
     ['/diese-seite-gibt-es-nicht-' . substr(md5(get_stylesheet()), 0, 6) . '/', 'Eine Adresse ohne Seite (404)', true],
 ];
 

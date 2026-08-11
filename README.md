@@ -170,10 +170,11 @@ Beide Vorlagen schreiben ihren Slug als Body-Klasse (`lotzwoo-page-full-width`,
 ab. Nur die erste wird heute in `style.css` gelesen; die zweite ist der Haken, den ein Kindtheme
 oder ein Site-Plugin braucht, wenn eine Kundenseite doch einmal anders aussehen soll.
 
-## Der Blockname, der zwei Repos verbindet
+## Die Namen, die zwei Repos verbinden
 
 ```
 lotzwoo/header-slot
+lotzwoo/cart-slot   +   id="lotzwoo-cart-slot"
 ```
 
 `parts/header.html` enthält diesen Platzhalter-Block, den **dieses Theme registriert und leer
@@ -192,8 +193,55 @@ Der Rückgabewert des Themes ist die leere Zeichenkette und **kein leeres `<div>
 Aktionsgruppe ist ein Flex-Container mit `blockGap`, und ein leerer Kasten darin schöbe die
 Nachbarn um eine Lücke.
 
-Der Blockname ist die einzige harte Kopplung zwischen Theme- und Plugin-Repo. Er steht deshalb in
-beiden READMEs. Wer ihn ändert, ändert beide.
+### Der Warenkorb-Slot — derselbe Vertrag, anderer Mechanismus
+
+Ticket 15 hat den zweiten Slot geschnitten. Er sieht aus wie der erste und funktioniert anders:
+
+| | Kopf (`lotzwoo/header-slot`) | Warenkorb (`lotzwoo/cart-slot`) |
+|---|---|---|
+| Registrierung | Theme, `register_block_type` | Theme, `register_block_type` — **gleich** |
+| Render-Ausgabe | `''` | `<div id="lotzwoo-cart-slot"></div>` — **anders** |
+| Füllung | Plugin, PHP-`render_block`-Filter | Plugin, JS `mountPoint()` in `assets/js/b2b-cart.js` — **anders** |
+| Kopplung | Blockname | Blockname **und** Div-ID — **zwei Namen** |
+| Ort im Markup | `parts/header.html` | `templates/page-cart.html`, zwischen `cart-items-block` und `cart-totals-block` |
+| Ohne Plugin | leerer String | leeres Div, per `:empty` ausgeblendet, Höhe 0 |
+
+Der Grund für den anderen Mechanismus: die zurückgehaltenen Positionen liegen **clientseitig**. Das
+Plugin hängt sie als Cart-Extension an die Store API, sein JavaScript liest sie aus
+`wp.data.select('wc/store/cart')`. Auf einer Block-Seite feuert `woocommerce_after_cart_table` nie,
+und ein `render_block`-Filter hätte beim Templaterendering nichts zum Füllen — die Daten gibt es zu
+diesem Zeitpunkt noch nicht. Das Theme liefert deshalb keinen Inhalt, sondern einen **Ort**.
+
+Das kostet ein eigenes `templates/page-cart.html`, das den Cart-Block **inline** führt statt über
+`wp:post-content`. Drei Folgen, alle in Ticket 15 abgewogen:
+
+- Woos innere Blockstruktur des Warenkorbs ist damit pflichtig. Ändert Woo sie, ändert sich diese
+  Datei nicht mit — der Warenkorb funktioniert weiter, verliert aber, was Woo neu hineingelegt hat.
+- Der Inhalt der Warenkorb-**Seite** wird nicht mehr gerendert. Wer dort im Seiteneditor etwas
+  ergänzt, sieht es nicht. (Woos Warnung dafür greift nicht: sie prüft nur Templates aus der
+  Datenbank, nicht aus einer Datei.)
+- Die drei Cross-Sells von Woo bleiben, weil Ticket 15 sie als Teil der übernommenen Struktur nennt.
+  Das Produktgitter „Neu im Sortiment" des **leeren** Warenkorbs ist dagegen weg: es ist ein Katalog
+  ohne Freigabeprüfung, und Ticket 12 hat dieselbe Tür in drei Archiv-Templates zugemacht. An seiner
+  Stelle steht derselbe Knopf „Zum Sortiment" wie dort.
+
+Die Kasse bekommt **keinen** Slot (Ticket 15, Frage 5, Entscheidung A): AD-1 lässt ihr Template bei
+WooCommerce, und ohne Template gibt es keine kontrollierbare Stelle. FR-CTX-06b wird auf dem
+Warenkorb erfüllt.
+
+**Der Zwischenzustand, bis das Plugin nachzieht:** dort heißt `MOUNT_ID` noch
+`lotzwoo-heldback-blocks`. Das JS findet den Anker also nicht und hängt seine Sektion wie bisher
+neben den Cart-Block. Das ist dokumentiert und kein Fehler; er verschwindet, wenn `MOUNT_ID` auf
+`lotzwoo-cart-slot` steht und die Checkout-Selektoren aus `MOUNT_TARGETS` fallen.
+
+Die Sektion selbst (`.lotzwoo-heldback` und ihre Kinder) wird von **diesem** Theme gestaltet — im
+Plugin hat sie keine einzige Regel. `.lotzwoo-heldback` ist dafür die dritte Wurzel der
+Token-Brücke; findet das Plugin später eigene Regeln, stehen die Farben des Kundenthemes schon dort.
+
+Diese Namen sind die einzigen harten Kopplungen zwischen Theme- und Plugin-Repo. Sie stehen deshalb
+in beiden READMEs. Wer einen ändert, ändert beide — und für den Warenkorb sind es zwei auf einmal.
+`scripts/check-frontend.php` prüft den Kopf-Slot mit zwei Tests und den Warenkorb-Slot mit drei; der
+dritte ruft den `render_callback` auf und sucht `id="lotzwoo-cart-slot"` in seiner Ausgabe.
 
 ## Flächen, die dieses Theme abschaltet
 

@@ -434,7 +434,45 @@ add_action('init', static function (): void {
 });
 
 /**
- * Die Editor-Seite desselben Blocks.
+ * `lotzwoo/cart-slot` — die Fläche, die das Plugin im Warenkorb füllt.
+ *
+ * Zweiter Slot, **anderer** Mechanismus, und der Unterschied steht in einer
+ * Zeile: der Rückgabewert ist der Anker `<div id="lotzwoo-cart-slot"></div>`
+ * und nicht die leere Zeichenkette.
+ *
+ * Der Grund (Ticket 15, Frage 1): die zurückgehaltenen Positionen liegen
+ * **clientseitig**. `Store_Api_Bridge::data()` hängt sie als Cart-Extension an
+ * die Store-API, `assets/js/b2b-cart.js` liest sie aus
+ * `wp.data.select('wc/store/cart')` und zeichnet die Sektion selbst. Auf einer
+ * Block-Seite feuert `woocommerce_after_cart_table` nie, und ein
+ * `render_block`-Filter wie beim Kopf-Slot hätte beim Templaterendering gar
+ * nichts zum Füllen — die Daten gibt es zu diesem Zeitpunkt noch nicht.
+ *
+ * Also liefert das Theme keinen Inhalt, sondern einen **Ort**: das JS sucht als
+ * Erstes `document.getElementById('lotzwoo-cart-slot')` und hängt sich hinein,
+ * wenn es das Element findet.
+ *
+ * Damit besteht diese Kopplung aus **zwei** Zeichenketten statt einer — dem
+ * Blocknamen und der Div-ID. `scripts/check-frontend.php` prüft deshalb drei
+ * Dinge und nicht zwei; die dritte Prüfung ruft diesen Callback auf und sucht
+ * die ID in seiner Ausgabe.
+ *
+ * Ohne Plugin bleibt das Div leer. `style.css` blendet es dann per `:empty`
+ * aus, damit im Flex-Container des Warenkorbs keine Lücke entsteht — dieselbe
+ * Sorge, die beim Kopf-Slot zur leeren Zeichenkette geführt hat, hier aber
+ * lösbar, weil der Anker das Einzige ist, was das Theme beitragen kann.
+ *
+ * `id` und nicht `class`: das JS liest `getElementById`, und eine ID sagt
+ * zugleich, dass es die Stelle genau einmal gibt.
+ */
+add_action('init', static function (): void {
+    register_block_type(get_template_directory() . '/blocks/cart-slot', [
+        'render_callback' => static fn (): string => '<div id="lotzwoo-cart-slot"></div>',
+    ]);
+});
+
+/**
+ * Die Editor-Seiten derselben Blöcke.
  *
  * Eine reine PHP-Registrierung genügt dem Website-Editor nicht: er braucht eine
  * `edit`-Komponente in JavaScript, sonst steht an der Stelle „Dieser Block wird
@@ -443,22 +481,28 @@ add_action('init', static function (): void {
  * Datei erwartet und ohne sie `_doing_it_wrong` auslöst — die entsteht in einem
  * Bauschritt, den dieses Repo nicht hat und für fünfzehn Zeilen nicht bekommt.
  *
+ * Eine Schleife über die Slugs, seit es zwei sind: ein zweiter Block hätte
+ * sonst einen zweiten Haken mit derselben Mechanik bedeutet, und ein dritter
+ * einen dritten.
+ *
  * Version aus der Dateizeit, aus demselben Grund wie beim Stylesheet.
  */
 add_action('enqueue_block_editor_assets', static function (): void {
-    $script = get_template_directory() . '/blocks/header-slot/index.js';
+    foreach (['header-slot', 'cart-slot'] as $slug) {
+        $script = get_template_directory() . "/blocks/{$slug}/index.js";
 
-    if (!is_readable($script)) {
-        return;
+        if (!is_readable($script)) {
+            continue;
+        }
+
+        wp_enqueue_script(
+            "lotzwoo-{$slug}-editor",
+            get_template_directory_uri() . "/blocks/{$slug}/index.js",
+            ['wp-blocks', 'wp-element', 'wp-block-editor'],
+            (string) filemtime($script),
+            true
+        );
     }
-
-    wp_enqueue_script(
-        'lotzwoo-header-slot-editor',
-        get_template_directory_uri() . '/blocks/header-slot/index.js',
-        ['wp-blocks', 'wp-element', 'wp-block-editor'],
-        (string) filemtime($script),
-        true
-    );
 });
 
 /**

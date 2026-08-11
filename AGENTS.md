@@ -16,13 +16,19 @@ Was hier gilt und dort nicht steht:
   ab, weil es `HEAD` ausliefert und nicht, was hier liegt.
 - **Prüfen vor dem Commit:** `npm run check`.
 
-## Die zwei Kopplungen nach außen
+## Die drei Kopplungen nach außen
 
 1. **Der Platzhalter-Block in `parts/header.html`** — dieses Theme registriert ihn, das Plugin füllt
    ihn. Wer ihn umbenennt, bricht das Plugin, ohne dass hier etwas rot wird.
-2. **Die Token-Brücke in `style.css`** — sie übersetzt `--wp--preset--*` in die `--lwb-*` des
-   Plugins, auf den Wurzeln `.lotzwoo-b2b-shop` und `.lotzwoo-reorder`. Die Richtung ist Absicht
-   (AD-8): das Theme hängt am Plugin, nie umgekehrt.
+2. **Der Anker im Warenkorb** — `lotzwoo/cart-slot` in `templates/page-cart.html`, dessen
+   `render_callback` `<div id="lotzwoo-cart-slot"></div>` liefert. Zwei Zeichenketten statt einer:
+   Blockname **und** Div-ID, letztere gegen `MOUNT_ID` in `assets/js/b2b-cart.js`. Ticket 15.
+3. **Die Token-Brücke in `style.css`** — sie übersetzt `--wp--preset--*` in die `--lwb-*` des
+   Plugins, auf den Wurzeln `.lotzwoo-b2b-shop`, `.lotzwoo-reorder` und `.lotzwoo-heldback`. Die
+   Richtung ist Absicht (AD-8): das Theme hängt am Plugin, nie umgekehrt.
+
+`scripts/check-frontend.php` deckt 1 mit zwei und 2 mit drei Prüfungen ab. Es braucht eine laufende
+Installation und läuft nicht in der CI.
 
 ## Was hier nicht hingehört
 

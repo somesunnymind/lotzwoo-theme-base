@@ -35,10 +35,20 @@ Tags: block-theme, full-site-editing, e-commerce
    das Plugin ohnehin mitbringt.
 
    Ein Kindtheme ändert nur theme.json. Diese Datei bleibt unberührt.
+
+   Drei Wurzeln, nicht zwei: `.lotzwoo-heldback` ist seit Ticket 15
+   dazugekommen. Die Sektion der zurückgehaltenen Positionen wird vom Plugin
+   **clientseitig** in den Warenkorb-Slot gezeichnet und liegt damit außerhalb
+   von `.lotzwoo-b2b-shop` — ohne eigene Wurzel erreichte sie keine der Token,
+   und sie ist die einzige Plugin-Fläche im Kaufweg, die das Plugin selbst noch
+   nicht gestaltet (`grep heldback` über seine Stylesheets findet nichts).
+   Deshalb stehen ihre Regeln weiter unten in dieser Datei; sobald das Plugin
+   eigene mitbringt, findet es hier die Token des Kundenthemes bereits vor.
    ================================================================== */
 
 .lotzwoo-b2b-shop,
-.lotzwoo-reorder {
+.lotzwoo-reorder,
+.lotzwoo-heldback {
   --lwb-brand-50:  var(--wp--preset--color--brand-50,  #eaf6f1);
   --lwb-brand-100: var(--wp--preset--color--brand-100, #cfe9de);
   --lwb-brand-200: var(--wp--preset--color--brand-200, #a3d5c2);
@@ -170,6 +180,197 @@ Tags: block-theme, full-site-editing, e-commerce
 .lotzwoo-reorder :is(.lotzwoo-reorder__all, .lotzwoo-reorder__termin),
 .lotzwoo-reorder__pager .button {
   border-color: var(--wp--preset--color--ink-350, #808d9d);
+}
+
+/* ==================================================================
+   Der Warenkorb-Slot und die Sektion, die das Plugin hineinzeichnet.
+
+   Ticket 15. Das Theme liefert den Ort (`<div id="lotzwoo-cart-slot">` aus dem
+   `render_callback` von `lotzwoo/cart-slot`), das Plugin füllt ihn aus der
+   Store-API-Cart: den Versand-Hinweis und die Sektion der zurückgehaltenen
+   Positionen. Beides hatte bis hierher **null** CSS-Regeln — Posten 6 der
+   Nachbarkarte hat am 2026-08-11 mit echtem Browser gemessen, dass die Sektion
+   ungestaltet unter dem Bestellknopf landete. Für FR-CTX-06b ist das dasselbe
+   wie „nicht da".
+
+   ## Der Anker im Flex-Container, und warum `order: -1`
+
+   `.wp-block-woocommerce-filled-cart-block` ist `display:flex; flex-wrap:wrap`
+   mit zwei Kindern: Positionen 65 %, Summen 35 % (gemessen in Woos `cart.css`).
+   Der Anker steht im Markup **zwischen** beiden — das ist die Entscheidung aus
+   Ticket 15, Frage 3, und sie gilt für Vorlesereihenfolge und Tastatur.
+
+   Sichtbar wäre er dort aber der Bruch der zwei Spalten: ein drittes Kind mit
+   100 % Breite umbricht und schiebt die Summen in eine dritte Zeile — aus dem
+   Warenkorb würde ein Stapel. Ein Kind, das nur so breit ist wie die linke
+   Spalte, hat dasselbe Problem eine Stufe milder.
+
+   Deshalb `order: -1`: die Sektion wird als Band über **beide** Spalten
+   gezeichnet, die Spalten bleiben, wie sie sind. Der Zweck der Übung ist damit
+   erfüllt und mehr als das — der Kunde sieht die zurückgehaltenen Positionen,
+   bevor sein Blick überhaupt in die rechte Spalte fällt.
+
+   Ein Grid aus dem Flex-Container zu machen (Sektion unter den Positionen,
+   Summen rechts oben) wäre die schönere Anordnung und ist verworfen: es hieße,
+   Woos Breiten an den inneren Klassen zu überschreiben, und bricht beim
+   nächsten Umbau dieser Klassen an einer Stelle, die niemand mit dieser Datei
+   in Verbindung bringt.
+
+   ## `:empty` und der Zwischenzustand
+
+   Ohne Plugin — und heute auch **mit** ihm, solange `MOUNT_ID` in
+   `b2b-cart.js` noch `lotzwoo-heldback-blocks` heißt — bleibt das Div leer.
+   `display:none` nimmt es dann ganz aus dem Flex-Container: kein Kind, keine
+   `blockGap`-Lücke, Höhe 0. Genau die Sorge, die beim Kopf-Slot zur leeren
+   Zeichenkette geführt hat, hier aber ohne Verzicht auf den Anker lösbar.
+   ================================================================== */
+
+#lotzwoo-cart-slot {
+  flex: 0 0 100%;
+  order: -1;
+}
+
+#lotzwoo-cart-slot:empty {
+  display: none;
+}
+
+/* Der Versand-Hinweis. Er trägt Woos `woocommerce-info` und bekommt von dort
+   eine Grundgestalt; hier steht nur, was ihn in diesen Entwurf einpasst.
+   Bewusst über Presets statt über die Token-Brücke: er liegt als Geschwister
+   **neben** `.lotzwoo-heldback` im Slot und damit außerhalb jeder Token-Wurzel.
+   Eine vierte Wurzel für eine Regel wäre der teurere Weg. */
+#lotzwoo-cart-slot .lotzwoo-shipping-blocked {
+  margin: 0 0 var(--wp--preset--spacing--40);
+  border-left: 3px solid var(--wp--preset--color--info-500);
+  background: var(--wp--preset--color--info-50);
+  padding: var(--wp--preset--spacing--30) var(--wp--preset--spacing--40);
+  color: var(--wp--preset--color--ink-700);
+  font-size: var(--wp--preset--font-size--md);
+}
+
+/* Die Sektion selbst.
+
+   Sie ist ein Ausnahmezustand und keine Fläche wie jede andere: hier steht,
+   was der Kunde bestellt hat und **nicht** bekommt. Deshalb der warme Ton der
+   Warnrolle und eine sichtbare Kante — kein Rot, denn es ist kein Fehler,
+   sondern eine Auskunft über die Freigaben seines Kontos.
+
+   Die Farben kommen aus `--lwb-*`; die Wurzel oben in dieser Datei übersetzt
+   sie aus theme.json. Ein Kundentheme mit anderer Warnfarbe färbt die Sektion
+   damit mit, ohne diese Regeln anzufassen. */
+.lotzwoo-heldback {
+  margin: 0 0 var(--wp--preset--spacing--50);
+  border: 1px solid var(--lwb-warn-500);
+  border-radius: 8px;
+  background: var(--lwb-warn-50);
+  padding: var(--wp--preset--spacing--40);
+  color: var(--lwb-ink-900);
+}
+
+.lotzwoo-heldback__title {
+  margin: 0;
+  font-size: var(--wp--preset--font-size--lg);
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.lotzwoo-heldback__hint {
+  margin: var(--wp--preset--spacing--10) 0 0;
+  color: var(--lwb-ink-600);
+  font-size: var(--wp--preset--font-size--md);
+}
+
+.lotzwoo-heldback__list {
+  margin: var(--wp--preset--spacing--40) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Eine Zeile je Position: Bezeichnung und Menge links, Grund und die Knöpfe
+   rechts. `flex-wrap`, weil die Bezeichnung eines Großhandelsartikels lang ist
+   und drei Knöpfe daneben auf einem Telefon keine Zeile mehr ergeben.
+
+   Die Linie steht **über** jeder Zeile und nicht unter ihr: so trägt die
+   erste Zeile die Trennung zur Überschrift, und unter der letzten bleibt keine
+   Linie ohne Gegenüber. */
+.lotzwoo-heldback__item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--wp--preset--spacing--20) var(--wp--preset--spacing--30);
+  border-top: 1px solid var(--lwb-warn-500);
+  padding: var(--wp--preset--spacing--30) 0;
+}
+
+.lotzwoo-heldback__label {
+  flex: 1 1 16rem;
+  font-weight: 600;
+}
+
+/* Tabellarische Ziffern: Mengen stehen untereinander und sollen sich vergleichen
+   lassen. Dieselbe Rolle, die die Matrix des Shops der Ziffernschrift gibt. */
+.lotzwoo-heldback__qty {
+  font-family: var(--wp--preset--font-family--mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--lwb-ink-700);
+}
+
+/* Der Grund ist die Antwort auf die Frage „warum fehlt das?" und damit das
+   Wichtigste an der Zeile nach der Bezeichnung. Er steht als Plakette, damit er
+   nicht als Fließtext neben den Knöpfen untergeht. */
+.lotzwoo-heldback__reason {
+  flex: 1 1 100%;
+  border-radius: 999px;
+  background: var(--lwb-white);
+  padding: 2px 10px;
+  color: var(--lwb-ink-700);
+  font-size: var(--wp--preset--font-size--sm);
+}
+
+/* Die vier Knöpfe der Sektion tragen Woos `button`-Klasse. Auf einer
+   Block-Seite ist die ungestaltet — Woos klassisches CSS greift nur unter
+   `.woocommerce` —, sie kämen also als Systemknöpfe des Browsers.
+
+   Zweitrangige Form für die drei Zeilenknöpfe: sie sind Korrekturen an einer
+   Auskunft, nicht der Weg nach vorn. Der Rahmen kommt aus der Rolle
+   „Rahmen Bedienelement" (`--wp--preset--color--ink-350`), die WCAG 1.4.11
+   trägt — dieselbe Begründung wie beim Provisorium weiter oben. */
+.lotzwoo-heldback .button {
+  border: 1px solid var(--wp--preset--color--ink-350, #808d9d);
+  border-radius: 8px;
+  background: var(--lwb-white);
+  padding: 6px 12px;
+  color: var(--lwb-ink-900);
+  font-size: var(--wp--preset--font-size--sm);
+  font-weight: 600;
+  line-height: 1.2;
+  cursor: pointer;
+}
+
+.lotzwoo-heldback .button:hover {
+  background: var(--lwb-ink-100);
+}
+
+.lotzwoo-heldback .button:focus-visible {
+  outline: none;
+  box-shadow: var(--lwb-focus);
+}
+
+/* „Alles wieder aufnehmen" ist der einzige Knopf, der etwas voranbringt, und
+   steht deshalb allein und in der Markenfarbe. */
+.lotzwoo-heldback__reactivate-all {
+  margin-top: var(--wp--preset--spacing--40);
+}
+
+.lotzwoo-heldback .lotzwoo-heldback__reactivate-all {
+  border-color: var(--lwb-brand-500);
+  background: var(--lwb-brand-500);
+  color: var(--lwb-white);
+}
+
+.lotzwoo-heldback .lotzwoo-heldback__reactivate-all:hover {
+  border-color: var(--lwb-brand-600);
+  background: var(--lwb-brand-600);
 }
 
 /* ==================================================================
