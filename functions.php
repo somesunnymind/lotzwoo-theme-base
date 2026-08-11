@@ -158,6 +158,76 @@ add_filter('render_block_woocommerce/customer-account', static function (string 
 }, 10, 1);
 
 /**
+ * Autoren- und Datumsarchive und die Seitensuche gibt es hier nicht.
+ *
+ * Es ist ein B2B-Portal ohne Blog. Heute fallen Autorenarchiv, Datumsarchiv und
+ * die gewöhnliche Suche auf `templates/index.html` und zeigen dort eine
+ * Beitragsschleife, die nie ein Ergebnis hat — und das Autorenarchiv zählt
+ * dabei Benutzernamen auf, die niemand veröffentlichen wollte.
+ *
+ * Über `theme.json` ist das nicht zu lösen: die erlaubten Schlüssel dort sind
+ * abschließend und kennen keinen Schalter für Anfragetypen. Ein Template
+ * *bedient* eine Anfrage, es verhindert sie nicht.
+ *
+ * ## Warum beides — Rewrite-Regeln **und** ein 404 im Ablauf
+ *
+ * Die leeren Regeln nehmen `/author/name/` und `/2026/08/` aus den hübschen
+ * Adressen. Sie nehmen aber **nicht** `?author=1` und `?m=202608`: die gehen an
+ * jeder Rewrite-Regel vorbei, weil sie gar keine brauchen. Nur die Regeln zu
+ * leeren sähe erledigt aus und wäre es nicht.
+ *
+ * ## Die Produktsuche bleibt
+ *
+ * Abgeschaltet wird nur die Suche **ohne** `post_type=product`. Die
+ * Produktsuche behält ihr Template und den Hinweis aufs Sortiment; ein
+ * pauschales 404 auf jedes `?s=` ließe `product-search-results.html` nie zum
+ * Zug kommen.
+ *
+ * Die Bedingung dafür ist **wörtlich dieselbe**, die WooCommerce selbst
+ * benutzt, um dieses Template vorzuziehen (`ProductSearchResultsTemplate`:
+ * `is_search() && is_post_type_archive('product')`). Das ist der Grund, sie so
+ * und nicht als eigene Prüfung auf `get_query_var('post_type')` zu schreiben:
+ * beide Seiten meinen dann garantiert dieselbe Menge von Anfragen. Eine
+ * gemischte Suche über Produkte *und* Seiten ist keine Produktsuche in diesem
+ * Sinn — sie bekäme kein Template und fiele auf die Beitragsschleife zurück,
+ * also fällt sie hier ins 404.
+ *
+ * `template_redirect` läuft im Template-Lader **vor** der Templateauswahl; ein
+ * hier gesetztes 404 landet deshalb sauber auf `templates/404.html`.
+ * `WP_Query::set_404()` setzt alle Anfrageflaggen zurück, nicht nur diese eine.
+ */
+add_filter('author_rewrite_rules', '__return_empty_array');
+add_filter('date_rewrite_rules', '__return_empty_array');
+
+add_action('template_redirect', static function (): void {
+    if (is_admin() || is_embed()) {
+        return;
+    }
+
+    $unwanted = is_author() || is_date() || (is_search() && !is_post_type_archive('product'));
+
+    if (!$unwanted) {
+        return;
+    }
+
+    global $wp_query;
+
+    $wp_query->set_404();
+    status_header(404);
+    nocache_headers();
+});
+
+/**
+ * Die leeren Regeln müssen einmal in die Datenbank.
+ *
+ * `author_rewrite_rules` und `date_rewrite_rules` wirken erst, wenn WordPress
+ * die Regeln neu schreibt — bis dahin stehen die alten in `rewrite_rules`. Beim
+ * Themewechsel erledigt das dieser Haken; auf einer Installation, in der das
+ * Theme schon aktiv ist, einmal `wp rewrite flush`.
+ */
+add_action('after_switch_theme', 'flush_rewrite_rules');
+
+/**
  * `lotzwoo/header-slot` — die Fläche, die das Plugin im Kopfbereich füllt.
  *
  * Schnellsuche, Favoriten-Zähler und Kundenchip gehören dem Plugin, stehen aber
