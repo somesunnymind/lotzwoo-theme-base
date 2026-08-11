@@ -156,6 +156,11 @@
       "name": "page-full-width",
       "title": "Seite — volle Breite",
       "postTypes": ["page"]
+    },
+    {
+      "name": "page-no-title",
+      "title": "Seite — ohne Titelzeile",
+      "postTypes": ["page"]
     }
   ],
 

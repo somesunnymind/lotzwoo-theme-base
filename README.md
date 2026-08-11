@@ -1,8 +1,8 @@
 # LotzApp B2B Theme (Basis)
 
 Minimales Block-Theme für B2B-Großhandelsshops auf WooCommerce. Es trägt das Design-System in
-`theme.json` und sonst so wenig wie möglich: Kopfbereich, Fußbereich, ein Seiten-Template über die
-volle Breite. **Alles Kundenspezifische gehört in ein Kindtheme** — das erste ist
+`theme.json` und sonst so wenig wie möglich: Kopfbereich, Fußbereich, zwei zuweisbare
+Seitenvorlagen. **Alles Kundenspezifische gehört in ein Kindtheme** — das erste ist
 [`lotzwoo-theme-bersta`](https://github.com/somesunnymind/lotzwoo-theme-bersta).
 
 ## Die Arbeitsteilung, in einem Absatz
@@ -77,6 +77,32 @@ Zwei Dinge, die dabei leicht falsch verstanden werden:
 **Das Kindtheme aktualisiert sich nicht mit.** Der Kern führt jedes Stylesheet einzeln.
 `lotzwoo-theme-bersta` hat bewusst keinen Update-Kanal und wird per Deploy-Skript ausgeliefert — so liegt
 in keiner Kundeninstallation ein Token.
+
+## Die zwei zuweisbaren Seitenvorlagen
+
+Neben `templates/page.html` — der Vorgabe für jede Seite — stehen zwei Vorlagen in
+`customTemplates`. Der Redakteur wählt sie im Seitenattribut „Vorlage"; ein Skript setzt dasselbe
+über das Meta `_wp_page_template`.
+
+| Slug (`_wp_page_template`) | Titel im Editor | Wozu |
+|---|---|---|
+| `page-full-width` | Seite — volle Breite | Hebt die 960px des Inhaltsbereichs auf. Die Seite mit dem Kurzcode `[lotzwoo_b2b_shop]` läuft hierüber — ein Katalog in 960px ist unlesbar. |
+| `page-no-title` | Seite — ohne Titelzeile | Rendert **keinen** `post_title`. Für Seiten, deren Überschrift im Inhalt steht. |
+
+`page-no-title` ist die Umsetzung von **E1**: die H1 lebt im Inhalt, `post_title` bleibt Verwaltungs-
+und Menütitel. Ohne sie steht die Überschrift auf redaktionellen Seiten doppelt — „Kontakt" über
+einem Absatz „Kontakt" —, und eine Startseite heißt „Startseite" statt das zu sagen, wofür sie da
+ist.
+
+**`post-title` aus `page.html` zu entfernen wäre der falsche Weg** und ist deshalb nicht geschehen:
+dieselbe Vorlage trägt die Sortimentsseite und das gesamte Konto — alle neun WooCommerce-Endpunkte
+plus `nachbestellen`. Die bekämen dann gar keine Überschrift mehr. Eine zuweisbare Vorlage trifft
+genau die Seiten, die es angeht.
+
+Beide Vorlagen schreiben ihren Slug als Body-Klasse (`lotzwoo-page-full-width`,
+`lotzwoo-page-no-title`) — der `body_class`-Filter in `functions.php` leitet den Namen aus dem Slug
+ab. Nur die erste wird heute in `style.css` gelesen; die zweite ist der Haken, den ein Kindtheme
+oder ein Site-Plugin braucht, wenn eine Kundenseite doch einmal anders aussehen soll.
 
 ## Der Blockname, der zwei Repos verbindet
 

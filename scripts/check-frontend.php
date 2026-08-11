@@ -78,6 +78,7 @@ const LANDKARTE = [
     'page-cart' => ['plugin', 'Ticket 05: kein eigenes Template — Ticket 01 hat die Annahme widerlegt, auf der AD-1 an dieser Stelle stand'],
     'page-checkout' => ['plugin', 'AD-1: der Austritt aus der Store API kostet die Zahlungsarten-Registrierung. Die Hülle kommt trotzdem von hier — siehe Kopplung 1'],
     'page-full-width' => ['theme', 'Das Sortiment (Seite mit dem Kurzcode) läuft hierüber'],
+    'page-no-title' => ['theme', 'E1: die Überschrift lebt im Inhalt. Für redaktionelle Seiten, die ihre H1 selbst mitbringen — `page.html` behält `post-title`, weil es auch das Sortiment trägt'],
     'product-search-results' => ['theme', 'Ticket 12: die Produktsuche zeigt den Hinweis, keinen Katalog'],
     'single' => ['theme', 'Grundgerüst'],
     'single-product' => ['plugin', 'AD-10: die Produktseite bekommt kein eigenes Template'],

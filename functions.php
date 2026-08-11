@@ -75,15 +75,43 @@ add_action('wp_enqueue_scripts', static function (): void {
 });
 
 /**
- * Mark the full-width template on the body, so the stylesheet can widen it.
+ * Die zugewiesene Seitenvorlage auf den `<body>` schreiben.
  *
- * `wp_is_block_theme()` templates carry no body class of their own for a custom
- * template, and the alternative — widening every page and narrowing the rest —
- * gets the default wrong for the pages that are ordinary prose.
+ * Block-Themes vergeben für eine `customTemplates`-Vorlage von sich aus keine
+ * Body-Klasse. Das Stylesheet braucht aber eine: `page-full-width` hebt dort
+ * die 960px des Inhaltsbereichs auf, und die Alternative — jede Seite zu
+ * verbreitern und den Rest wieder einzufangen — hätte die Vorgabe für genau
+ * die Seiten falsch, die gewöhnlicher Fließtext sind.
+ *
+ * Der Name wird aus dem Vorlagen-Slug **abgeleitet** statt je Vorlage
+ * aufgezählt. Bis zum 2026-08-11 stand hier ein Vergleich gegen die
+ * Zeichenkette `page-full-width`; mit der zweiten Vorlage (`page-no-title`)
+ * wäre daraus eine zweite Bedingung geworden, und mit der dritten eine dritte.
+ * `lotzwoo-page-full-width` heisst weiterhin genau so — die Regel in
+ * `style.css` bleibt unberührt.
+ *
+ * `sanitize_html_class()`, weil der Slug aus `_wp_page_template` kommt und das
+ * ein Meta-Wert ist: er steht so in der Datenbank, wie ihn zuletzt jemand
+ * hineingeschrieben hat, und das muss kein Dateiname sein.
  */
 add_filter('body_class', static function (array $classes): array {
-    if (is_page() && get_page_template_slug() === 'page-full-width') {
-        $classes[] = 'lotzwoo-page-full-width';
+    if (!is_page()) {
+        return $classes;
+    }
+
+    $slug = (string) get_page_template_slug();
+
+    // `default` ist der Wert, den WordPress für „keine eigene Vorlage" setzt —
+    // eine Klasse `lotzwoo-page-default` behauptete eine Zuweisung, die es
+    // nicht gibt.
+    if ($slug === '' || $slug === 'default') {
+        return $classes;
+    }
+
+    $class = sanitize_html_class('lotzwoo-' . $slug);
+
+    if ($class !== '') {
+        $classes[] = $class;
     }
 
     return $classes;
