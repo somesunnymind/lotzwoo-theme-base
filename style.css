@@ -410,6 +410,9 @@ header .wp-block-navigation-item__content {
   text-decoration: none;
 }
 
+/* Die Flaeche ist beiden Zustaenden gemeinsam und bleibt es. Was den Fokus
+   *anzeigt*, ist der Ring weiter unten — siehe den Block bei „Fokus im
+   Kopfbereich“. */
 header .wp-block-navigation-item__content:hover,
 header .wp-block-navigation-item__content:focus-visible {
   background: var(--wp--preset--color--ink-100);
@@ -466,6 +469,63 @@ header .current-menu-item > .wp-block-navigation-item__content {
   background: var(--wp--preset--color--ink-100);
   color: var(--wp--preset--color--ink-900);
   text-decoration: none;
+}
+
+/* Fokus im Kopfbereich — Navigationslinks, Konto, Warenkorb.
+
+   Dieselbe Regel, die die zwei Overlay-Knoepfe weiter unten schon tragen, eine
+   Ebene weiter gezogen. Bis hierher hatten die drei nur die Flaeche aus
+   `ink-100`, und die zwei Zeilen darueber geben sie bei `:hover` UND bei
+   `:focus-visible` — mit zwei Folgen:
+
+   * Die Flaeche traegt die Fokusanzeige nicht. `ink-100` kommt gegen `surface`
+     auf 1.17:1 und gegen das weisse Overlay auf 1.25:1; WCAG 2.1 verlangt in
+     1.4.11 fuer die Fokusanzeige 3:1. Was man sah, war Chromes Vorgabering
+     (`outline: auto 1px rgb(16,16,16)`, am 2026-08-11 an allen drei gemessen)
+     — sichtbar, aber ohne Marke, ohne verlaessliche Staerke und je Browser
+     anders.
+   * Fokus und Mauszeiger sahen identisch aus. Wer tastet, konnte nicht sehen,
+     wo er steht.
+
+   Die Trennung liegt deshalb nicht in der Flaeche, sondern im Ring: die
+   Flaeche bleibt beiden Zustaenden gemeinsam (eine Stelle, kein Auseinander-
+   laufen), den Fokus zeigt allein der Ring. `outline` und nicht `box-shadow`,
+   weil es kein Layout kostet, und `brand-500` aus dem Preset, damit der Ring
+   dem Kindtheme folgt, ohne dass hier ein zweiter Farbwert stuende.
+
+   `outline-offset: -2px`, der Ring also INNERHALB der Randbox — und das ist
+   gemessen, nicht Geschmack. Im offenen Overlay setzt der Kern die
+   Navigationslinks buendig an den linken Bildschirmrand (x=0, ohne Polsterung)
+   und legt darum einen Vorfahren mit `overflow: auto`. Mit `+2px` reicht der
+   Ring bis -4px und wird links beschnitten: aus dem Rechteck wird ein C, auf
+   jedem der sechs Links. Dieselbe Falle wie beim Schliessen-Knopf, nur sechs
+   Mal. Nach innen gezeichnet kann ihn nichts beschneiden — bei 390px und bei
+   1280px nachgesehen, Ueberstand ueberall 0.
+
+   Nach innen liegt der Ring auf der eigenen Fuellung. Das sind zwei Flaechen,
+   denn auf der aktuellen Seite gewinnt `brand-50` aus der Regel darunter
+   (gleiche Spezifitaet, spaeter notiert — im Browser bestaetigt):
+
+     Ring                Flaeche darunter                      Kontrast
+     brand-500 #b33a2b   Fuellung ink-100 #ede5d8               4.72:1
+     brand-500 #b33a2b   aktuelle Seite brand-50 #faefed        5.24:1
+     brand-500 #157d5f   Fuellung ink-100 #f1f4f7               4.61:1
+     brand-500 #157d5f   aktuelle Seite brand-50 #eaf6f1        4.59:1
+
+   Die ersten zwei Zeilen sind das aktive Kindtheme lotzwoo-theme-bersta, die
+   letzten zwei das Basistheme. Die Aussenkante des Rings grenzt weiterhin an
+   die Flaeche daneben — #b33a2b auf Creme #fbf7f0 5.53:1 und auf dem weissen
+   Overlay 5.90:1, #157d5f auf Weiss 5.08:1. Alle sieben Werte tragen die 3:1,
+   der niedrigste mit 4.59:1.
+
+   Der Oeffnen-Knopf behaelt seinen Ring aussen (`+2px`, weiter unten): er steht
+   frei in der Kopfzeile, dort schneidet nichts, und 24px Kantenlaenge sind zu
+   wenig, um einen Ring noch nach innen zu nehmen. */
+header .wp-block-navigation-item__content:focus-visible,
+.lotzwoo-header-actions .wc-block-customer-account__link:focus-visible,
+.lotzwoo-header-actions .wc-block-mini-cart__button:focus-visible {
+  outline: 2px solid var(--wp--preset--color--brand-500);
+  outline-offset: -2px;
 }
 
 /* Die zwei Knoepfe des Overlay-Menues — "Menü öffnen" und "Menü schließen".
