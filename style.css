@@ -654,8 +654,16 @@ header .wp-element-button:focus-visible {
    Warum hier `outline` statt `var(--lwb-focus)`: dieser Schatten lebt auf den
    Wurzeln `.lotzwoo-b2b-shop`/`.lotzwoo-reorder` und ist im Kopfbereich gar
    nicht in Reichweite (im Browser geprueft: leer). Ein `outline` kostet
-   ausserdem kein Layout und wird von `overflow` nicht abgeschnitten — beim
-   Schliessen-Knopf, der im Overlay oben rechts klebt, ist das kein Detail.
+   ausserdem kein Layout — beim Schliessen-Knopf, der im Overlay oben rechts
+   klebt, ist das kein Detail.
+
+   ACHTUNG, hier stand bis zum 2026-08-11 das Gegenteil der Wahrheit: ein
+   `outline` werde „von `overflow` nicht abgeschnitten". Er wird es sehr wohl.
+   Drei Sitzungen haben es unabhaengig gemessen — der Overlay-Container
+   (`.wp-block-navigation__responsive-container.has-modal-open`) traegt
+   `overflow: auto` und clippt, und zweimal musste der Versatz deshalb nach
+   innen gedreht werden (`118da8e`, `96db4e0`). Wer hier einen Ring nach aussen
+   setzt, misst vorher den Ueberstand gegen jeden clippenden Vorfahren.
 
    `brand-500` und nicht `ink-900`, weil der Ring die Marke traegt; die Farbe
    kommt aus dem Preset, folgt also dem Kindtheme, ohne dass hier ein zweiter
@@ -665,10 +673,17 @@ header .wp-element-button:focus-visible {
      brand-500 #b33a2b   Kopf/Creme #fbf7f0 (oeffnen)      5.53:1
      brand-500 #b33a2b   Overlay    #ffffff (schliessen)   5.90:1
      brand-500 #b33a2b   Fuellung   #ede5d8 (daneben)      4.72:1
-     brand-500 #157d5f   dieselben drei              4.76 / 5.08 / 4.07:1
+     brand-500 #157d5f   Kopf/`surface` #ffffff            5.08:1
+     brand-500 #157d5f   Fuellung   #f1f4f7 (daneben)       4.61:1
 
-   Die ersten drei Zeilen sind die Farbe des aktiven Kindthemes, die letzte
-   der Rueckfall des Basisthemes. Alle sechs tragen die 3:1.
+   Die ersten drei Zeilen sind die Farbe des aktiven Kindthemes, die letzten
+   zwei der Rueckfall des Basisthemes. Alle fuenf tragen die 3:1.
+
+   Bis zum 2026-08-11 stand in der Basistheme-Zeile „dieselben drei" und
+   „4.76 / 5.08 / 4.07". Die 4.76 ist `#157d5f` auf Creme `#fbf7f0` — eine
+   Kombination, die nie rendert: die Creme gehoert dem Kindtheme, im
+   Basistheme ist `surface` weiss. Die Zahl war richtig gerechnet und
+   beschrieb eine Flaeche, die es an dieser Stelle nicht gibt.
 
    Nur `:focus-visible`, kein `:hover`: der Ruhe- und Mauszustand der zwei
    Knoepfe ist Gestaltung und laeuft als Stream F. */
