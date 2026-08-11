@@ -218,6 +218,44 @@ main a:not(.wp-element-button):not(:where(.wp-block-navigation-item__content, .w
   color: var(--wp--preset--color--brand-500);
 }
 
+/* Die Trennlinie — das meistwiederholte Element der Website.
+
+   Fuenf bis acht pro Seite, und bis zum 2026-08-11 das einzige, das nicht nach
+   der Marke aussah: gemessen 100px breit, `border-bottom: 2px solid
+   rgb(128, 128, 128)`. Das ist WordPress' Werkseinstellung, unveraendert
+   ausgeliefert — ein grauer Strich von Daumenlaenge mitten in einer Seite, die
+   sonst durchgehend in `ink-200` gehalten ist.
+
+   ADR 004 verlangt an dieser Stelle das Gegenteil: „feine Linien statt Kaesten",
+   und `--linie` = `#E4DACA`, im Theme das Preset `ink-200`. Der Entwurf setzt
+   sie ueberall gleich — Kopfunterkante, Fusskante, Datenzeilen —, immer
+   `1px solid var(--linie)` und immer ueber die volle Breite.
+
+   Deshalb hier: volle Inhaltsbreite, 1px, Preset-Farbe. Drei Werte, drei
+   Messungen dagegen.
+
+   `currentColor` statt der Variable direkt im Rahmen: waehlt jemand im Editor
+   eine Farbe, setzt WordPress `.has-…-color` mit `!important` auf `color` — der
+   Rahmen folgt dann von selbst. Stuende das Preset im `border-top`, gaebe es
+   eine Farbwahl, die sichtbar nichts tut.
+
+   `is-style-dots` bleibt ausgenommen. Die Punktvariante des Kerns zeichnet ihr
+   Muster als `::before` und schaltet dafuer `border` und `background` per
+   `!important` ab; eine Randregel darauf waere eine Regel, die aussieht, als
+   griffe sie. Wer Punkte waehlt, hat etwas anderes gemeint als eine Linie.
+
+   `opacity: 1` ist kein Zierrat: der Kern vergibt auf jeder Trennlinie die
+   Klasse `has-alpha-channel-opacity` (an allen 21 Linien der sechs Seiten
+   nachgesehen), und daran haengt in aelteren Kernfassungen eine Deckung von
+   0.4. Eine Linie, die schon zart ist, darf nicht auch noch halb da sein. */
+.wp-block-separator:not(.is-style-dots) {
+  width: 100%;
+  border: 0;
+  border-top: 1px solid currentColor;
+  color: var(--wp--preset--color--ink-200);
+  opacity: 1;
+}
+
 /* ==================================================================
    Was ein B2B-Portal vom Theme braucht und was ein Blog-Theme nicht
    mitbringt.
