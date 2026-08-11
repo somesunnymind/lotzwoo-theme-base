@@ -256,6 +256,126 @@ main a:not(.wp-element-button):not(:where(.wp-block-navigation-item__content, .w
   opacity: 1;
 }
 
+/* Die Tabelle — und die Spalte, deren Verschwinden eine Rechtsfolge hat.
+
+   `grep wp-block-table style.css` gab bis zum 2026-08-11 null Treffer: die
+   Tabellen der Website standen unveraendert auf WordPress' Werkseinstellung.
+   Die ist ein Gitter — `td, th { border: 1px solid }` plus
+   `thead { border-bottom: 3px solid }` —, also genau das Gegenteil dessen, was
+   ADR 004 verlangt. Der Entwurf kennt ueberhaupt keine `<table>`; sein
+   Tabellenbild ist `dl.daten`: Versalien-Label in `.8rem` ueber dem Wert, je
+   Zeile eine Linie in `--linie`, keine senkrechte Kante, keine Fuellung. Das
+   ist hier nachgebaut.
+
+   ## Der eigentliche Befund
+
+   Drei Tabellen sind breiter als ihr Kasten. Die Empfaenger-Tabelle der
+   Datenschutzerklaerung misst 538px in 358px verfuegbarer Breite — die dritte
+   Spalte „Grundlage", die Rechtsgrundlagen, liegt ausserhalb des Sichtfelds.
+   Impressum 408px in 391px und 391px in 358px, mitten im Wort abgeschnitten.
+
+   Der Kern legt auf `figure.wp-block-table` bereits `overflow-x: auto` (an
+   allen fuenf erreichbaren Tabellen nachgemessen). Der Inhalt ist also nicht
+   weg, er ist nur nicht auffindbar: nichts am Bild sagt, dass rechts noch etwas
+   steht. Das ist der Befund — nicht „abgeschnitten", sondern „lautlos".
+
+   ## Zwei Griffe, in dieser Reihenfolge
+
+   **Erstens weniger Ueberlauf.** `hyphens: auto` greift, weil die Seite
+   `lang="de"` traegt. Zwei der drei Faelle liegen nur 17px bzw. 33px ueber
+   ihrem Kasten; ein Trennstrich in „Bezirkshauptmannschaft" loest sie ganz auf.
+   Nicht `overflow-wrap: anywhere`: das schrumpfte die Tabelle zuverlaessig,
+   indem es mitten in Woertern bricht — auf einer Seite mit Firmenbuchnummern
+   und Paragraphen ist das schlechter lesbar als ein Bildlauf.
+
+   **Zweitens ein sichtbarer Rand am Schnitt.** Vier Ebenen: zwei Deckel, die
+   mit dem Inhalt wandern (`local`), und darunter zwei Schatten, die an der
+   Kapsel kleben (`scroll`). Am Anfang liegt der linke Deckel ueber dem linken
+   Schatten und loescht ihn; sobald gescrollt wird, wandert er weg und der
+   Schatten erscheint. Das Ergebnis ist ein Hinweis, der sich selbst
+   zurueckzieht: er steht genau dann, wenn dort wirklich noch etwas ist, und
+   erscheint auf keiner der fuenf Tabellen, die ohnehin passen. Kein
+   JavaScript.
+
+   Die Deckelfarbe ist `surface`. Auf dem aktiven Kindtheme ist das die
+   Seitenflaeche selbst (Creme `#fbf7f0`), also exakt richtig; im blanken
+   Basistheme steht `#ffffff` gegen einen Grund von `#f7f9fb` — 1.02:1, an einem
+   weich auslaufenden 32px-Streifen nicht zu sehen. Der Schatten wird per
+   `color-mix` aus `ink-900` angeruehrt und folgt damit dem Kundentheme, ohne
+   dass hier ein zweiter Farbwert stuende.
+
+   ## Was bewusst NICHT hier steht
+
+   **Kein `tabindex="0"` auf der Kapsel.** Der uebliche Rat setzt es
+   unbedingt — und damit auf jede Tabelle, auch auf die, die passt. Gemessen an
+   Chrome 151: eine Kapsel, die ueberlaeuft, bekommt von selbst einen
+   Tabulator-Halt, eine passende nicht. Der Browser tut also bereits genau das
+   Bedingte, das eine feste Auszeichnung nur unbedingt koennte. Fuenf der acht
+   Tabellen dieser Website passen; sie bekaemen einen Halt, an dem nichts zu tun
+   ist.
+
+   **Kein Umbau auf Kartenstapel je Zeile.** Die Form waere besser — nichts
+   muesste sich mehr bewegen —, aber sie braucht je Zelle die Beschriftung ihrer
+   Spalte aus der Kopfzeile. Fuenf Tabellen dieser Website haben heute eine
+   **leere** Kopfzeile (Befund S6, ein Fehler des Importskripts): jeder Wert
+   bekaeme eine leere Beschriftung. Die Form ist erst zu haben, wenn die
+   Kopfzeilen stimmen — dann ist sie es wert.
+
+   Schirmleseprogramme sind von alldem nicht betroffen: `overflow` verbirgt
+   nichts vor ihnen, die dritte Spalte wurde immer vorgelesen. Der Befund war
+   ein sehender Befund, und die Loesung ist es auch. */
+.wp-block-table {
+  overflow-x: auto;
+
+  /* Reihenfolge: die zuerst genannte Ebene liegt oben. Die Deckel muessen
+     ueber den Schatten liegen, sonst loeschen sie nichts. */
+  background-image:
+    linear-gradient(to right, var(--wp--preset--color--surface, #fff), transparent),
+    linear-gradient(to left,  var(--wp--preset--color--surface, #fff), transparent),
+    linear-gradient(to right, color-mix(in srgb, var(--wp--preset--color--ink-900, #0d1520) 16%, transparent), transparent),
+    linear-gradient(to left,  color-mix(in srgb, var(--wp--preset--color--ink-900, #0d1520) 16%, transparent), transparent);
+  background-position: 0 0, 100% 0, 0 0, 100% 0;
+  background-repeat: no-repeat;
+  background-size: 32px 100%, 32px 100%, 16px 100%, 16px 100%;
+  background-attachment: local, local, scroll, scroll;
+}
+
+.wp-block-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+/* `:is(th, td)` wiegt zwei Klassen und schlaegt damit das `.wp-block-table td`
+   des Kerns, ohne `!important` zu brauchen. */
+.wp-block-table :is(th, td) {
+  border: 0;
+  border-bottom: 1px solid var(--wp--preset--color--ink-200);
+  padding: var(--wp--preset--spacing--30) var(--wp--preset--spacing--40);
+  text-align: left;
+  vertical-align: top;
+  hyphens: auto;
+}
+
+/* Aussen buendig: die Linie soll die Spalte tragen, nicht einen Kasten
+   andeuten. Dasselbe tut der Entwurf mit `dl.daten`. */
+.wp-block-table :is(th, td):first-child { padding-left: 0; }
+.wp-block-table :is(th, td):last-child  { padding-right: 0; }
+
+/* Die 3px-Kante des Kerns unter dem Tabellenkopf. Sie ist der Grund, warum die
+   fuenf leeren Kopfzeilen aus S6 als „schmales Band mit dicker Unterkante"
+   auffallen — der Selektor wiegt hier ein Element mehr und gewinnt. */
+.wp-block-table table thead {
+  border-bottom: 0;
+}
+
+.wp-block-table thead th {
+  color: var(--wp--preset--color--ink-500);
+  font-size: var(--wp--preset--font-size--xs);
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
 /* ==================================================================
    Was ein B2B-Portal vom Theme braucht und was ein Blog-Theme nicht
    mitbringt.
