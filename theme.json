@@ -29,17 +29,28 @@
 
         { "slug": "ink-900", "name": "Text",            "color": "#0d1520" },
         { "slug": "ink-700", "name": "Text kräftig",    "color": "#263243" },
+        { "slug": "ink-600", "name": "Text ruhig",      "color": "#3a4759" },
         { "slug": "ink-500", "name": "Text sekundär",   "color": "#5a6879" },
-        { "slug": "ink-400", "name": "Text tertiär",    "color": "#8592a3" },
-        { "slug": "ink-200", "name": "Rahmen",          "color": "#dbe1e8" },
+        { "slug": "ink-400", "name": "Text tertiär",    "color": "#647387" },
+        { "slug": "ink-350", "name": "Rahmen Bedienelement", "color": "#808d9d" },
+        { "slug": "ink-300", "name": "Symbol gedämpft", "color": "#b9c2cd" },
+        { "slug": "ink-200", "name": "Linie",           "color": "#dbe1e8" },
         { "slug": "ink-100", "name": "Fläche Hover",    "color": "#f1f4f7" },
-        { "slug": "ink-50",  "name": "Hintergrund",     "color": "#f7f9fb" },
-        { "slug": "white",   "name": "Weiß",            "color": "#ffffff" },
+        { "slug": "ink-50",  "name": "Fläche getönt",   "color": "#f7f9fb" },
 
-        { "slug": "ok-500",   "name": "Erfolg",  "color": "#17794a" },
-        { "slug": "warn-500", "name": "Warnung", "color": "#a86a08" },
-        { "slug": "err-500",  "name": "Fehler",  "color": "#b42318" },
-        { "slug": "info-500", "name": "Hinweis", "color": "#1e5eb8" }
+        { "slug": "surface",   "name": "Fläche",           "color": "#ffffff" },
+        { "slug": "surface-2", "name": "Fläche abgesetzt", "color": "#f7f9fb" },
+        { "slug": "white",     "name": "Weiß",             "color": "#ffffff" },
+
+        { "slug": "ok-50",    "name": "Erfolg Fläche",  "color": "#e8f6ee" },
+        { "slug": "ok-500",   "name": "Erfolg",         "color": "#17794a" },
+        { "slug": "warn-50",  "name": "Warnung Fläche", "color": "#fdf3e3" },
+        { "slug": "warn-500", "name": "Warnung",        "color": "#9a6107" },
+        { "slug": "err-50",   "name": "Fehler Fläche",  "color": "#fdecec" },
+        { "slug": "err-500",  "name": "Fehler",         "color": "#b42318" },
+        { "slug": "err-700",  "name": "Fehler kräftig", "color": "#8a1a12" },
+        { "slug": "info-50",  "name": "Hinweis Fläche", "color": "#eaf1fc" },
+        { "slug": "info-500", "name": "Hinweis",        "color": "#1e5eb8" }
       ]
     },
 
