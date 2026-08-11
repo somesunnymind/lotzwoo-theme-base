@@ -158,6 +158,129 @@ add_filter('render_block_woocommerce/customer-account', static function (string 
 }, 10, 1);
 
 /**
+ * Die aktuelle Seite im Kopfbereich markieren.
+ *
+ * Die Navigation in `parts/header.html` steht **inline** — sechs
+ * `core/navigation-link` ohne `ref` auf ein `wp_navigation`-Objekt. Das ist die
+ * Entscheidung aus Ticket 13: jede Zeile des Themes kommt aus einer Datei, der
+ * Klon bleibt ohne Datenbank reproduzierbar, und beim Themewechsel bleibt keine
+ * verwaiste Menü-Zeile in der Datenbank des Kunden zurück.
+ *
+ * Der Preis steht in `wp-includes/blocks/navigation-link.php`:
+ *
+ * ```php
+ * $is_active = ! empty( $attributes['id'] ) && get_queried_object_id() === (int) $attributes['id'] …
+ * ```
+ *
+ * Ein **eigener** Link hat kein `id` — er kann keines haben, ohne die
+ * Beitrags-ID einer bestimmten Installation ins Theme zu schreiben. Damit ist
+ * `$is_active` immer falsch, und der Kern vergibt weder `current-menu-item`
+ * noch `aria-current="page"`. Die Fläche für die aktive Seite steht seit der
+ * Markenarbeit in `style.css` und bekäme nie eine Zeile zu färben.
+ *
+ * Verglichen wird deshalb der **Pfad**. `$wp->request` ist der Pfad der
+ * laufenden Anfrage, ohne Schrägstriche an den Enden und ohne Abfrageteil —
+ * genau die Form, in der die `url` der Links im Markup steht. Kein
+ * `home_url()`, keine Domäne: ein Theme, das an mehrere Kunden geht, darf seine
+ * Aktivmarkierung nicht an einem Hostnamen festmachen.
+ *
+ * Ein Link auf die Startseite (`/`) bleibt bewusst unmarkiert: sein Pfad ist
+ * leer, und leer gegen leer träfe auf jeder Seite zu, die WordPress als
+ * Startseite ausliefert — einschließlich der Shop-Seite dieser Installation.
+ * Die Navigation trägt heute keinen solchen Eintrag; der Riegel steht, bevor
+ * jemand einen einfügt.
+ */
+add_filter('render_block_core/navigation-link', static function (string $content, array $block): string {
+    $url = $block['attrs']['url'] ?? '';
+
+    // Ein Link mit `id` ist ein Beitrags- oder Term-Link; für den hat der Kern
+    // die Markierung schon gesetzt oder bewusst nicht gesetzt.
+    if (!is_string($url) || $url === '' || !empty($block['attrs']['id'])) {
+        return $content;
+    }
+
+    $path = wp_parse_url($url, PHP_URL_PATH);
+
+    if (!is_string($path)) {
+        return $content;
+    }
+
+    $path = trim($path, '/');
+
+    global $wp;
+
+    if ($path === '' || $path !== trim((string) ($wp->request ?? ''), '/')) {
+        return $content;
+    }
+
+    $tags = new WP_HTML_Tag_Processor($content);
+
+    if ($tags->next_tag('li')) {
+        $tags->add_class('current-menu-item');
+    }
+
+    if ($tags->next_tag('a')) {
+        $tags->set_attribute('aria-current', 'page');
+    }
+
+    return $tags->get_updated_html();
+}, 10, 2);
+
+/**
+ * Der Weg ins Sortiment im Kopfbereich.
+ *
+ * Der Knopf steht in `parts/header.html` mit `href="/shop/"`. Das ist der
+ * Rückfall, nicht die Antwort: welchen Slug die Shop-Seite trägt, entscheidet
+ * jede Installation für sich, und `/shop/` ist nur der Standard einer frischen
+ * WooCommerce-Einrichtung. Hier wird er durch die tatsächliche Adresse ersetzt.
+ *
+ * **Warum Woos Shop-Seite und nicht die Sortiment-Seite selbst.** Die Seite mit
+ * dem Kurzcode `[lotzwoo_b2b_shop]` ist die, die der Kunde sehen soll. Ihre
+ * Adresse kennt das Theme nicht: sie steht in keiner Option, sondern nur im
+ * Inhalt irgendeiner Seite, und danach zu suchen hieße, bei jedem Seitenaufbau
+ * die Beitragstabelle zu durchsuchen. Woos Shop-Seite dagegen gibt es in jeder
+ * Installation, sie steht in einer Option, und Ticket 04 dieser Karte hat
+ * bereits entschieden, dass Woos Katalogseiten aufs Sortiment geroutet werden.
+ * Der Knopf zeigt also auf die Stelle, die zum Sortiment führen **soll**.
+ *
+ * Solange dieses Routing im Plugin fehlt (Block K der Nachbarkarte), landet er
+ * auf `templates/archive-product.html` — dem Hinweis „Kein Katalog an dieser
+ * Stelle" samt Weg weiter. Ein Zwischenstand, der sichtbar ist und nichts
+ * Falsches behauptet. Die Alternative wäre ein fest verdrahtetes `/` gewesen:
+ * das stimmt genau so lange, bis jemand `page_on_front` umstellt, und zeigt
+ * danach lautlos auf die Startseite.
+ *
+ * Ohne WooCommerce bleibt stehen, was in der Datei steht.
+ */
+add_filter('render_block_core/button', static function (string $content, array $block): string {
+    $classes = $block['attrs']['className'] ?? '';
+
+    if (!is_string($classes) || !str_contains($classes, 'lotzwoo-shop-link')) {
+        return $content;
+    }
+
+    if (!function_exists('wc_get_page_permalink')) {
+        return $content;
+    }
+
+    $url = wc_get_page_permalink('shop');
+
+    if (!is_string($url) || $url === '') {
+        return $content;
+    }
+
+    $tags = new WP_HTML_Tag_Processor($content);
+
+    if (!$tags->next_tag('a')) {
+        return $content;
+    }
+
+    $tags->set_attribute('href', $url);
+
+    return $tags->get_updated_html();
+}, 10, 2);
+
+/**
  * Autoren- und Datumsarchive und die Seitensuche gibt es hier nicht.
  *
  * Es ist ein B2B-Portal ohne Blog. Heute fallen Autorenarchiv, Datumsarchiv und
