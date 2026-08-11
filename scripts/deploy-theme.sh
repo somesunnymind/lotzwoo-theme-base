@@ -72,3 +72,47 @@ if [ "$fail" -ne 0 ]; then
 fi
 
 echo "Deploy verifiziert."
+
+# Die Frontend-Pruefung hinterher.
+#
+# Der Deploy ist der einzige Vorgang, der sicher weiss, dass sich am Theme
+# etwas geaendert hat und dass eine Installation danebensteht — der richtige
+# Moment also, um zu fragen, ob noch jede Seite ihr Template bekommt.
+#
+# **Nicht blockierend, mit Absicht.** Der Deploy bleibt erfolgreich, auch wenn
+# die Pruefung etwas findet; er sagt nur, dass sie etwas gefunden hat. Sonst
+# passiert das, was solche Kopplungen immer erledigt: die erste unbequeme
+# Warnung, und jemand baut den Aufruf wieder aus.
+#
+# Aufgerufen wird die Datei **aus dem Repo**, nicht aus dem Ziel: `scripts/`
+# ist `export-ignore` und wird gar nicht ausgeliefert.
+#
+# Fehlt `wp` oder liegt das Ziel nicht in einer WordPress-Installation, wird
+# uebersprungen statt zu scheitern. Dieses Skript liefert aus; das Pruefen ist
+# die Zugabe.
+CHECK="$REPO_ROOT/scripts/check-frontend.php"
+WP_ROOT="${THEMES_DIR%/wp-content/themes}"
+
+if [ ! -f "$CHECK" ]; then
+  echo "Hinweis: $CHECK fehlt — Frontend-Pruefung uebersprungen."
+  exit 0
+fi
+
+if ! command -v wp >/dev/null 2>&1; then
+  echo "Hinweis: kein wp-cli gefunden — Frontend-Pruefung uebersprungen."
+  exit 0
+fi
+
+if [ "$WP_ROOT" = "$THEMES_DIR" ] || [ ! -f "$WP_ROOT/wp-load.php" ]; then
+  echo "Hinweis: keine WordPress-Wurzel ueber $THEMES_DIR — Frontend-Pruefung uebersprungen."
+  exit 0
+fi
+
+echo
+if sg www-data -c "wp --path=$WP_ROOT eval-file $CHECK"; then
+  exit 0
+fi
+
+echo
+echo "Die Frontend-Pruefung hat etwas gefunden. Der Deploy selbst ist durch." >&2
+exit 0
