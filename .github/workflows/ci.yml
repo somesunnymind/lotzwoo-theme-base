@@ -22,14 +22,19 @@ jobs:
 
       # `node-version` ist eine andere Achse als die Laufzeit der Action: hier
       # steht, womit die Pruefungen unten laufen, nicht womit setup-node selbst
-      # laeuft. Bleibt vorerst 20 -- das ist eine eigene Entscheidung.
+      # laeuft. Am 2026-08-12 von 20 auf 22 gehoben -- Node 20 ist seit April
+      # 2026 am Ende seiner Wartung, und die drei Pruefungen unten brauchen
+      # nichts, was sich zwischen den Fassungen geaendert haette (sie lesen
+      # JSON, HTML und Theme-Header). 22 statt 24, weil `engines` in der
+      # `package.json` nichts fordert und die Wahl damit die konservative ist:
+      # eine LTS-Fassung, die laenger getragen wird als die, die wir verlassen.
       #
       # Seit setup-node v5 wird automatisch zwischengespeichert, sobald
       # `package.json` ein `packageManager`-Feld traegt. Dieses hier hat keines,
       # also aendert sich am Verhalten nichts.
       - uses: actions/setup-node@v7
         with:
-          node-version: '20'
+          node-version: '22'
 
       - name: Werkzeug installieren
         run: npm install --no-audit --no-fund
