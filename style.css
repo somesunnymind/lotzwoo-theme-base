@@ -517,6 +517,27 @@ header .wp-block-navigation__responsive-container-close:focus-visible {
   outline-offset: 2px;
 }
 
+/* Der Schliessen-Knopf braucht den Ring nach innen, und das ist kein
+   Schoenheitsgriff.
+
+   Der Kern heftet ihn im offenen Overlay in die obere rechte Ecke — gemessen
+   auf 390px Breite sitzt er auf [366, 0, 24, 24], also buendig an zwei
+   Bildschirmkanten. Ein Ring mit `outline-offset: 2px` liegt damit von -4px
+   bis 394px, und weil die Seite waagerecht nicht scrollt, werden oben und
+   rechts je 4px abgeschnitten: der Ring wird zum C statt zum Rechteck.
+   Nachgesehen, nicht vermutet — der Screenshot zeigt es.
+
+   Das ist kein Einzelfall dieser Breite. Der Kern setzt den Knopf auf jeder
+   Fenstergroesse in dieselbe Ecke, also schneidet es immer.
+
+   Mit `-2px` wird der Ring innerhalb der Randbox gezeichnet und kann nicht
+   mehr beschnitten werden. Er liegt dann auf der Fuellung statt auf dem
+   Overlay: `brand-500` gegen `ink-100` sind 4.72:1, weiterhin ueber den 3:1
+   aus 1.4.11, und seine Aussenkante grenzt an das weisse Overlay mit 5.90:1. */
+header .wp-block-navigation__responsive-container-close:focus-visible {
+  outline-offset: -2px;
+}
+
 /* Icon und Text stehen zueinander zentriert, nicht auf der Schriftlinie.
    Gilt fuer beide Schaltflaechen und fuer das getauschte Lucide-Konto-Icon. */
 .lotzwoo-header-actions svg {
