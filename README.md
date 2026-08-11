@@ -80,12 +80,28 @@ in keiner Kundeninstallation ein Token.
 
 ## Der Blockname, der zwei Repos verbindet
 
-`parts/header.html` enthält einen Platzhalter-Block, den **dieses Theme registriert und leer
-rendert** und den **das Plugin per `render_block`-Filter füllt** (Favoriten-Zähler, Kundenchip,
-Schnellsuche). Ohne Plugin rendert der Kopf leer statt kaputt.
+```
+lotzwoo/header-slot
+```
+
+`parts/header.html` enthält diesen Platzhalter-Block, den **dieses Theme registriert und leer
+rendert** und den **das Plugin per `render_block`-Filter füllt** (Schnellsuche, Favoriten-Zähler,
+Kundenchip). Ohne Plugin rendert der Kopf leer statt kaputt.
+
+| | |
+|---|---|
+| Blockname | `lotzwoo/header-slot` |
+| Registrierung | `blocks/header-slot/block.json`, `render_callback` gibt `''` zurück |
+| Editor-Seite | `blocks/header-slot/index.js`, ohne Bauschritt |
+| Ort im Markup | `parts/header.html`, erstes Kind von `.lotzwoo-header-actions`, links von Konto-Symbol und Mini-Warenkorb |
+| Haken im Plugin | `add_filter('render_block_lotzwoo/header-slot', …)` — mit Schrägstrich, wie der Blockname |
+
+Der Rückgabewert des Themes ist die leere Zeichenkette und **kein leeres `<div>`**: die
+Aktionsgruppe ist ein Flex-Container mit `blockGap`, und ein leerer Kasten darin schöbe die
+Nachbarn um eine Lücke.
 
 Der Blockname ist die einzige harte Kopplung zwischen Theme- und Plugin-Repo. Er steht deshalb in
-beiden READMEs.
+beiden READMEs. Wer ihn ändert, ändert beide.
 
 ## Wo die Entscheidungen stehen
 

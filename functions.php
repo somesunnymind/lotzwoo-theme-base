@@ -158,6 +158,68 @@ add_filter('render_block_woocommerce/customer-account', static function (string 
 }, 10, 1);
 
 /**
+ * `lotzwoo/header-slot` — die Fläche, die das Plugin im Kopfbereich füllt.
+ *
+ * Schnellsuche, Favoriten-Zähler und Kundenchip gehören dem Plugin, stehen aber
+ * im Kopfbereich des Themes. Sie brauchen einen Ort, den beide Seiten kennen.
+ *
+ * **Die Zuständigkeit ist mit Absicht herum:** das Theme registriert den Block
+ * und rendert ihn leer, das Plugin füllt ihn per `render_block`-Filter. Das ist
+ * die Richtung, die AD-8 verlangt — die Abhängigkeit steht im Theme, nie im
+ * Plugin —, und sie hat drei Folgen: ohne Plugin rendert der Kopf **leer statt
+ * kaputt**; das Plugin kann den Inhalt ändern, ohne das Theme anzufassen; und
+ * schaltet jemand das Plugin ab, zeigt der Website-Editor keine Fehlerkachel.
+ *
+ * Der Rückgabewert ist die **leere Zeichenkette**, kein leeres `<div>`: die
+ * Aktionsgruppe im Kopf ist ein Flex-Container mit `blockGap`, und ein leerer
+ * Kasten darin verschiebt Konto-Symbol und Mini-Warenkorb um eine Lücke.
+ *
+ * Der Gegenhaken im Plugin lautet
+ * `add_filter('render_block_lotzwoo/header-slot', …)` — mit Schrägstrich, wie
+ * der Blockname. Dokumentiert in beiden READMEs, weil er die einzige Kopplung
+ * zwischen zwei Repos ist und sonst in einem Jahr ein Rätsel wäre.
+ *
+ * Verworfen, mit Grund: **Hooked Blocks** (WP 6.4/6.5) positionieren nur
+ * relativ zu einem Ankerblock — „nach der Navigation" beschreibt die Stelle
+ * nicht mehr, sobald jemand den Kopf im Website-Editor umbaut. **`wp_body_open`**
+ * liegt vor dem Kopfbereich, nicht darin. Ein **Shortcode** hätte keine
+ * Editor-Vorschau, keine `theme.json`-Stile und keinen Block-Support.
+ */
+add_action('init', static function (): void {
+    register_block_type(get_template_directory() . '/blocks/header-slot', [
+        'render_callback' => static fn (): string => '',
+    ]);
+});
+
+/**
+ * Die Editor-Seite desselben Blocks.
+ *
+ * Eine reine PHP-Registrierung genügt dem Website-Editor nicht: er braucht eine
+ * `edit`-Komponente in JavaScript, sonst steht an der Stelle „Dieser Block wird
+ * von deiner Website nicht unterstützt". Das Skript hängt nicht in `block.json`
+ * unter `editorScript`, weil WordPress dort eine `index.asset.php` neben der
+ * Datei erwartet und ohne sie `_doing_it_wrong` auslöst — die entsteht in einem
+ * Bauschritt, den dieses Repo nicht hat und für fünfzehn Zeilen nicht bekommt.
+ *
+ * Version aus der Dateizeit, aus demselben Grund wie beim Stylesheet.
+ */
+add_action('enqueue_block_editor_assets', static function (): void {
+    $script = get_template_directory() . '/blocks/header-slot/index.js';
+
+    if (!is_readable($script)) {
+        return;
+    }
+
+    wp_enqueue_script(
+        'lotzwoo-header-slot-editor',
+        get_template_directory_uri() . '/blocks/header-slot/index.js',
+        ['wp-blocks', 'wp-element', 'wp-block-editor'],
+        (string) filemtime($script),
+        true
+    );
+});
+
+/**
  * Der eigene Kopfbereich auf der Kasse.
  *
  * WooCommerces `page-checkout.html` zieht einen Kopf-Part, der fest auf
