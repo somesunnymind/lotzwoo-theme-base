@@ -116,8 +116,20 @@ Tags: block-theme, full-site-editing, e-commerce
    beiden Wurzeln. Der Grund, das überhaupt zu sagen statt weiter zu erben,
    ist das Kindtheme — sobald eines eine Serife für Überschriften setzt, holt
    sich `styles.elements.heading` aus theme.json auch die Überschriften des
-   Shops. Ein Sortimentskopf in der Website-Serife über einer Bestellmatrix
-   ist nicht gemeint; die Matrix ist eine Oberfläche, keine Drucksache.
+   Shops.
+
+   Ab `h2` ist das nicht gemeint. Was der Shop unterhalb der Seitenüberschrift
+   an Überschriften setzt, sind Bedienbeschriftungen — Filtergruppen, der Kopf
+   der Schnellerfassung, die Kontextschritte, der Kopf der Nachbestellseite.
+   Sie gehören zur Oberfläche und nicht zur Drucksache, und sie erben deshalb
+   die Schrift der Wurzel.
+
+   Die `h1` ist die Ausnahme, und zwar bewusst: es gibt genau eine
+   (`.lwb-head__title h1`, die Sortimentsüberschrift), sie ist der Titel der
+   Seite und nicht Teil des Bedienwerks. Sie ist zugleich die Stelle, an der
+   Website und Shop sich berühren — und der bruchfreie Übergang zwischen
+   beiden war die Begründung von ADR 004. Sie trägt deshalb die Serife des
+   Kundenthemes, so wie jeder andere Seitentitel auch.
 
    Die Ziffernschrift der Matrix (tabellarische Ziffern auf Preis-, Mengen-
    und Artikelnummernspalten) bleibt offen und gehört ins Plugin-Repo — sie
@@ -127,8 +139,8 @@ Tags: block-theme, full-site-editing, e-commerce
   font-family: var(--wp--preset--font-family--sans, "Inter", "Segoe UI", system-ui, sans-serif);
 }
 
-.lotzwoo-b2b-shop :is(h1, h2, h3),
-.lotzwoo-reorder :is(h1, h2, h3) {
+.lotzwoo-b2b-shop :is(h2, h3, h4, h5, h6),
+.lotzwoo-reorder :is(h2, h3, h4, h5, h6) {
   font-family: inherit;
 }
 
