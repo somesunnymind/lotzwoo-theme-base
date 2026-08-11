@@ -78,6 +78,72 @@ Zwei Dinge, die dabei leicht falsch verstanden werden:
 `lotzwoo-theme-bersta` hat bewusst keinen Update-Kanal und wird per Deploy-Skript ausgeliefert — so liegt
 in keiner Kundeninstallation ein Token.
 
+## Die Schriftskala — eine Leiter, zwei Hälften
+
+`theme.json` kann keine Kommentare tragen, und die elf Größen dort sind ohne Begründung nicht zu
+lesen. Sie steht deshalb hier.
+
+| Slug | Wert | 390px | 1440px | |
+|---|---|---|---|---|
+| `xs` … `3xl` | `0.75rem` … `1.875rem` | 12–30px | 12–30px | **fest**, die Bedienskala |
+| `4xl` | `clamp(1.7rem, 3.2vw, 2.6rem)` | 27,2px | 41,6px | **fluid**, die redaktionelle Skala |
+| `5xl` | `clamp(2.2rem, 4vw, 3.2rem)` | 35,2px | 51,2px | |
+| `6xl` | `clamp(2.4rem, 5vw, 3.9rem)` | 38,4px | 62,4px | |
+
+Die untere Hälfte ist die Skala der **Oberfläche**: Bedienbeschriftungen, Tabellenzellen,
+Filtergruppen, der Fließtext. Sie ist fest, und das ist keine Nachlässigkeit — eine Bestellmaske,
+deren Zeilenhöhe mit der Fensterbreite wandert, ist an jeder Breite anders zu treffen.
+
+Die obere Hälfte ist die Skala der **Drucksache**: Seitentitel, Kennzahlen, Abschnittsüberschriften.
+Die drei Werte sind wörtlich die des Entwurfs
+([ADR 004](https://github.com/somesunnymind/bersta-website), `docs/mockups/richtung-entwurf/`) —
+`3.9rem` ist dort die `h1`, `3.2rem` die Kennzahl, `2.6rem` die `h2`.
+
+### Warum eigene `clamp()` und nicht `settings.typography.fluid`
+
+Zwei Messungen, beide am Klon mit `wp_get_typography_font_size_value()`.
+
+**Erstens: der Schalter greift die bestehenden Größen an.** Mit `"fluid": true` schreibt WordPress
+sie um — `base`, die 15px-Basis, auf der die gesamte B2B-Oberfläche steht:
+
+```
+base  0.9375rem -> clamp(0.875rem, 0.875rem + ((1vw - 0.2rem) * 0.063), 0.938rem)
+lg    1.0625rem -> clamp(0.875rem, …, 1.063rem)
+3xl   1.875rem  -> clamp(1.185rem, …, 1.875rem)
+```
+
+Auf 390px Breite sind das **14,0px statt 15px** für den Fließtext, 14px statt 17px für `lg`, 19px
+statt 30px für `3xl`. Der Shop verschöbe sich auf jedem Telefon. Zurückzuhalten wäre das nur mit
+`"fluid": false` an jeder der acht bestehenden Größen — acht Ausnahmen, damit eine Regel gilt, und
+eine Falle für die neunte, die jemand später hinzufügt.
+
+**Zweitens: die Maschine kann den Entwurf nicht sagen.** Ihr Bezugsrahmen ist fest 320–1600px. Für
+die `h1` mit `min: 2.4rem`, `max: 3.9rem` liefert sie:
+
+```
+clamp(2.4rem, 2.4rem + ((1vw - 0.2rem) * 1.5), 3.9rem)   ->  1440px: 55,2px
+```
+
+Der Entwurf will dort 62,4px. Der Grund ist nicht die Formel, sondern der Rahmen: die `h1` des
+Entwurfs ist bei **1248px** ausgewachsen, die Kennzahl bei **1280px**, die `h2` bei **1300px** — und
+ihre unteren Knicke liegen bei 768px, 880px und 850px. Drei Bänder. `minViewportWidth` und
+`maxViewportWidth` gibt es nur **einmal**, global; ein Rahmen, der einer der drei Größen passt, ist
+für die beiden anderen falsch.
+
+Deshalb: `settings.typography.fluid` bleibt `false`, und die Fluidität steht als `clamp()` im Wert.
+Bei `false` fasst WordPress die Werte gar nicht an — sie stehen unverändert im generierten
+Stylesheet. Die acht bestehenden Größen können sich damit nicht verschieben, weil an ihnen nichts
+gerechnet wird.
+
+### Was diese Skala noch nicht tut
+
+Sie ist **Vorrat**, keine Zuweisung. `styles.elements.heading` bleibt unberührt: eine `h1` global auf
+`6xl` zu setzen träfe auch die `h1` des Sortiments und jede `h2` der Filtergruppen — die sind
+Bedienbeschriftungen und keine Drucksache (dieselbe Grenze zieht schon die Schriftfamilien-Regel in
+`style.css`). Welcher Block welche Größe trägt, entscheidet die Seite über
+`has-4-xl-font-size` … `has-6-xl-font-size`. **Achtung beim Slug:** WordPress entstellt `4xl` zu
+`4-xl`, wie schon bei `3xl` → `has-3-xl-font-size`.
+
 ## Die zwei zuweisbaren Seitenvorlagen
 
 Neben `templates/page.html` — der Vorgabe für jede Seite — stehen zwei Vorlagen in

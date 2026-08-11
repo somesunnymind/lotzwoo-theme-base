@@ -79,7 +79,11 @@
         { "slug": "lg",   "name": "L",    "size": "1.0625rem" },
         { "slug": "xl",   "name": "XL",   "size": "1.25rem" },
         { "slug": "2xl",  "name": "2XL",  "size": "1.5rem" },
-        { "slug": "3xl",  "name": "3XL",  "size": "1.875rem" }
+        { "slug": "3xl",  "name": "3XL",  "size": "1.875rem" },
+
+        { "slug": "4xl",  "name": "4XL",  "size": "clamp(1.7rem, 3.2vw, 2.6rem)" },
+        { "slug": "5xl",  "name": "5XL",  "size": "clamp(2.2rem, 4vw, 3.2rem)" },
+        { "slug": "6xl",  "name": "6XL",  "size": "clamp(2.4rem, 5vw, 3.9rem)" }
       ]
     },
 
