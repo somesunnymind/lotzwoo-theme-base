@@ -16,9 +16,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      # Beide Actions laufen ab diesen Hauptversionen auf der node24-Laufzeit.
+      # v4 lief auf node20 und meldete die Abkuendigung bei jedem Lauf.
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v4
+      # `node-version` ist eine andere Achse als die Laufzeit der Action: hier
+      # steht, womit die Pruefungen unten laufen, nicht womit setup-node selbst
+      # laeuft. Bleibt vorerst 20 -- das ist eine eigene Entscheidung.
+      #
+      # Seit setup-node v5 wird automatisch zwischengespeichert, sobald
+      # `package.json` ein `packageManager`-Feld traegt. Dieses hier hat keines,
+      # also aendert sich am Verhalten nichts.
+      - uses: actions/setup-node@v7
         with:
           node-version: '20'
 

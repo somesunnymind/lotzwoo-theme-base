@@ -15,7 +15,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      # node24-Laufzeit, siehe ci.yml.
+      - uses: actions/checkout@v7
 
       # Torwaechter 1. Ein Tag, der dem Header widerspricht, liefert ein Update
       # aus, das jede Installation sieht und nie erfuellt: der Kern vergleicht
@@ -90,7 +91,9 @@ jobs:
             | grep -qE '^[[:space:]]*Theme Name:[[:space:]]*\S' \
             || { echo "Leerer 'Theme Name' im ZIP" >&2; exit 1; }
 
+      # v3 ist genau der Sprung von node20 auf node24 -- die Release-Notiz
+      # nennt keine andere Aenderung, `files` und `permissions` bleiben.
       - name: ZIP an das Release haengen
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: build/lotzwoo-theme-base.zip
