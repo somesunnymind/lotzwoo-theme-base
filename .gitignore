@@ -1,2 +1,10 @@
 .DS_Store
 node_modules/
+
+# Arbeitskopien, die das Werkzeug anlegt (`.claude/worktrees/…`).
+#
+# Der Grund steht nicht in AGENTS.md, sondern in `scripts/deploy-theme.sh`: es
+# bricht bei `git status --porcelain` ab, und ein untracked `.claude/` zaehlt mit.
+# Am 2026-08-11 lag genau so eine Kopie hier und hat die Auslieferung aus diesem
+# Verzeichnis blockiert, waehrend sie aus der Kopie heraus lief.
+.claude/
