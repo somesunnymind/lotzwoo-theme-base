@@ -55,6 +55,7 @@
     },
 
     "typography": {
+      "defaultFontSizes": false,
       "customFontSize": true,
       "lineHeight": true,
       "dropCap": false,
