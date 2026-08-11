@@ -195,6 +195,16 @@ add_filter('render_block_woocommerce/customer-account', static function (string 
  * `template_redirect` läuft im Template-Lader **vor** der Templateauswahl; ein
  * hier gesetztes 404 landet deshalb sauber auf `templates/404.html`.
  * `WP_Query::set_404()` setzt alle Anfrageflaggen zurück, nicht nur diese eine.
+ *
+ * ## Priorität 1, und warum das keine Kosmetik ist
+ *
+ * Am selben Haken hängt `redirect_canonical` mit Priorität 10 — und es kommt
+ * bei gleicher Priorität zuerst, weil der Kern es früher registriert. Bei
+ * Priorität 10 gemessen: `/?author=1` antwortete **301** mit
+ * `Location: /author/temp_setup/`. Das 404 kam danach zwar auch, aber der
+ * Benutzername stand da schon im Antwortkopf — genau die Aufzählung, gegen die
+ * diese Abschaltung gebaut ist. Vor `redirect_canonical` gesetzt, gibt es die
+ * Umleitung nicht mehr.
  */
 add_filter('author_rewrite_rules', '__return_empty_array');
 add_filter('date_rewrite_rules', '__return_empty_array');
@@ -215,7 +225,7 @@ add_action('template_redirect', static function (): void {
     $wp_query->set_404();
     status_header(404);
     nocache_headers();
-});
+}, 1);
 
 /**
  * Die leeren Regeln müssen einmal in die Datenbank.
