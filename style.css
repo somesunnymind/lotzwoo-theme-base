@@ -528,6 +528,110 @@ header .wp-block-navigation-item__content:focus-visible,
   outline-offset: -2px;
 }
 
+/* Logo-Link und Website-Titel — derselbe Ring, aber nach AUSSEN.
+
+   Die letzten zwei Kopfbedienelemente ohne eigene Fokusanzeige; bis hierher
+   trugen sie Chromes Vorgabering (`outline: auto 1px rgb(16,16,16)`, am
+   2026-08-11 an beiden gemessen).
+
+   Die Richtung ist hier die andere als eine Regel weiter oben, und das ist
+   gemessen. Zwei Gruende, jeder fuer sich ausreichend:
+
+   * **Es schneidet nichts.** Der Ring nach innen war oben eine Notwehr gegen
+     den `overflow: auto` des offenen Overlays. Diese zwei stehen gar nicht
+     darin: bei offenem Overlay faengt der Kern den Fokus im Modal, beide sind
+     mit der Tabulatortaste nicht mehr erreichbar (nachgesehen — der Fokus
+     kommt dort nie an). Bei geschlossenem Overlay hat keiner von beiden einen
+     clippenden Vorfahren, bei 390px so wenig wie bei 1280px.
+   * **Nach innen laege der Ring im Bild bzw. in der Schrift.** Die Randbox des
+     Logo-Links ist die des `<img>`; ein Ring mit `-2px` zeichnete sich auf die
+     aeusseren 2px der Kundengrafik, deren Farben das Theme nicht kennt. Der
+     Titel wiederum hat keine Polsterung (anders als die Navigationslinks, die
+     ihre `ink-100`-Flaeche haben) — dort schnitte der Ring durch die Versalien.
+
+   Mit `+2px` liegt zwischen Ring und Element ein 2px breiter Streifen der
+   Kopfflaeche. Beide Kanten des Rings grenzen damit an dieselbe Flaeche, und
+   die Logo-Grafik beruehrt er ueberhaupt nicht:
+
+     brand-500 #b33a2b   auf Kopfflaeche #fbf7f0 (bersta)     5.53:1
+     brand-500 #157d5f   auf Kopfflaeche #ffffff (Basis)      5.08:1 */
+header .wp-block-site-logo a:focus-visible,
+header .wp-block-site-title a:focus-visible {
+  outline: 2px solid var(--wp--preset--color--brand-500);
+  outline-offset: 2px;
+}
+
+/* Der Fokusring auf einer GEFUELLTEN Markenflaeche — hier "Zum Sortiment".
+
+   Der Sonderfall des Kopfbereichs, und keine Wiederholung: die Fuellung dieses
+   Knopfes IST `brand-500`. Der Ring, den die uebrigen sechs Bedienelemente
+   tragen, kaeme darauf auf 1:1 und waere schlicht nicht da.
+
+   DIE REGEL, und sie gilt nicht nur fuer diesen Knopf:
+
+     Auf einer gefuellten Markenflaeche ist die Ringfarbe die Schriftfarbe
+     dieser Flaeche — hier `white`. Weil die Flaeche gefuellt ist, kann sich der
+     Ring von ihrer Umgebung nicht mehr selbst abgrenzen; deshalb bleibt aussen
+     zusaetzlich der `brand-500`-Ring, den der Kopfbereich ohnehin fuehrt.
+
+   Der erste Satz ist der tragende, denn er borgt sich eine Garantie, die schon
+   besteht, statt eine zweite aufzumachen: `theme.json` setzt fuer
+   `elements.button` `white` auf `brand-500`. Eine Fuellung, die als gefuellter
+   Knopf durchgeht, hat ihren Kontrast gegen Weiss also bereits als Schrift
+   beweisen muessen — und 4.5:1 fuer Text ist strenger als die 3:1, die 1.4.11
+   vom Ring verlangt. Das traegt in die Zukunft: wuerde eine kuenftige Fuellung
+   je so hell, dass ein weisser Ring die 3:1 verfehlt, haette ihre eigene weisse
+   Beschriftung die 4.5:1 schon vorher verfehlt. Der Fehler faellt dann an der
+   Schrift auf, nicht erst an der Fokusanzeige.
+
+   Gerechnet gegen beide Paletten und gegen die Toene, auf denen der Ring
+   wirklich liegt — die Fuellung im Ruhezustand und die `brand-600` des
+   `:hover`, denn beide Zustaende koennen zusammenfallen:
+
+     Kante                                       bersta      Basis
+     Kern white gegen Fuellung brand-500          5.90:1     5.08:1
+     Kern white gegen Fuellung brand-600 (hover)  7.75:1     6.48:1
+     Kern white gegen Saum brand-500              5.90:1     5.08:1
+     Saum brand-500 gegen Kopfflaeche             5.53:1     5.08:1
+
+   Acht Werte, alle ueber 3:1, der niedrigste 5.08:1. Jede Kante des Rings
+   traegt einzeln — die Anzeige haengt an keiner einzelnen Nachbarfarbe.
+
+   Die zwei anderen Kandidaten sind gerechnet und im Browser angesehen worden,
+   nicht geraten:
+
+   * **Nur ein weisser Ring innen (invertiert).** Gegen die Fuellung 5.90/5.08,
+     das traegt. Seine Aussenkante grenzt aber an die Kopfflaeche: 1.07:1 in
+     bersta, 1.00:1 im Basistheme. Im Bild sieht der Knopf dann aus, als haette
+     er 2px seines Randes verloren — die Anzeige verschwindet nach aussen.
+   * **`ink-900` als Ringfarbe.** Faellt an der Rechnung durch, und zwar zuerst
+     in der aktiven Palette: 2.97:1 auf `brand-500` in bersta, 3.61:1 im
+     Basistheme — und auf dem `brand-600` des Hover-Zustands 2.26:1 bzw.
+     2.83:1. Der Wert wird schlechter, je dunkler die Fuellung, also genau in
+     die Richtung, in die die Marken-Rampe von 500 nach 900 laeuft. Als Regel
+     fuer den naechsten gefuellten Knopf waere er damit schon widerlegt, bevor
+     es ihn gibt.
+
+   `outline-offset: 0`, damit die zwei Ringe einander beruehren: ein Spalt
+   dazwischen zeigte die Kopfflaeche, und deren Kante gegen den weissen Kern
+   traegt nichts (1.07:1). Der Saum bleibt wortgleich die Regel der uebrigen
+   sechs; der `inset`-Schatten ist die einzige Zutat, und er liegt innerhalb der
+   eigenen Randbox, kann also von nichts beschnitten werden, was nicht schon den
+   Knopf selbst beschneidet. Ueberstand bei 390px und 1280px nachgemessen,
+   ueberall 0.
+
+   `header` vor dem Selektor mit Absicht: im Kopfbereich traegt genau ein
+   Element `.wp-element-button` (nachgesehen — Konto und Warenkorb tun es
+   nicht), auf der Seite sind es fuenf. Die anderen vier stehen auf den
+   Plugin-Flaechen und haben dort mit `--lwb-focus` ihre eigene Regel; diese
+   hier greift bewusst nicht dorthin. Der naechste gefuellte Knopf IM KOPF
+   bekommt den Ring dagegen ohne eine weitere Zeile. */
+header .wp-element-button:focus-visible {
+  outline: 2px solid var(--wp--preset--color--brand-500);
+  outline-offset: 0;
+  box-shadow: inset 0 0 0 2px var(--wp--preset--color--white);
+}
+
 /* Die zwei Knoepfe des Overlay-Menues — "Menü öffnen" und "Menü schließen".
 
    Sie waren die einzigen fokussierbaren Stellen des Kopfbereichs ohne eigene
