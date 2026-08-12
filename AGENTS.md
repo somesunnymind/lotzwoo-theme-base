@@ -29,8 +29,16 @@ Was hier gilt und dort nicht steht:
 
 4. **Die zwei Parts, die dem Kundentheme gehören** — `parts/navigation.html` und
    `parts/footer-links.html`. AD-11: die Seitenstruktur eines Kunden ist kundenspezifisch und darf
-   hier nicht stehen. Was in diesen beiden Dateien liegt, ist **Vorgabe für eine Installation ohne
-   Kindtheme**, nichts weiter. Der Rahmen drumherum — Logo, `lotzwoo/header-slot`, Konto,
+   hier nicht stehen. **Beide Dateien sind leer**, und das ist die Vorgabe für eine Installation
+   ohne Kindtheme: die Basis hat zur Seitenstruktur eines Kunden keine Meinung. Eine generische
+   `core/page-list` stand hier kurz als Rückfall und ist am 2026-08-12 wieder herausgeflogen — sie
+   zieht die Seiten aus der **Datenbank** und lieferte auf dieser Installation prompt „Über uns",
+   „Produkte", „Cart", „Checkout" und „Sample Page" in die Kopfzeile. Kundenspezifisch bleibt
+   kundenspezifisch, auch wenn es nicht im Theme steht.
+
+   Dass ein leerer Part **lautlos** leer ist, fängt `scripts/check-frontend.php` ab: es warnt, wenn
+   ein Kindtheme aktiv ist und seinen Part nicht mitbringt. Der Rahmen drumherum — Logo,
+   `lotzwoo/header-slot`, Konto,
    Warenkorb, der Knopf „Zum Sortiment", die Rechtsspalte des Fußes — bleibt hier und verbessert
    sich damit für alle Kunden zugleich.
 
