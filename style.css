@@ -1183,10 +1183,20 @@ p.is-style-label {
   text-transform: uppercase;
 }
 
-/* Die grosse Zahl. `serif` gibt es in der Basis nicht — die Schrift ist
-   Kundensache und steht in der theme.json des Kindthemes (bei Bersta: Bitter,
-   nach ADR 004). Der Fallback greift also nur in einer Installation ohne
-   Kindtheme und landet dort auf der Grundschrift statt auf gar nichts.
+/* Die grosse Zahl. `serif` steht seit dem 2026-08-12 in der theme.json der
+   Basis — als generischer Stapel mit Georgia voran, ohne mitgelieferte
+   Schriftdatei. Bis dahin kannte den Slug nur das Kindtheme, und dieser
+   Block-Style zeigte in der Basis auf ein Token, das es dort nicht gab: ein
+   Vertrag, den das Design-System mit sich selbst bricht, und zwar lautlos —
+   der Rueckfall auf die Grundschrift sah aus wie eine Absicht.
+
+   Welche Serife es ist, bleibt Kundensache: Bersta ueberschreibt denselben
+   Slug mit Bitter (ADR 004), die Kaskade der theme.json erledigt das ueber den
+   gleichen Slugnamen von selbst.
+
+   Der Fallback auf `sans` bleibt stehen. Er greift jetzt nur noch, wenn ein
+   Kindtheme das `fontFamilies`-Array ersetzt und `serif` dabei weglaesst —
+   WordPress ersetzt dieses Array als Ganzes.
 
    `5-xl`, nicht `5xl`: WordPress setzt zwischen Ziffer und Buchstabe einen
    Bindestrich, wenn es aus dem Slug den Custom-Property-Namen bildet. Am

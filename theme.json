@@ -70,6 +70,11 @@
           "slug": "mono",
           "name": "Zahlen",
           "fontFamily": "\"SF Mono\", \"JetBrains Mono\", ui-monospace, \"Cascadia Mono\", Consolas, monospace"
+        },
+        {
+          "slug": "serif",
+          "name": "Serif",
+          "fontFamily": "Georgia, \"Iowan Old Style\", \"Times New Roman\", Times, serif"
         }
       ],
       "fontSizes": [
