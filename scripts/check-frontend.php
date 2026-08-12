@@ -443,6 +443,98 @@ if (!str_contains($slot_ausgabe, 'id="lotzwoo-cart-slot"')) {
     $zeile('ok', 'Warenkorb-Slot: der `render_callback` liefert den Anker `id="lotzwoo-cart-slot"` — dieselbe Zeichenkette wie `MOUNT_ID` im Plugin');
 }
 
+/**
+ * Kopplung 5: der Weg ins Sortiment.
+ *
+ * Die dritte Zeichenkette, die sich zwei Repos teilen: `lotzwoo/sortiment-url`.
+ * Das Theme wendet den Filter auf das `href` seiner fünf „Zum Sortiment"-Knöpfe
+ * an, das Plugin beantwortet ihn mit der Seite, die `[lotzwoo_b2b_shop]` trägt.
+ *
+ * Geprüft wird **beides**, und aus dem teuersten Grund dieses Projekts: ein
+ * Hook, der korrekt hängt und nie feuert, sieht von beiden Seiten aus wie der
+ * Rückfall auf `/` — also wie der Zustand vor diesem Auftrag. Und dieser
+ * Rückfall ist heute noch dazu **zufällig richtig**, weil `page_on_front` die
+ * Sortimentsseite ist. Eine Prüfung, die nur die Ausgabe ansieht, wäre grün,
+ * ohne etwas zu bedeuten.
+ *
+ * Deshalb hängt sich die Prüfung selbst an den Filter, rendert einen
+ * Musterknopf durch `do_blocks()` und sieht nach, ob **ihre eigene** Antwort im
+ * `href` ankommt. Das misst die Naht im Theme und ist von der Anwesenheit des
+ * Plugins unabhängig — genau richtig für ein Basis-Theme, das ohne das Plugin
+ * lauffähig bleiben muss.
+ *
+ * Die Klasse `lotzwoo-shop-link` ist die zweite Zeichenkette dieser Kopplung,
+ * diesmal eine theme-interne: sie steht im Markup und im Filter. Wer sie in
+ * einem Template streicht, bekommt einen Knopf, der stumm auf `/` zeigt.
+ */
+$abschnitt('Der Weg ins Sortiment (Kopplung 5)');
+
+const SORTIMENT_KNOEPFE = [
+    'parts/header.html' => 'Kopfzeile, auf jeder Seite',
+    'templates/archive-product.html' => 'Produktarchiv (Ticket 12)',
+    'templates/product-search-results.html' => 'Produktsuche (Ticket 12)',
+    'templates/taxonomy-product_attribute.html' => 'Attribut-Archiv (Ticket 12)',
+    'templates/page-cart.html' => 'Leerer Warenkorb (Ticket 15)',
+];
+
+$inhalte = [
+    'parts/header.html' => $eigenerkopf instanceof WP_Block_Template ? (string) $eigenerkopf->content : null,
+];
+
+foreach (['archive-product', 'product-search-results', 'taxonomy-product_attribute', 'page-cart'] as $slug) {
+    $template = $gefunden[$slug] ?? null;
+    $inhalte["templates/{$slug}.html"] = $template instanceof WP_Block_Template
+        ? (string) $template->content
+        : null;
+}
+
+foreach (SORTIMENT_KNOEPFE as $datei => $zweck) {
+    $inhalt = $inhalte[$datei] ?? null;
+
+    if ($inhalt === null) {
+        $zeile('fehler', "{$datei}: nicht auflösbar — der Knopf ins Sortiment ist nicht prüfbar ({$zweck})");
+        continue;
+    }
+
+    if (!str_contains($inhalt, 'lotzwoo-shop-link')) {
+        $zeile('fehler', "{$datei}: der Knopf trägt kein `lotzwoo-shop-link` mehr — der Filter greift ihn nicht, er zeigt stumm auf `/` ({$zweck})");
+        continue;
+    }
+
+    $zeile('ok', "{$datei}: Knopf mit `lotzwoo-shop-link` — {$zweck}");
+}
+
+// Die Naht selbst. Eigene Antwort hinein, `href` heraus.
+$sonde = 'https://sortiment.pruefung.invalid/naht';
+$antwort_sonde = static fn (): string => $sonde;
+
+add_filter('lotzwoo/sortiment-url', $antwort_sonde, 99);
+
+$gerendert = do_blocks(
+    '<!-- wp:button {"className":"lotzwoo-shop-link"} -->'
+    . '<div class="wp-block-button lotzwoo-shop-link">'
+    . '<a class="wp-block-button__link wp-element-button" href="/">Zum Sortiment</a></div>'
+    . '<!-- /wp:button -->'
+);
+
+remove_filter('lotzwoo/sortiment-url', $antwort_sonde, 99);
+
+if (!str_contains($gerendert, 'href="' . $sonde . '"')) {
+    $zeile('fehler', 'Sortiment-Naht: der Filter `lotzwoo/sortiment-url` **feuert nicht**. Ein Musterknopf behält sein `href` aus dem Markup — alle fünf Knöpfe zeigen dann auf `/`, und weil dort heute das Sortiment liegt, sieht man es nirgends');
+} else {
+    $zeile('ok', 'Sortiment-Naht: `lotzwoo/sortiment-url` feuert und schreibt das `href` — am Musterknopf gemessen, nicht am Code');
+}
+
+// Was heute wirklich herauskommt. Kein Urteil: ohne Plugin ist `/` die
+// richtige Antwort, und das Basis-Theme muss ohne dieses Plugin laufen.
+$aufgeloest = apply_filters('lotzwoo/sortiment-url', '/');
+
+if ($aufgeloest === '/') {
+    $zeile('hinweis', 'Sortiment: niemand beantwortet den Filter — die fünf Knöpfe zeigen auf `/`. Ohne das Plugin `lotzapp-for-woocommerce` ist genau das der vorgesehene Rückfall');
+} else {
+    $zeile('ok', "Sortiment: aufgelöst auf {$aufgeloest}");
+}
+
 // ---------------------------------------------------------------------------
 // 3. Was der Kunde wirklich bekommt.
 // ---------------------------------------------------------------------------
