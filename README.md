@@ -243,6 +243,42 @@ in beiden READMEs. Wer einen ändert, ändert beide — und für den Warenkorb s
 `scripts/check-frontend.php` prüft den Kopf-Slot mit zwei Tests und den Warenkorb-Slot mit drei; der
 dritte ruft den `render_callback` auf und sucht `id="lotzwoo-cart-slot"` in seiner Ausgabe.
 
+## Die fünf Block-Styles — und der dritte Name, der aus dem Haus zeigt
+
+Ticket 17. `bersta-website/scripts/import-pages.py` baute fünf wiederkehrende Bausteine an **45
+Aufrufstellen** aus Block-Attributen zusammen; jede Palettenänderung hätte 45 Stellen gehabt, und
+keine davon im Theme. Seit `register_block_style()` schreibt das Skript nur noch die Klasse, das
+Aussehen gehört hierher.
+
+| Klasse | Blocktyp | Was sie trägt |
+|---|---|---|
+| `is-style-label` | `core/paragraph` | Versalien, `brand-500`, Grad `sm`, Gewicht 600, Sperrung `.13em` |
+| `is-style-kennzahl` | `core/paragraph` | Grad `5-xl`, Serifenschrift des Kindthemes, Gewicht 500 |
+| `is-style-karte` | `core/group` | Rahmen 1px `ink-200`, Polsterung `spacing--50` |
+| `is-style-abgesetzt` | `core/group` | Polsterung `spacing--70` oben/unten, `spacing--50` seitlich |
+| `is-style-empfaenger` | `core/group` | Kante 3px `ink-200` am Textanfang, Polsterung `40`/`50` |
+
+Drei Dinge, die dabei leicht falsch gemacht werden:
+
+- **Der Hintergrund von `abgesetzt` bleibt Attribut.** Er wechselt je Aufrufer zwischen `surface-2`
+  und keinem Hintergrund und ist damit Inhalt der Seite, nicht des Bausteins.
+- **`karte` und `empfaenger` sind innen mehrteilig** (`h3` + `p`, bzw. zwei Absätze). Ein Block-Style
+  trägt Aussehen, nicht Zusammensetzung — deren Aufbau bleibt im Website-Repo. Wer später eine Karte
+  umbaut, findet die Hälfte davon dort.
+- **Klasse *statt* Attribut, nie zusätzlich.** Bleiben die Inline-Styles stehen, gewinnen sie, und
+  das CSS hier läuft ins Leere. Es sieht dann funktionierend aus und ist es nicht.
+
+Die Namen sind eine Kopplung zum **Website**-Repo — dieselbe Art Vertrag wie `lotzwoo/header-slot`
+zum Plugin, nur ohne Prüfskript: wer hier umbenennt, muss `import-pages.py` nachziehen, und hier
+wird nichts rot.
+
+`register_block_style()` macht die Styles im Website-Editor **auswählbar**, nicht sichtbar. Das
+Aussehen steht in `style.css`, und die Editor-Leinwand bekam aus diesem Theme bis Ticket 17
+überhaupt kein CSS — `add_theme_support('editor-styles')` ist die Erlaubnis, nicht die Zustellung.
+Zugestellt wird über `enqueue_block_assets` und nicht über `add_editor_style()`: letzteres löst über
+`get_theme_file_path()` auf und **bevorzugt das Kindtheme**, hätte im Editor also die vier Kilobyte
+des Kindes geliefert und die des Elternteils nie.
+
 ## Flächen, die dieses Theme abschaltet
 
 Ein B2B-Portal ist kein Blog. Das Theme schaltet drei Flächen ab, die WordPress sonst bedient:

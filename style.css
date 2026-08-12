@@ -1150,3 +1150,76 @@ header .wp-block-navigation__responsive-container-close:focus-visible {
   width: auto;
   z-index: 100000;
 }
+
+/* ==================================================================
+   Die fünf wiederkehrenden Bausteine.
+
+   Ticket 17, Gegenstück zu den `register_block_style()`-Aufrufen in
+   `functions.php`. Bis hierher baute `import-pages.py` diese fünf an 45
+   Aufrufstellen aus Block-Attributen zusammen — jede Palettenänderung hätte
+   45 Stellen gehabt, und keine davon im Theme.
+
+   Jeder Wert ist der, den das Skript heute schreibt, nur an einer Stelle statt
+   an fünfzehn. Der Umbau soll nichts verschieben, sondern den Ort wechseln;
+   deshalb steht hier kein „schöner" Wert und kein neuer Hexwert, sondern
+   ausschließlich Token aus theme.json.
+
+   Systemregeln, nicht Kundengestaltung: die Bausteine sind Rollen (ein Label,
+   eine Karte, ein abgesetzter Abschnitt), ihre Farben kommen aus der Palette
+   des jeweiligen Kindthemes. Deshalb gehören sie hierher und nicht nach Bersta.
+
+   Die Klassennamen sind eine Kopplung zum Website-Repo. `import-pages.py`
+   schreibt genau diese Zeichenketten; wer hier umbenennt, muss dort nachziehen.
+   ================================================================== */
+
+/* Versalien-Label über einer Überschrift. Der Buchstabenabstand ist kein
+   Token — er stand so im Skript und wandert unverändert mit; eine eigene
+   Skala für einen einzigen Wert wäre mehr Zusage als Nutzen. */
+p.is-style-label {
+  color: var(--wp--preset--color--brand-500);
+  font-size: var(--wp--preset--font-size--sm);
+  font-weight: 600;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+/* Die grosse Zahl. `serif` gibt es in der Basis nicht — die Schrift ist
+   Kundensache und steht in der theme.json des Kindthemes (bei Bersta: Bitter,
+   nach ADR 004). Der Fallback greift also nur in einer Installation ohne
+   Kindtheme und landet dort auf der Grundschrift statt auf gar nichts.
+
+   `5-xl`, nicht `5xl`: WordPress setzt zwischen Ziffer und Buchstabe einen
+   Bindestrich, wenn es aus dem Slug den Custom-Property-Namen bildet. Am
+   erzeugten Stylesheet abgelesen, nicht geraten — `--wp--preset--font-size--5xl`
+   existiert nicht und wäre stillschweigend wirkungslos geblieben. */
+p.is-style-kennzahl {
+  font-family: var(--wp--preset--font-family--serif, var(--wp--preset--font-family--sans));
+  font-size: var(--wp--preset--font-size--5-xl);
+  font-weight: 500;
+}
+
+/* Textkarte mit Rahmen. Innen `h3` + `p` — der Aufbau bleibt im Skript, ein
+   Block-Style trägt Aussehen und keine Zusammensetzung. */
+.wp-block-group.is-style-karte {
+  border: 1px solid var(--wp--preset--color--ink-200);
+  padding: var(--wp--preset--spacing--50);
+}
+
+/* Abgesetzter Abschnitt. Nur Polsterung und Vertikalabstand: der Hintergrund
+   bleibt Attribut, weil er je Aufrufer zwischen `surface-2` und keinem
+   Hintergrund wechselt und damit Inhalt der Seite ist, nicht des Bausteins. */
+.wp-block-group.is-style-abgesetzt {
+  padding-block: var(--wp--preset--spacing--70);
+  padding-inline: var(--wp--preset--spacing--50);
+}
+
+/* Ein Empfänger der Datenschutz-Auskunft, als Block statt als Tabellenzeile
+   (T5: die dritte Spalte lag auf 390px ausserhalb des Sichtfelds).
+   Logische Eigenschaften statt `border-left`/`padding-left`, weil die Kante
+   an den Textanfang gehört und nicht an die linke Bildschirmseite; in dieser
+   Leserichtung ist das derselbe Ort. */
+.wp-block-group.is-style-empfaenger {
+  border-inline-start: 3px solid var(--wp--preset--color--ink-200);
+  padding-block: var(--wp--preset--spacing--40);
+  padding-inline: var(--wp--preset--spacing--50) var(--wp--preset--spacing--40);
+}

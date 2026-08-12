@@ -506,6 +506,118 @@ add_action('enqueue_block_editor_assets', static function (): void {
 });
 
 /**
+ * Die fünf wiederkehrenden Bausteine als Block-Styles.
+ *
+ * Ticket 17. Das Importskript der Website baute dieselben fünf Bausteine an 45
+ * Aufrufstellen aus Block-Attributen zusammen — Rahmen, Polsterung, Schriftgrad
+ * je Aufruf ins `post_content` geschrieben. Jede Palettenänderung hätte damit 45
+ * Stellen gehabt, und keine davon im Theme.
+ *
+ * Ein Block-Style ist eine registrierte Klasse plus CSS: das Skript schreibt
+ * `is-style-…`, das Theme besitzt das Aussehen. **Eine** Quelle.
+ *
+ * Verworfen, mit Grund (entschieden 2026-08-12): **Patterns**. Ein
+ * unsynchronisiertes Pattern wird beim Einfügen kopiert und ist konstruktions-
+ * bedingt eine zweite Quelle, die lautlos auseinanderläuft; ein synchronisiertes
+ * läge als `wp_block` in der Datenbank und widerspräche „das Repo ist die
+ * Quelle, die Instanz das Abbild".
+ *
+ * Was ein Block-Style **nicht** trägt, ist die Zusammensetzung. `karte` ist
+ * innen `h3` + `p`, `empfaenger` sind zwei Absätze — deren Aufbau bleibt im
+ * Website-Repo. Hierher geht nur, wie sie aussehen.
+ *
+ * Das CSS steht in `style.css` und nicht als `inline_style` an dieser Stelle:
+ * wer eine Farbe oder eine Polsterung sucht, sucht sie im Stylesheet, und ein
+ * zweiter Ort für CSS ist genau der Fehler, den dieses Ticket abstellt. Dass
+ * der Website-Editor dasselbe Stylesheet bekommt, regelt der Haken auf
+ * `enqueue_block_assets` weiter unten.
+ *
+ * Die Namen sind eine Kopplung zum Website-Repo — `import-pages.py` schreibt
+ * genau diese Zeichenketten. Wer einen umbenennt, muss dort nachziehen; hier
+ * wird nichts rot.
+ */
+add_action('init', static function (): void {
+    $styles = [
+        'core/paragraph' => [
+            'label' => __('Label', 'lotzwoo-theme-base'),
+            'kennzahl' => __('Kennzahl', 'lotzwoo-theme-base'),
+        ],
+        'core/group' => [
+            'karte' => __('Karte', 'lotzwoo-theme-base'),
+            'abgesetzt' => __('Abgesetzt', 'lotzwoo-theme-base'),
+            'empfaenger' => __('Empfänger', 'lotzwoo-theme-base'),
+        ],
+    ];
+
+    foreach ($styles as $block => $variants) {
+        foreach ($variants as $name => $label) {
+            register_block_style($block, [
+                'name' => $name,
+                'label' => $label,
+            ]);
+        }
+    }
+});
+
+/**
+ * Das Stylesheet des Themes im Website-Editor.
+ *
+ * Ohne das hier sind die fünf Block-Styles oben zwar **auswählbar**, zeigen im
+ * Editor aber nichts — die Registrierung meldet den Namen an, das Aussehen
+ * steht in `style.css`, und die Editor-Leinwand bekam bis hierher aus diesem
+ * Theme überhaupt kein CSS. `add_theme_support('editor-styles')` allein ist nur
+ * die Erlaubnis, nicht die Zustellung. Derselbe Fehlerfall wie beim
+ * `header-slot`: registriert ist nicht gleich sichtbar.
+ *
+ * `enqueue_block_assets` und nicht `add_editor_style()`, aus einem Grund, der
+ * sich erst mit Kindtheme zeigt: `add_editor_style('style.css')` löst über
+ * `get_theme_file_path()` auf, und das **bevorzugt das Kindtheme**. Bei
+ * aktivem `lotzwoo-theme-bersta` hätte der Editor also die 4 KB des Kindes
+ * bekommen und die 54 KB des Elternteils nie. Ein voller URI umginge das,
+ * würde aber über `file_get_contents()` durchs Netz geladen.
+ *
+ * `enqueue_block_assets` läuft in beiden Welten; im Frontend hängt das
+ * Stylesheet schon an `wp_enqueue_scripts`, deshalb der Riegel auf `is_admin()`.
+ * Eltern zuerst, Kind danach — dieselbe Reihenfolge wie im Frontend, sonst
+ * gewönne die falsche Seite.
+ *
+ * Version aus der Dateizeit, aus demselben Grund wie beim Stylesheet.
+ */
+add_action('enqueue_block_assets', static function (): void {
+    if (!is_admin()) {
+        return;
+    }
+
+    $parent = get_template_directory() . '/style.css';
+
+    if (is_readable($parent)) {
+        wp_enqueue_style(
+            'lotzwoo-theme-base-editor',
+            get_template_directory_uri() . '/style.css',
+            [],
+            (string) filemtime($parent)
+        );
+    }
+
+    if (get_template_directory() === get_stylesheet_directory()) {
+        return;
+    }
+
+    $child = get_stylesheet_directory() . '/style.css';
+
+    if (!is_readable($child)) {
+        return;
+    }
+
+    wp_enqueue_style(
+        'lotzwoo-theme-child-editor',
+        get_stylesheet_uri(),
+        ['lotzwoo-theme-base-editor'],
+        (string) filemtime($child)
+    );
+});
+
+/**
  * Der eigene Kopfbereich auf der Kasse.
  *
  * WooCommerces `page-checkout.html` zieht einen Kopf-Part, der fest auf
