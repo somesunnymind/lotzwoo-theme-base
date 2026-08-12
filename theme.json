@@ -172,6 +172,8 @@
 
   "templateParts": [
     { "name": "header", "title": "Kopfbereich", "area": "header" },
-    { "name": "footer", "title": "Fußbereich", "area": "footer" }
+    { "name": "footer", "title": "Fußbereich", "area": "footer" },
+    { "name": "navigation", "title": "Menüführung — Kundentheme", "area": "uncategorized" },
+    { "name": "footer-links", "title": "Rechtslinks im Fuß — Kundentheme", "area": "uncategorized" }
   ]
 }

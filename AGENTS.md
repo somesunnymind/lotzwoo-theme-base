@@ -27,8 +27,18 @@ Was hier gilt und dort nicht steht:
    Plugins, auf den Wurzeln `.lotzwoo-b2b-shop`, `.lotzwoo-reorder` und `.lotzwoo-heldback`. Die
    Richtung ist Absicht (AD-8): das Theme hängt am Plugin, nie umgekehrt.
 
-`scripts/check-frontend.php` deckt 1 mit zwei und 2 mit drei Prüfungen ab. Es braucht eine laufende
-Installation und läuft nicht in der CI.
+4. **Die zwei Parts, die dem Kundentheme gehören** — `parts/navigation.html` und
+   `parts/footer-links.html`. AD-11: die Seitenstruktur eines Kunden ist kundenspezifisch und darf
+   hier nicht stehen. Was in diesen beiden Dateien liegt, ist **Vorgabe für eine Installation ohne
+   Kindtheme**, nichts weiter. Der Rahmen drumherum — Logo, `lotzwoo/header-slot`, Konto,
+   Warenkorb, der Knopf „Zum Sortiment", die Rechtsspalte des Fußes — bleibt hier und verbessert
+   sich damit für alle Kunden zugleich.
+
+   Wer hier einen Menüpunkt einträgt, den ein bestimmter Kunde braucht, hat den Fehler gemacht, den
+   Ticket 16 gefunden hat.
+
+`scripts/check-frontend.php` deckt 1 mit zwei, 2 mit drei und 4 mit zwei Prüfungen ab. Es braucht
+eine laufende Installation und läuft nicht in der CI.
 
 ## Was hier nicht hingehört
 
