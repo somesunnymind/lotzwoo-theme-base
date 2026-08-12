@@ -92,6 +92,27 @@ const TEILE = [
 ];
 
 /**
+ * Was dem Kindtheme seit AD-11 legitim gehört.
+ *
+ * Vor dem 2026-08-12 war die Antwort „nichts": jede Datei im Kindtheme war ein
+ * Verstoß gegen AD-8, und diese Prüfung meldete sie pauschal als Warnung. Seit
+ * AD-11 ist die Seitenstruktur eines Kunden ausdrücklich dort zuhause — und
+ * eine Prüfung, die genau das jedes Mal anmahnt, wird nach dem dritten Lauf
+ * nicht mehr gelesen.
+ *
+ * Die Liste ist deshalb **abschließend**, nicht beispielhaft. Alles, was nicht
+ * darauf steht, warnt weiter: ein `templates/page.html` im Kindtheme fehlt beim
+ * nächsten Kunden, und daran hat AD-11 nichts geändert.
+ *
+ * Der Schlüssel ist der Slug, der Wert die Begründung, die in der Ausgabe
+ * mitläuft — dieselbe Form wie in der Landkarte oben und aus demselben Grund.
+ */
+const KIND_EIGEN = [
+    'navigation' => 'AD-11: die Menüführung ist die Seitenstruktur des Kunden',
+    'footer-links' => 'AD-11: welche Rechtsseiten es gibt, entscheidet der Kunde',
+];
+
+/**
  * Die Seiten, die wirklich abgeholt werden.
  *
  * Bewusst kurz. Jede zusätzliche URL kostet einen Roundtrip und prüft meist
@@ -205,14 +226,21 @@ foreach (LANDKARTE as $slug => [$erwartet, $grund]) {
     }
 
     // Welche Datei der Kette gewinnt, ist eine zweite, informative Frage. Ein
-    // Kindtheme, das ein Template überschreibt, ist nach AD-8 unerwünscht (dort
-    // gehören nur Farben, Schrift und Logo hin) — aber es ist kein *Fallback*,
-    // und das ist der Fehler, gegen den diese Prüfung antritt.
+    // Kindtheme, das ein Template überschreibt, ist unerwünscht — aber es ist
+    // kein *Fallback*, und das ist der Fehler, gegen den diese Prüfung antritt.
+    //
+    // „Unerwünscht" gilt seit AD-11 nicht mehr pauschal: was auf KIND_EIGEN
+    // steht, gehört dorthin. Alles andere warnt weiter.
     $im_kind = get_stylesheet_directory() !== get_template_directory()
         && file_exists(get_stylesheet_directory() . "/templates/{$slug}.html");
 
+    if ($im_kind && isset(KIND_EIGEN[$slug])) {
+        $zeile('ok', "{$slug}: aus dem **Kindtheme**, wie vorgesehen — " . KIND_EIGEN[$slug]);
+        continue;
+    }
+
     if ($im_kind) {
-        $zeile('warnung', "{$slug}: aus dem **Kindtheme**. Nach AD-8 gehören dorthin nur Farben, Schrift und Logo — ein Template dort fehlt beim nächsten Kunden");
+        $zeile('warnung', "{$slug}: aus dem **Kindtheme**, steht aber nicht auf der Liste der kundeneigenen Slugs (AD-11) — ein Template dort fehlt beim nächsten Kunden");
         continue;
     }
 
@@ -251,6 +279,70 @@ foreach (TEILE as $slug => $zweck) {
     }
 
     $zeile('ok', "parts/{$slug}.html: aus dem Theme");
+}
+
+/**
+ * Kopplung 4: die zwei Parts, die dem Kundentheme gehören (AD-11).
+ *
+ * `parts/navigation.html` und `parts/footer-links.html` sind die einzige Stelle,
+ * an der die Seitenstruktur eines Kunden steht. Das Basis-Theme liefert je eine
+ * Vorgabe für den Fall, dass kein Kindtheme etwas mitbringt.
+ *
+ * Geprüft wird **nicht**, ob die Dateien existieren — das täte auch die
+ * Auflösung oben. Geprüft wird, **wessen** Datei gewinnt, und zwar am
+ * Verzeichnis statt am `theme`-Feld des Template-Objekts: das Feld trägt bei
+ * datei-basierten Parts den Stylesheet-Namen, egal aus welchem der beiden
+ * Verzeichnisse die Datei kam, und wäre hier eine Antwort, die immer stimmt.
+ *
+ * Der interessante Fall ist der **stille**: ein Kindtheme ist aktiv, bringt aber
+ * keinen eigenen Part mit. Dann steht im Kopf die generische Seitenliste der
+ * Basis, im Fuß gar nichts — die Seite ist heil, die Rechtslinks sind weg, und
+ * niemand sucht danach. Genau dafür ist diese Prüfung da.
+ */
+$abschnitt('Die Parts des Kundenthemes (AD-11)');
+
+$kind_aktiv = get_stylesheet_directory() !== get_template_directory();
+
+foreach (KIND_EIGEN as $slug => $grund) {
+    $part = $teile[get_stylesheet() . '//' . $slug] ?? null;
+
+    if (!$part instanceof WP_Block_Template) {
+        $zeile('fehler', "parts/{$slug}.html: gar nicht aufgelöst — der Kopf- bzw. Fußbereich zieht diesen Part, und er kommt aus keinem der beiden Themes ({$grund})");
+        continue;
+    }
+
+    if ($part->source === 'custom') {
+        $zeile('warnung', "parts/{$slug}.html: liegt in der **Datenbank**. Der Website-Editor hat eine Fassung gespeichert — die Datei im Kindtheme wird nicht mehr gelesen, und Ticket 13 gilt für diesen Part nicht mehr");
+        continue;
+    }
+
+    $aus_kind = $kind_aktiv && file_exists(get_stylesheet_directory() . "/parts/{$slug}.html");
+
+    if ($aus_kind) {
+        $zeile('ok', "parts/{$slug}.html: aus dem **Kindtheme** — {$grund}");
+        continue;
+    }
+
+    if ($kind_aktiv) {
+        $zeile('warnung', "parts/{$slug}.html: ein Kindtheme ist aktiv, bringt diesen Part aber nicht mit — ausgeliefert wird die neutrale Vorgabe der Basis ({$grund})");
+        continue;
+    }
+
+    $zeile('ok', "parts/{$slug}.html: die neutrale Vorgabe der Basis, kein Kindtheme aktiv — {$grund}");
+}
+
+// Die Gegenprobe zur Liste: ein Part im Kindtheme, der nicht darauf steht.
+// Ohne diese Schleife wäre die Liste eine Erlaubnis ohne Grenze, und der Satz
+// „das Kindtheme trägt nur Farben, Schrift, Logo und seine Seitenstruktur"
+// stünde nur noch in einer Markdown-Datei.
+foreach ($kind_aktiv ? (glob(get_stylesheet_directory() . '/parts/*.html') ?: []) : [] as $datei) {
+    $slug = basename($datei, '.html');
+
+    if (isset(KIND_EIGEN[$slug])) {
+        continue;
+    }
+
+    $zeile('warnung', "parts/{$slug}.html: aus dem **Kindtheme**, steht aber nicht auf der Liste der kundeneigenen Slugs (AD-11) — ein Part dort erbt keine Verbesserung am Rahmen mehr");
 }
 
 /**
