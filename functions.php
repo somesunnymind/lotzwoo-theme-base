@@ -254,31 +254,97 @@ add_filter('render_block_core/navigation-link', static function (string $content
     return $tags->get_updated_html();
 }, 10, 2);
 
-/*
- * Der Weg ins Sortiment im Kopfbereich — und warum hier kein Filter mehr steht.
+/**
+ * Der Weg ins Sortiment — fünf Knöpfe, eine Auflösung.
  *
- * `2debf23` hat den Knopf `.lotzwoo-shop-link` per `render_block_core/button`
- * auf `wc_get_page_permalink('shop')` umgeschrieben, mit einem guten Argument:
- * welchen Slug Woos Shop-Seite trägt, entscheidet jede Installation für sich,
- * und sie steht wenigstens in einer Option — die Adresse der Seite mit dem
- * Kurzcode `[lotzwoo_b2b_shop]` steht nirgends.
+ * Fünf Stellen dieses Themes verlinken „Zum Sortiment", und bis zum 2026-08-12
+ * stand in allen fünf hart `/`. Das stimmte, solange `page_on_front` die
+ * Sortimentsseite ist — also **zufällig**. Stellt jemand die Startseite um,
+ * zeigen alle fünf lautlos woanders hin, und niemand sieht einen Fehler.
  *
- * Der Auftraggeber hat am 2026-08-11 anders entschieden: **der Knopf zeigt
- * auf `/`.** Der Grund ist der Zwischenstand, den das Argument in Kauf nahm.
- * Woos Shop-Seite trägt seit Ticket 12 den Hinweis „Kein Katalog an dieser
- * Stelle"; der Weg ins Sortiment endete also bei der Auskunft, dass es hier
- * keinen gibt — und zwar so lange, bis das Archiv-Routing im Plugin steht
- * (Nachbarkarte). Ein Knopf, der auf eine Absage führt, ist teurer als eine
- * Annahme, die stimmt, solange die Startseite das Sortiment ist.
+ * `2debf23` hatte den Kopf-Knopf schon einmal umgeschrieben, damals auf
+ * `wc_get_page_permalink('shop')`. Der Auftraggeber hat das am 2026-08-11
+ * zurückgenommen (`47494eb`), und das war richtig: Woos Shop-Seite trägt seit
+ * Ticket 12 „Kein Katalog an dieser Stelle" — der Weg ins Sortiment endete bei
+ * einer Absage. Die Adresse der Seite mit dem Kurzcode `[lotzwoo_b2b_shop]`
+ * stand damals nirgends. **Jetzt steht sie irgendwo**, und zwar hinter genau
+ * einem Namen: `lotzwoo/sortiment-url`.
  *
- * Der Einwand gegen `/` bleibt richtig und ist nicht widerlegt: stellt jemand
- * `page_on_front` um, zeigt der Knopf lautlos auf die neue Startseite. Er steht
- * dafür in einer Datei, die im Website-Editor änderbar ist, und dieselbe
- * Adresse steht schon in den drei Archiv-Templates hinter „Zum Sortiment" —
- * alle vier sagen jetzt dasselbe.
+ * ## Warum ein Filter und kein Nachschlagen im Template
  *
- * Sobald das Routing steht, ist der Filter drei Zeilen entfernt wieder da.
+ * Die fünf Templates bleiben statisches Blockmarkup. Sie können nichts
+ * nachschlagen, und sie sollen es auch nicht: eine Datei, die im
+ * Website-Editor bearbeitbar ist, ist der falsche Ort für eine Abfrage. Was
+ * dort steht, ist der **Rückfallwert** — und der wird hier als Eingabe in den
+ * Filter gegeben, statt ihn ein zweites Mal hinzuschreiben.
+ *
+ * ## Ohne Plugin
+ *
+ * Hängt niemand an `lotzwoo/sortiment-url`, gibt `apply_filters()` den
+ * Eingabewert zurück — also das `href` aus dem Markup, also `/`. Es gibt keinen
+ * Zweig für „Plugin fehlt", weil es keinen braucht: das ist dieselbe Richtung
+ * wie bei `lotzwoo/header-slot` und `lotzwoo/cart-slot`, die Abhängigkeit steht
+ * im Theme und nie im Plugin (AD-8). Das Basis-Theme bleibt allein lauffähig.
+ *
+ * Auch das Plugin hängt an diesem Filter und ruft ihn nicht anders auf: die
+ * beiden Kontoseiten gehen über `Sortiment_Locator::url()`, und die reicht
+ * ihren eigenen Rückfallwert durch dieselbe Naht. Sieben Verweise, eine
+ * Auflösung.
+ *
+ * ## Woran die fünf zu erkennen sind
+ *
+ * An der Klasse `lotzwoo-shop-link`, die alle fünf Knöpfe im Markup tragen.
+ * Der Kopf-Knopf hatte sie schon; die vier anderen haben sie mit diesem Auftrag
+ * bekommen.
+ *
+ * Die Alternative wäre gewesen, jeden `core/button` mit `href="/"` und der
+ * Beschriftung „Zum Sortiment" zu erwischen. Das erkennt einen Knopf an seinem
+ * Text: es bricht bei jeder Umformulierung, es bricht in jeder Übersetzung, und
+ * es fasst irgendwann einen Knopf an, der nur zufällig so heißt. Eine Klasse
+ * sagt, was gemeint ist.
+ *
+ * Ersetzt wird **nur** das `href` des ersten `a`, über den Tag-Prozessor statt
+ * über einen regulären Ausdruck — der Knopf trägt Attribute aus `theme.json`
+ * und aus den Block-Supports, und die gehen niemanden hier etwas an.
  */
+add_filter('render_block_core/button', static function (string $content, array $block): string {
+    $classes = $block['attrs']['className'] ?? '';
+
+    if (!is_string($classes) || !in_array('lotzwoo-shop-link', preg_split('/\s+/', trim($classes)) ?: [], true)) {
+        return $content;
+    }
+
+    $tags = new WP_HTML_Tag_Processor($content);
+
+    if (!$tags->next_tag('a')) {
+        return $content;
+    }
+
+    // Der Rückfallwert kommt aus dem Markup und ist nicht hier hartkodiert:
+    // steht im Template etwas anderes als `/`, ist das die Absicht dessen, der
+    // es hingeschrieben hat, und nicht ein Fehler, den dieser Filter geradezieht.
+    $fallback = $tags->get_attribute('href');
+    $fallback = is_string($fallback) && $fallback !== '' ? $fallback : '/';
+
+    /**
+     * Wo das Sortiment liegt.
+     *
+     * Die Naht zum Plugin `lotzapp-for-woocommerce`, das die Seite mit dem
+     * Kurzcode `[lotzwoo_b2b_shop]` ermittelt. Ohne dieses Plugin antwortet
+     * niemand, und der Eingabewert kommt unverändert zurück.
+     *
+     * @param string $fallback Das `href`, das im Template steht.
+     */
+    $url = apply_filters('lotzwoo/sortiment-url', $fallback);
+
+    if (!is_string($url) || $url === '' || $url === $fallback) {
+        return $content;
+    }
+
+    $tags->set_attribute('href', $url);
+
+    return $tags->get_updated_html();
+}, 10, 2);
 
 /**
  * Autoren- und Datumsarchive und die Seitensuche gibt es hier nicht.
