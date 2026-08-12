@@ -241,6 +241,35 @@ Tags: block-theme, full-site-editing, e-commerce
   display: none;
 }
 
+/* ==================================================================
+   Die leere Huelle eines Template-Parts.
+
+   `parts/navigation.html` und `parts/footer-links.html` sind in der Basis
+   leer — die Seitenstruktur eines Kunden gehoert ins Kindtheme (AD-11). Der
+   Block `core/template-part` rendert trotzdem seinen Rahmen: ein
+   `<div class="wp-block-template-part">` ohne Inhalt. Gemessen am 2026-08-12,
+   Basis-Theme allein, 1440px: der Knopf „Zum Sortiment" ruecken damit 24px
+   nach rechts, und ueber der Copyright-Zeile stehen 24px zu viel — zwei
+   `blockGap`-Luecken um nichts.
+
+   Zwei Regeln, weil zwei Layouts betroffen sind. `display:none` nimmt die
+   Huelle aus dem Flex-Container des Kopfes. Im Fuss genuegt das **nicht**:
+   die `constrained`-Anordnung setzt den Abstand ueber `* + *`, und ein
+   ausgeblendetes Element bleibt ein Geschwister. Deshalb die zweite Regel.
+
+   `:empty` und nicht „Datei weglassen": ohne Datei zeigte der Website-Editor
+   den Part als geloescht an, und ein Kindtheme haette keine Vorlage zum
+   Aufmachen.
+   ================================================================== */
+
+.wp-block-template-part:empty {
+  display: none;
+}
+
+.wp-block-template-part:empty + * {
+  margin-block-start: 0;
+}
+
 /* Der Versand-Hinweis. Er trägt Woos `woocommerce-info` und bekommt von dort
    eine Grundgestalt; hier steht nur, was ihn in diesen Entwurf einpasst.
    Bewusst über Presets statt über die Token-Brücke: er liegt als Geschwister
