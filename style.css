@@ -456,6 +456,62 @@ main a:not(.wp-element-button):not(:where(.wp-block-navigation-item__content, .w
   color: var(--wp--preset--color--brand-500);
 }
 
+/* Ueberschriften brechen. Deutsch tut das von selbst nicht.
+
+   Der Befund, am 2026-08-12 gemessen: `/datenschutz/` lief bei 390px um 50px
+   waagrecht ueber — `.entry-content` 409px in 343px verfuegbarer Breite. Nicht
+   der Inhalt war es, sondern die Ueberschrift: „Datenschutzerklaerung" mit
+   `has-6-xl-font-size` bei 38,4px, **ein Wort**, das laenger ist als der Kasten.
+   Ein Wort ist fuer den Umbruch eine unteilbare Einheit; der Kasten gibt nach,
+   nicht das Wort.
+
+   Die Regel steht deshalb hier und nicht an dieser Seite. Es ist keine
+   Eigenheit der Datenschutzerklaerung, es ist die Sprache: „Lieferbedingungen",
+   „Mindestbestellwert", „Bestellannahmezeiten", „Verbraucherstreitbeilegung" —
+   jede kuenftige Ueberschrift jedes Kunden kann es ausloesen, und je groesser
+   der Schriftgrad, desto frueher. Am Titel repariert waere es einmal repariert.
+
+   ## Warum zwei Eigenschaften, und welche die Zusage traegt
+
+   `overflow-wrap: break-word` **traegt sie**: es bricht ein Wort, das allein
+   auf seiner Zeile nicht passt, und nur dann. Gemessen: 409/343 -> 343/343,
+   der Ueberlauf der Seite faellt von 50px auf 0.
+
+   `hyphens: auto` ist die typografisch bessere Antwort auf ein Kompositum —
+   „Datenschutz-erklaerung" statt eines Schnitts mitten im Wort — und steht
+   deshalb zuerst: wo der Browser trennen kann, trennt er, und `break-word`
+   kommt gar nicht erst zum Zug. Es traegt die Zusage aber **nicht**, und das
+   ist gemessen und nicht vermutet: der Messrechner (Chrome 151, Linux) bringt
+   keine Trenn-Woerterbuecher mit. Dort ist `hyphens: auto` wirkungslos — „120px
+   breiter Kasten, `Datenschutzerklaerung`, `hyphens:auto` gegen `hyphens:none`:
+   beide 140px, beide einzeilig". Auf den Browsern der Besucher (Windows, macOS,
+   Firefox) greift es, hier ist es nicht nachweisbar. Eine Regel, deren Wirkung
+   man auf der eigenen Werkbank nicht sehen kann, darf nicht die einzige sein.
+
+   ## Nicht `overflow-wrap: anywhere`, und das ist dieselbe Entscheidung wie bei
+   der Tabelle
+
+   Bei `.wp-block-table` (siehe unten) wurde `anywhere` verworfen. Der Grund
+   gilt hier fort, nur an anderer Stelle: `anywhere` zaehlt beim Ermitteln der
+   kleinstmoeglichen Breite mit und laesst damit Kaesten schrumpfen, die gar
+   nicht ueberlaufen. `break-word` tut das nicht — es greift erst, wenn wirklich
+   kein Platz mehr ist. Beide erreichen hier dasselbe (gemessen: `anywhere` und
+   `break-word` liefern auf `/datenschutz/` identisch 343/343, zwei Zeilen,
+   92,2px Hoehe); `break-word` erreicht es ohne die Nebenwirkung. Es ist
+   ausserdem das, was der Kern selbst auf `.wp-block-column` setzt.
+
+   Kein `!important`, kein Klassengewicht: ein Kindtheme, das fuer eine
+   bestimmte Ueberschrift etwas anderes will, ueberschreibt das mit einer
+   einzigen Zeile.
+
+   Bei 1440px aendert die Regel nichts — dort passt jedes dieser Woerter, und
+   eine Umbruchregel, die auf dem Schreibtisch etwas verschiebt, waere zu breit
+   geraten. Nachgemessen an sechs Seiten. */
+main :is(h1, h2, h3, h4, h5, h6) {
+  hyphens: auto;
+  overflow-wrap: break-word;
+}
+
 /* Die Trennlinie — das meistwiederholte Element der Website.
 
    Fuenf bis acht pro Seite, und bis zum 2026-08-11 das einzige, das nicht nach
@@ -537,9 +593,11 @@ hr.wp-block-separator:not(.is-style-wide):not(.is-style-dots) {
 
    ## Zwei Griffe, in dieser Reihenfolge
 
-   **Erstens weniger Ueberlauf.** `hyphens: auto` greift, weil die Seite
-   `lang="de"` traegt. Zwei der drei Faelle liegen nur 17px bzw. 33px ueber
-   ihrem Kasten; ein Trennstrich in „Bezirkshauptmannschaft" loest sie ganz auf.
+   **Erstens weniger Ueberlauf.** `hyphens: auto` greift dort, wo der Browser
+   deutsche Trennstellen kennt — die Seite traegt `lang="de"`. Zwei der drei
+   Faelle liegen nur 17px bzw. 33px ueber ihrem Kasten; ein Trennstrich in
+   „Bezirkshauptmannschaft" loest sie ganz auf.
+
    Nicht `overflow-wrap: anywhere`: das schrumpfte die Tabelle zuverlaessig,
    indem es mitten in Woertern bricht — auf einer Seite mit Firmenbuchnummern
    und Paragraphen ist das schlechter lesbar als ein Bildlauf.
@@ -579,7 +637,35 @@ hr.wp-block-separator:not(.is-style-wide):not(.is-style-dots) {
 
    Schirmleseprogramme sind von alldem nicht betroffen: `overflow` verbirgt
    nichts vor ihnen, die dritte Spalte wurde immer vorgelesen. Der Befund war
-   ein sehender Befund, und die Loesung ist es auch. */
+   ein sehender Befund, und die Loesung ist es auch.
+
+   ## Nachtrag 2026-08-12: die Ueberschriftenregel entscheidet dasselbe
+   ## scheinbar andersherum
+
+   Weiter oben steht seit heute „Ueberschriften brechen. Deutsch tut das von
+   selbst nicht." — eine Regel, die Woerter **bricht**, waehrend diese hier das
+   ausdruecklich nicht will. Beide Begruendungen sollen voneinander wissen,
+   deshalb dieser Absatz.
+
+   Es ist kein Widerspruch, sondern zwei Faelle: eine ueberlaufende Zelle liegt
+   in einer Kapsel mit Bildlauf und sichtbarem Rand und ist damit
+   **erreichbar** — eine ueberlaufende Ueberschrift schiebt die ganze Seite auf
+   und nimmt jede andere Zeile mit. Die Zelle hat ein Auffangnetz, die
+   Ueberschrift hat keines. Und was dort gewaehlt wurde, ist nicht das hier
+   verworfene `anywhere`, sondern `break-word`: der Einwand oben („schrumpfte
+   die Tabelle") trifft es nicht, weil `break-word` bei der kleinstmoeglichen
+   Breite nicht mitzaehlt und deshalb keinen Kasten schrumpft.
+
+   Zwei Zahlen dazu, damit hier niemand aus dem Text auf eine Wirkung schliesst,
+   die nie jemand gesehen hat: die beiden Impressum-Tabellen messen am
+   2026-08-12 bei 390px **407/343** und **384/343** — sie laufen weiterhin ueber
+   und leben von der Kapsel, nicht vom Trennstrich. Der Messrechner (Chrome 151,
+   Linux) bringt keine Trenn-Woerterbuecher mit; nachgeprueft an einem 120px
+   breiten Kasten mit „Datenschutzerklaerung": `hyphens:auto` und `hyphens:none`
+   ergeben beide 140px und eine Zeile. `hyphens: auto` ist auf dieser Werkbank
+   also **nicht pruefbar**. Die Zeile bleibt, weil sie auf den Browsern der
+   Besucher greift — sie ist eine Verbesserung, keine Zusage. Die Zusage traegt
+   hier die Kapsel und bei den Ueberschriften `break-word`. */
 .wp-block-table {
   overflow-x: auto;
 
