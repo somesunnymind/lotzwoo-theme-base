@@ -18,9 +18,11 @@ Tags: block-theme, full-site-editing, e-commerce
    Die Brücke zwischen theme.json und den B2B-Oberflächen.
 
    Das Plugin bringt sein eigenes Design-System mit (`b2b-tokens.css`,
-   54 Custom Properties, auf `.lotzwoo-b2b-shop` und `.lotzwoo-reorder`
-   gescopet). Das ist richtig so: das Plugin muss in jedem Theme
-   funktionieren, auch in einem, das nichts von ihm weiß.
+   54 Custom Properties, auf die sechs Wurzeln unten gescopet — bis zum
+   2026-08-13 stand hier „`.lotzwoo-b2b-shop` und `.lotzwoo-reorder`", und
+   genau diese verkürzte Liste war der Fehler). Das ist richtig so: das
+   Plugin muss in jedem Theme funktionieren, auch in einem, das nichts von
+   ihm weiß.
 
    Dieses Theme weiß von ihm. Also übersetzt es hier die
    theme.json-Presets in die Token des Plugins — genau an der Stelle,
@@ -167,10 +169,25 @@ Tags: block-theme, full-site-editing, e-commerce
    die eine Verbindung behaupteten, die es nicht gab.
 
    Ersetzt durch die Fassung, die wirklich wirkt: die Familie steht auf den
-   beiden Wurzeln. Der Grund, das überhaupt zu sagen statt weiter zu erben,
+   Wurzeln. Der Grund, das überhaupt zu sagen statt weiter zu erben,
    ist das Kindtheme — sobald eines eine Serife für Überschriften setzt, holt
    sich `styles.elements.heading` aus theme.json auch die Überschriften des
    Shops.
+
+   **Auf allen sechs Wurzeln, seit dem 2026-08-13.** Bis dahin standen hier
+   drei, und die Lücke war dieselbe wie eine Etage höher bei den Token, nur
+   eine Ebene tiefer: `.lotzwoo-favorites`, `.lotzwoo-locations` und
+   `.lotzwoo-ordercontext` bekamen die Token von AP-25, aber keine der Regeln,
+   die sie benutzen. Auf Bersta gemessen kamen die Überschriften der drei
+   Konto-Flächen in **Bitter** statt in **Inter** — die Serife des
+   Kundenthemes mitten in der Bedienoberfläche. Auf dem Basistheme war nichts
+   zu sehen, weil dort beide Rollen dieselbe Grotesk tragen; deshalb hat es
+   niemand bemerkt, und deshalb wird auch hier nichts rot.
+
+   Die Regel gilt für die Wurzel und nicht nur für die Überschrift, obwohl auf
+   Bersta heute nur die Überschrift abweicht: `<body>` trägt dort zufällig
+   dieselbe Grotesk. Ein Kundentheme mit einer eigenen Fließtextschrift
+   verschöbe sonst die ganze Fläche, und der Befund käme ein drittes Mal.
 
    Ab `h2` ist das nicht gemeint. Was der Shop unterhalb der Seitenüberschrift
    an Überschriften setzt, sind Bedienbeschriftungen — Filtergruppen, der Kopf
@@ -190,6 +207,9 @@ Tags: block-theme, full-site-editing, e-commerce
    braucht die Zellen, nicht die Wurzel. */
 .lotzwoo-b2b-shop,
 .lotzwoo-reorder,
+.lotzwoo-favorites,
+.lotzwoo-locations,
+.lotzwoo-ordercontext,
 .lotzwoo-heldback {
   font-family: var(--wp--preset--font-family--sans, "Inter", "Segoe UI", system-ui, sans-serif);
 }
@@ -198,9 +218,14 @@ Tags: block-theme, full-site-editing, e-commerce
    nennt, und er ist am 2026-08-12 im Browser sichtbar geworden: die
    Überschrift der Sektion kam in der Serife des Kundenthemes: Bersta setzt
    `styles.elements.heading`, und die Sektion ist keine Drucksache, sondern
-   eine Bedienbeschriftung im Warenkorb. */
+   eine Bedienbeschriftung im Warenkorb. Genau derselbe Befund stand am
+   2026-08-13 auf den drei Konto-Flächen — dort ist es die einzige Stelle, an
+   der die fehlende Wurzel überhaupt sichtbar wurde. */
 .lotzwoo-b2b-shop :is(h2, h3, h4, h5, h6),
 .lotzwoo-reorder :is(h2, h3, h4, h5, h6),
+.lotzwoo-favorites :is(h2, h3, h4, h5, h6),
+.lotzwoo-locations :is(h2, h3, h4, h5, h6),
+.lotzwoo-ordercontext :is(h2, h3, h4, h5, h6),
 .lotzwoo-heldback :is(h2, h3, h4, h5, h6) {
   font-family: inherit;
 }
@@ -226,10 +251,37 @@ Tags: block-theme, full-site-editing, e-commerce
    ändert genau eine Farbe an einem Element, das es schon gibt.
 
    Der Befund ist älter als die Umfärbung — `#dbe1e8` auf Weiß sind 1.32:1 —
-   und überlebt sie, weil auch die warme Linie bei 1.30:1 liegt. */
+   und überlebt sie, weil auch die warme Linie bei 1.30:1 liegt.
+
+   Favoriten und Orte stehen seit dem 2026-08-13 mit drin. Sie hatten dieselben
+   Felder aus derselben Variable und standen nur deshalb nicht hier, weil die
+   Liste beim Schreiben dieses Blocks zwei Wurzeln kannte. Eine Barriere hört
+   nicht am Endpunkt auf.
+
+   Zwei Dinge, die die Liste bewusst *nicht* enthält:
+
+   * `.lotzwoo-locations__set--active`. Es sieht aus wie ein Bedienelement mit
+     zarter Kante, hat aber als einziges hier eine eigene Rahmenfarbe im
+     Überfahren (`.lotzwoo-locations__set:hover` → `brand-600`, gleiche
+     Spezifität wie diese Regel). Aufgenommen bekäme der Knopf beim Überfahren
+     einen grauen Ring um eine markenfarbene Fläche. Der Zustand ist selten und
+     der Schaden sichtbar; der Rahmen bleibt, wie er ist.
+   * `.lotzwoo-ordercontext`. Diese Fläche hat keine Bedienelemente — sie ist
+     eine Tabelle mit Abzeichen in Woos eigener Bestellansicht. Ihre Kanten
+     sind Trennlinien, und für die ist der zarte Strich ausdrücklich richtig.
+
+   Eine Eigenschaft dieser Regelform, die schon für `.lotzwoo-reorder__termin`
+   galt und jetzt auch für `.lotzwoo-locations__select` gilt: sie schlägt das
+   `:focus-visible` des Plugins, weil beide auf (0,2,0) liegen und diese Datei
+   später kommt. Der Fokus bleibt trotzdem angezeigt — er hängt am
+   `box-shadow` aus `--lwb-focus`, nicht am Rahmen —, aber er wechselt die
+   Rahmenfarbe nicht mehr. Am 2026-08-13 auf beiden Themes nachgemessen. */
 .lotzwoo-b2b-shop :is(.lwb-input, .lwb-select, .lwb-qty, .lwb-viewswitch, .lwb-pill, .lwb-scantoggle, .lwb-btn--secondary),
 .lotzwoo-reorder :is(.lotzwoo-reorder__all, .lotzwoo-reorder__termin),
-.lotzwoo-reorder__pager .button {
+.lotzwoo-reorder__pager .button,
+.lotzwoo-favorites :is(.lotzwoo-favorites__pill, .lotzwoo-favorites__qty, .lotzwoo-favorites__remove),
+.lotzwoo-favorites__more .button,
+.lotzwoo-locations .lotzwoo-locations__select {
   border-color: var(--wp--preset--color--ink-350, #808d9d);
 }
 
@@ -487,16 +539,31 @@ Tags: block-theme, full-site-editing, e-commerce
    und wiegen deshalb nichts — das hält die Regel bei einer Klasse Gewicht:
    schwer genug, um `elements.link` aus theme.json zu schlagen (das braucht
    sie, sonst bliebe der Link farbig), leicht genug, damit jede Plugin-Regel
-   mit zwei Klassen sie schlägt. */
-main a:not(.wp-element-button):not(:where(.wp-block-navigation-item__content, .wc-block-components-button, .lotzwoo-b2b-shop a, .lotzwoo-reorder a)) {
+   mit zwei Klassen sie schlägt.
+
+   **Alle sechs Wurzeln, seit dem 2026-08-13.** Die Ausnahmeliste stand auf
+   denselben zwei wie die Schrift darüber, und das ist derselbe Fehler in
+   umgekehrter Richtung: statt einer fehlenden Regel eine Regel, die zu weit
+   greift. Am 2026-08-13 mit einer Sonde je Wurzel gemessen — auf
+   `.lotzwoo-favorites`, `.lotzwoo-locations`, `.lotzwoo-ordercontext` und
+   `.lotzwoo-heldback` kam der Fließtext-Ton der Website (`ink-900` mit
+   Markenunterstrich) statt der Bedienfarbe der Fläche.
+
+   Sichtbar wurde davon bis heute wenig, und das ist kein Gegenargument,
+   sondern die Beschreibung des Musters: die Plugin-Regeln mit zwei Klassen
+   schlagen diese hier, wie der Absatz oben es vorsieht. Es traf genau die
+   Links mit *einer* Klasse — `.lotzwoo-locations__empty-link` (Leerzustand)
+   und `.lotzwoo-favorites__status a`. Beide sind Zustände, die man selten
+   sieht, und beide standen falsch, sobald man sie sah. */
+main a:not(.wp-element-button):not(:where(.wp-block-navigation-item__content, .wc-block-components-button, .lotzwoo-b2b-shop a, .lotzwoo-reorder a, .lotzwoo-favorites a, .lotzwoo-locations a, .lotzwoo-ordercontext a, .lotzwoo-heldback a)) {
   color: var(--wp--preset--color--ink-900);
   text-decoration-color: var(--wp--preset--color--brand-500);
   text-decoration-thickness: 1.5px;
   text-underline-offset: .18em;
 }
 
-main a:not(.wp-element-button):not(:where(.wp-block-navigation-item__content, .wc-block-components-button, .lotzwoo-b2b-shop a, .lotzwoo-reorder a)):hover,
-main a:not(.wp-element-button):not(:where(.wp-block-navigation-item__content, .wc-block-components-button, .lotzwoo-b2b-shop a, .lotzwoo-reorder a)):focus-visible {
+main a:not(.wp-element-button):not(:where(.wp-block-navigation-item__content, .wc-block-components-button, .lotzwoo-b2b-shop a, .lotzwoo-reorder a, .lotzwoo-favorites a, .lotzwoo-locations a, .lotzwoo-ordercontext a, .lotzwoo-heldback a)):hover,
+main a:not(.wp-element-button):not(:where(.wp-block-navigation-item__content, .wc-block-components-button, .lotzwoo-b2b-shop a, .lotzwoo-reorder a, .lotzwoo-favorites a, .lotzwoo-locations a, .lotzwoo-ordercontext a, .lotzwoo-heldback a)):focus-visible {
   color: var(--wp--preset--color--brand-500);
 }
 
@@ -805,10 +872,18 @@ hr.wp-block-separator:not(.is-style-wide):not(.is-style-dots) {
    Aufbau auf beiden Seiten derselbe — dasselbe Maß ohne Innenabstand in
    einem Elternteil mit 16px — und die Flucht stimmt in jeder Breite.
 
-   Der Selektor greift die beiden Wurzeln des Plugins, nicht `> *`: die
+   Der Selektor greift zwei Wurzeln des Plugins, nicht `> *`: die
    Blockstruktur der Seite kann sich ändern, `.lotzwoo-b2b-shop` und
-   `.lotzwoo-reorder` nicht. Es sind dieselben beiden, auf denen oben schon
-   die Token-Brücke steht. */
+   `.lotzwoo-reorder` nicht.
+
+   Und hier bleibt es bei zweien, obwohl die Token-Brücke oben seit dem
+   2026-08-13 sechs Wurzeln führt — das ist die „eigene Begründung", die der
+   Vertrag für eine kürzere Liste verlangt: `.lotzwoo-page-full-width` ist
+   eine *Seitenvorlage*, die von Hand zugewiesen wird, und zugewiesen ist sie
+   der Sortiments- und der Nachbestellseite. Die drei Konto-Flächen liegen im
+   Konto-Template von WooCommerce und bekommen diese Klasse nie; eine Zeile
+   für sie wäre eine Regel, die nirgends greift. Wer die Vorlage später einer
+   Konto-Seite zuweist, trägt sie hier nach. */
 .lotzwoo-page-full-width .wp-block-post-content > * {
   max-width: none;
 }
@@ -832,7 +907,11 @@ hr.wp-block-separator:not(.is-style-wide):not(.is-style-dots) {
    Die drei Stufen sind die der Admin-Bar selbst: 32px im Normalfall,
    46px darunter — und unter 600px gar keiner, weil sie dort
    `position: absolute` wird und mitscrollt. Ein Versatz für eine Leiste,
-   die nicht mehr steht, wäre ein Loch über der Tabelle. */
+   die nicht mehr steht, wäre ein Loch über der Tabelle.
+
+   Auch hier zwei Wurzeln statt sechs, mit Begründung: `--lwb-sticky-top`
+   liest genau eine Sache, die klebende Kontextleiste des Shops. Die drei
+   Konto-Flächen haben nichts Klebendes; der Token stünde dort ohne Leser. */
 body.admin-bar .lotzwoo-b2b-shop,
 body.admin-bar .lotzwoo-reorder {
   --lwb-sticky-top: 32px;
@@ -1218,8 +1297,10 @@ header .wp-element-button:focus-visible {
      oben schon fuer `--lwb-focus` steht.
 
    Warum hier `outline` statt `var(--lwb-focus)`: dieser Schatten lebt auf den
-   Wurzeln `.lotzwoo-b2b-shop`/`.lotzwoo-reorder` und ist im Kopfbereich gar
-   nicht in Reichweite (im Browser geprueft: leer). Ein `outline` kostet
+   Wurzeln des Plugins — seit dem 2026-08-13 sechs, damals zwei — und ist im
+   Kopfbereich gar nicht in Reichweite (im Browser geprueft: leer). An der
+   Zahl haengt das Argument nicht: der Kopfbereich liegt ausserhalb jeder von
+   ihnen. Ein `outline` kostet
    ausserdem kein Layout — beim Schliessen-Knopf, der im Overlay oben rechts
    klebt, ist das kein Detail.
 
