@@ -55,7 +55,7 @@ Tags: block-theme, full-site-editing, e-commerce
    führte fünf Wurzeln, dieses Theme drei, die Schnittmenge war zwei — und auf
    `.lotzwoo-favorites`, `.lotzwoo-locations` und `.lotzwoo-ordercontext` galt
    deshalb **kein einziges** Token dieser Datei. Die drei Konto-Flächen trugen
-   die Marke des Kunden nicht: `--lwb-white` stand dort auch auf Bersta bei
+   die Marke des Kunden nicht: die Grundfläche stand dort auch auf Bersta bei
    #ffffff statt bei #fbf7f0, mitten in einem cremefarbenen Shop.
 
    Eine Fläche steht auch dann in beiden Listen, wenn eine der beiden Seiten
@@ -96,13 +96,18 @@ Tags: block-theme, full-site-editing, e-commerce
   --lwb-ink-100: var(--wp--preset--color--ink-100, #f1f4f7);
   --lwb-ink-50:  var(--wp--preset--color--ink-50,  #f7f9fb);
 
-  /* Die größte Fläche der Oberfläche. Sie heißt im Plugin `white`, meint aber
-     die Rolle „Karte, Tabelle, Eingabefeld" — 32 Regeln. Ein Kundentheme auf
-     Creme würde sonst weiße Kästen auf getöntem Grund zeigen. Die Rolle ist
-     deshalb `surface`, nicht das Preset `white`: Weiß muss Weiß bleiben
-     können, dort wo es wörtlich gemeint ist (der Rand am Warenkorb-Zähler
-     weiter unten ist so eine Stelle). */
-  --lwb-white: var(--wp--preset--color--surface, #fff);
+  /* Die größte Fläche der Oberfläche: die Rolle „Karte, Tabelle,
+     Eingabefeld" — 32 Regeln. Ein Kundentheme auf Creme würde sonst weiße
+     Kästen auf getöntem Grund zeigen. Sie hängt deshalb am Preset `surface`
+     und nicht an `white`: Weiß muss Weiß bleiben können, dort wo es wörtlich
+     gemeint ist (der Rand am Warenkorb-Zähler weiter unten ist so eine
+     Stelle).
+
+     Der Token hieß bis zum 2026-08-13 `--lwb-white` — auf beiden Seiten, und
+     der Name war der Fehler: er hat drei Sitzungen gegen ein Symptom bauen
+     lassen. Jetzt heißt er wie die Rolle und wie das Preset, an dem er
+     hängt. */
+  --lwb-surface: var(--wp--preset--color--surface, #fff);
 
   /* Und hier die zweite Rolle, die dem Satz oben bisher gefehlt hat: die
      Fläche, die sich vom Grund abheben *soll*. Sie ist wörtlich Weiß und
@@ -397,7 +402,7 @@ Tags: block-theme, full-site-editing, e-commerce
   flex: 0 1 auto;
   max-width: 100%;
   border-radius: 999px;
-  background: var(--lwb-white);
+  background: var(--lwb-surface);
   padding: 2px 10px;
   color: var(--lwb-ink-700);
   font-size: var(--wp--preset--font-size--sm);
@@ -414,7 +419,7 @@ Tags: block-theme, full-site-editing, e-commerce
 .lotzwoo-heldback .button {
   border: 1px solid var(--wp--preset--color--ink-350, #808d9d);
   border-radius: 8px;
-  background: var(--lwb-white);
+  background: var(--lwb-surface);
   padding: 6px 12px;
   color: var(--lwb-ink-900);
   font-size: var(--wp--preset--font-size--sm);
@@ -441,7 +446,7 @@ Tags: block-theme, full-site-editing, e-commerce
 .lotzwoo-heldback .lotzwoo-heldback__reactivate-all {
   border-color: var(--lwb-brand-500);
   background: var(--lwb-brand-500);
-  color: var(--lwb-white);
+  color: var(--lwb-surface);
 }
 
 .lotzwoo-heldback .lotzwoo-heldback__reactivate-all:hover {
