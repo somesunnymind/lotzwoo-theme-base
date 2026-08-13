@@ -956,10 +956,32 @@ header .current-menu-item > .wp-block-navigation-item__content {
   padding: 0;
 }
 
+/* Die Beschriftung trägt die Schrift der Menüpunkte daneben, nicht die des
+   Fließtexts. Woo liefert den Link mit `font: inherit` aus, er erbte also
+   die 0.9375rem des Bodys und dessen Normalgewicht und stand damit neben
+   „Über uns" sichtbar größer und dünner in derselben Zeile.
+
+   `color: inherit` statt eines Tokens, und zwar mit Absicht: die
+   Navigationslinks *sind* geerbt gefärbt. Ihre eigene Regel weiter oben
+   setzt zwar `ink-500`, kommt damit aber nicht durch — WordPress' eigenes
+   Navigations-Stylesheet trägt
+
+     .wp-block-navigation .wp-block-navigation-item__content.wp-block-navigation-item__content
+
+   mit doppelter Klasse und `color: inherit`, und (0,3,0) schlägt das
+   (0,1,1) von `header .wp-block-navigation-item__content`. Der Menüpunkt
+   steht deshalb in `ink-900`, nicht in `ink-500`. Wer hier ein Token
+   einträgt, trifft die gerenderte Kopfzeile also gerade nicht.
+
+   Nur der Konto-Link, nicht der Warenkorb daneben: der trägt kein Wort,
+   und sein Icon soll leiser bleiben als die Beschriftung. */
 .lotzwoo-header-actions .wc-block-customer-account__link {
   gap: var(--wp--preset--spacing--20);
   padding: 5px 10px;
   min-height: 36px;
+  color: inherit;
+  font-size: var(--wp--preset--font-size--md);
+  font-weight: 500;
 }
 
 .lotzwoo-header-actions .wc-block-customer-account__link:hover,
