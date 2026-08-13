@@ -78,6 +78,19 @@ Tags: block-theme, full-site-editing, e-commerce
      weiter unten ist so eine Stelle). */
   --lwb-white: var(--wp--preset--color--surface, #fff);
 
+  /* Und hier die zweite Rolle, die dem Satz oben bisher gefehlt hat: die
+     Fläche, die sich vom Grund abheben *soll*. Sie ist wörtlich Weiß und
+     hängt deshalb am Preset `white`, das beide theme.json führen — nicht an
+     `surface`. Die zwei müssen auf einem Kundentheme verschieden aussehen,
+     sonst gibt es nichts, wovon sich der Vordergrund abhebt: auf Bersta
+     #ffffff gegen #fbf7f0.
+
+     Nur die Farbe steht hier. Kontur und Schatten der Rolle (`--lwb-front`,
+     `--lwb-front-border`, `--lwb-front-shadow`) bleiben beim Plugin — sie
+     sind aus Token gerührt, die dieses Theme ohnehin schon setzt, und eine
+     zweite Fassung davon wäre wieder die doppelte Wahrheit. */
+  --lwb-white-pure: var(--wp--preset--color--white, #ffffff);
+
   --lwb-ok-50:    var(--wp--preset--color--ok-50,    #e8f6ee);
   --lwb-ok-500:   var(--wp--preset--color--ok-500,   #17794a);
   --lwb-warn-50:  var(--wp--preset--color--warn-50,  #fdf3e3);
