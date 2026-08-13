@@ -40,6 +40,43 @@ add_action('after_setup_theme', static function (): void {
 });
 
 /**
+ * Der Handle des Token-Stylesheets im Plugin — `Design_Tokens::HANDLE`.
+ *
+ * Als Zeichenkette und nicht über die Klasse: das Theme darf das Plugin nicht
+ * laden, es hängt sich nur an, wenn es ohnehin da ist.
+ */
+const LOTZWOO_TOKEN_HANDLE = 'lotzwoo-b2b-tokens';
+
+/**
+ * Die Zusage über die Reihenfolge, seit dem 2026-08-13.
+ *
+ * Theme und Plugin definieren dieselben Token auf derselben Selektorliste und
+ * damit auf derselben Spezifität: **es gewinnt, was später im Dokument steht.**
+ * Bis hierher war das der Zufall der Enqueue-Kette — gemessen stand das Plugin
+ * im Dokument auf Position 7 und dieses Theme auf 13, aber zugesagt war es
+ * nirgends. Solange die beiden Wurzellisten sich nur in zwei Flächen
+ * überschnitten, entschied dieser Zufall über zwei Flächen; seit sie
+ * übereinstimmen, entschiede er über alle sechs.
+ *
+ * Die Richtung folgt dem Kopfkommentar von `style.css`: das Theme hängt am
+ * Plugin, nie umgekehrt. Deshalb steht die Abhängigkeit hier und nicht in
+ * `Design_Tokens::register()`.
+ *
+ * **Nur wenn der Handle registriert ist.** Eine Abhängigkeit auf einen
+ * unbekannten Handle lässt WordPress das abhängige Stylesheet stillschweigend
+ * **gar nicht** ausgeben — ohne Plugin bliebe das Theme ohne sein eigenes CSS.
+ * Das Plugin registriert die Token nur auf den Seiten, auf denen es sie auch
+ * einreiht; auf allen anderen ist die Liste hier leer und dieses Theme lädt
+ * keine fremde Datei mit.
+ *
+ * @return string[]
+ */
+function lotzwoo_token_dependency(): array
+{
+    return wp_style_is(LOTZWOO_TOKEN_HANDLE, 'registered') ? [LOTZWOO_TOKEN_HANDLE] : [];
+}
+
+/**
  * The stylesheet, and the child's on top of it when there is one.
  *
  * Version taken from the file's own mtime rather than a constant: a theme is
@@ -52,7 +89,7 @@ add_action('wp_enqueue_scripts', static function (): void {
     wp_enqueue_style(
         'lotzwoo-theme-base',
         get_template_directory_uri() . '/style.css',
-        [],
+        lotzwoo_token_dependency(),
         is_readable($parent) ? (string) filemtime($parent) : null
     );
 

@@ -36,18 +36,44 @@ Tags: block-theme, full-site-editing, e-commerce
 
    Ein Kindtheme ändert nur theme.json. Diese Datei bleibt unberührt.
 
-   Drei Wurzeln, nicht zwei: `.lotzwoo-heldback` ist seit Ticket 15
-   dazugekommen. Die Sektion der zurückgehaltenen Positionen wird vom Plugin
-   **clientseitig** in den Warenkorb-Slot gezeichnet und liegt damit außerhalb
-   von `.lotzwoo-b2b-shop` — ohne eigene Wurzel erreichte sie keine der Token,
+   `.lotzwoo-heldback` ist seit Ticket 15 dabei. Die Sektion der
+   zurückgehaltenen Positionen wird vom Plugin **clientseitig** in den
+   Warenkorb-Slot gezeichnet und liegt damit außerhalb von
+   `.lotzwoo-b2b-shop` — ohne eigene Wurzel erreichte sie keine der Token,
    und sie ist die einzige Plugin-Fläche im Kaufweg, die das Plugin selbst noch
    nicht gestaltet (`grep heldback` über seine Stylesheets findet nichts).
    Deshalb stehen ihre Regeln weiter unten in dieser Datei; sobald das Plugin
    eigene mitbringt, findet es hier die Token des Kundenthemes bereits vor.
    ================================================================== */
 
+/* ------------------------------------------------------------------
+   Die sechs Wurzeln sind ein Vertrag zwischen zwei Repos.
+
+   Dieselbe Liste steht in `lotzapp-for-woocommerce/assets/css/b2b-tokens.css`,
+   und sie muss dort dieselbe sein. Wer hier eine Fläche hinzufügt und dort
+   nicht, baut genau den Fehler, der am 2026-08-13 gefunden wurde: das Plugin
+   führte fünf Wurzeln, dieses Theme drei, die Schnittmenge war zwei — und auf
+   `.lotzwoo-favorites`, `.lotzwoo-locations` und `.lotzwoo-ordercontext` galt
+   deshalb **kein einziges** Token dieser Datei. Die drei Konto-Flächen trugen
+   die Marke des Kunden nicht: `--lwb-white` stand dort auch auf Bersta bei
+   #ffffff statt bei #fbf7f0, mitten in einem cremefarbenen Shop.
+
+   Eine Fläche steht auch dann in beiden Listen, wenn eine der beiden Seiten
+   sie noch nicht gestaltet. Token kosten nichts; die Lücke ist das Teure, und
+   sie wird nirgends rot — dasselbe Muster wie AD-11, nur andersherum.
+
+   Die Reihenfolge im Dokument ist seit dem 2026-08-13 zugesagt: `functions.php`
+   hängt diese Datei an das Token-Stylesheet des Plugins, wo es geladen ist.
+   Beide Seiten definieren dieselben Token auf derselben Spezifität — es gewinnt,
+   was später steht, und das muss diese Datei sein, sonst trägt keine Fläche die
+   Marke.
+   ------------------------------------------------------------------ */
+
 .lotzwoo-b2b-shop,
 .lotzwoo-reorder,
+.lotzwoo-favorites,
+.lotzwoo-locations,
+.lotzwoo-ordercontext,
 .lotzwoo-heldback {
   --lwb-brand-50:  var(--wp--preset--color--brand-50,  #eaf6f1);
   --lwb-brand-100: var(--wp--preset--color--brand-100, #cfe9de);
