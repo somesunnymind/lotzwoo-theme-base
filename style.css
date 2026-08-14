@@ -4,7 +4,7 @@ Theme URI: https://somesunnymind.com/
 Update URI: https://github.com/somesunnymind/lotzwoo-theme-base
 Author: LotzApp Solutions
 Description: Minimales Block-Theme für B2B-Großhandelsshops auf WooCommerce. Trägt das Design-System in theme.json und sonst so wenig wie möglich — Kopfbereich, Fußbereich, zwei zuweisbare Seitenvorlagen. Alles Kundenspezifische gehört in ein Kindtheme.
-Version: 0.3.3
+Version: 0.3.4
 Requires at least: 6.6
 Tested up to: 7.0
 Requires PHP: 8.1
@@ -1501,6 +1501,66 @@ p.is-style-kennzahl {
   border-inline-start: 3px solid var(--wp--preset--color--ink-200);
   padding-block: var(--wp--preset--spacing--40);
   padding-inline: var(--wp--preset--spacing--50) var(--wp--preset--spacing--40);
+}
+
+/* Ein Schritt einer Zeitleiste: Haarlinie mit Punkt, Inhalt daneben.
+
+   Warum das hier steht und nicht als Inline-Style im Website-Repo: der Punkt
+   ist ein Pseudoelement, und ein Block-Attribut kann keines erzeugen. Alles
+   andere an diesem Baustein waere inline moeglich gewesen — der Punkt ist der
+   Grund, aus dem er ueberhaupt ein Block-Style ist.
+
+   Warum ueberhaupt eine Zeitleiste im Basis-Theme: „ein Schritt in einer
+   zeitlichen Folge" ist eine Rolle, keine Kundengestaltung — dieselbe
+   Begruendung wie bei Karte und Empfaenger. Die Farben kommen aus der Palette
+   des jeweiligen Kindthemes.
+
+   Der Punkt bleibt `ink-300` und wird *nicht* die Markenfarbe. ADR 004 haelt
+   das Rot fuer Labels, den Primaerknopf und Zustaende frei; eine Zeitmarke ist
+   keines davon. Die Jahreszahl darueber traegt ohnehin `is-style-label` und
+   damit das Rot — zwei rote Elemente uebereinander waeren genau die Unruhe,
+   die ADR 004 abstellen wollte.
+
+   Logische Eigenschaften wie beim Empfaenger: die Kante gehoert an den
+   Textanfang, nicht an die linke Bildschirmseite.
+
+   Beim letzten Schritt laeuft die Linie nicht weiter — sonst zeigte sie ins
+   Leere und behauptete einen vierten Eintrag. Der Punkt bleibt, weil er
+   absolut liegt. */
+.wp-block-group.is-style-zeitleiste-schritt {
+  position: relative;
+  border-inline-start: 1px solid var(--wp--preset--color--ink-200);
+  padding-inline-start: var(--wp--preset--spacing--60);
+  padding-block-end: var(--wp--preset--spacing--60);
+}
+
+.wp-block-group.is-style-zeitleiste-schritt::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: -4.5px;
+  inset-block-start: 0.4em;
+  inline-size: 9px;
+  block-size: 9px;
+  border-radius: 50%;
+  background: var(--wp--preset--color--ink-300);
+}
+
+.wp-block-group.is-style-zeitleiste-schritt > :first-child {
+  margin-block-start: 0;
+}
+
+.wp-block-group.is-style-zeitleiste-schritt:last-child {
+  border-inline-start-color: transparent;
+  padding-block-end: 0;
+}
+
+/* Das Zitat im Zeitleisten-Schritt traegt die eigene Kante nicht noch einmal —
+   die Zeitleiste stellt links schon eine. Zwei parallele Linien im Abstand von
+   einem Zeichen lesen als Fehler, nicht als Struktur. */
+.wp-block-group.is-style-zeitleiste-schritt .wp-block-quote {
+  border-inline-start: none;
+  padding-inline-start: 0;
+  margin-block-start: var(--wp--preset--spacing--40);
 }
 
 /* ==================================================================

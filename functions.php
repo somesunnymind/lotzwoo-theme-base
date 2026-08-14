@@ -691,6 +691,7 @@ add_action('init', static function (): void {
             'karte' => __('Karte', 'lotzwoo-theme-base'),
             'abgesetzt' => __('Abgesetzt', 'lotzwoo-theme-base'),
             'empfaenger' => __('Empfänger', 'lotzwoo-theme-base'),
+            'zeitleiste-schritt' => __('Zeitleisten-Schritt', 'lotzwoo-theme-base'),
         ],
     ];
 
