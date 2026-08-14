@@ -4,7 +4,7 @@ Theme URI: https://somesunnymind.com/
 Update URI: https://github.com/somesunnymind/lotzwoo-theme-base
 Author: LotzApp Solutions
 Description: Minimales Block-Theme für B2B-Großhandelsshops auf WooCommerce. Trägt das Design-System in theme.json und sonst so wenig wie möglich — Kopfbereich, Fußbereich, zwei zuweisbare Seitenvorlagen. Alles Kundenspezifische gehört in ein Kindtheme.
-Version: 0.3.7
+Version: 0.3.8
 Requires at least: 6.6
 Tested up to: 7.0
 Requires PHP: 8.1
@@ -1561,11 +1561,23 @@ p.is-style-kennzahl {
    Begruendung wie bei Karte und Empfaenger. Die Farben kommen aus der Palette
    des jeweiligen Kindthemes.
 
-   Der Punkt bleibt `ink-300` und wird *nicht* die Markenfarbe. ADR 004 haelt
-   das Rot fuer Labels, den Primaerknopf und Zustaende frei; eine Zeitmarke ist
-   keines davon. Die Jahreszahl darueber traegt ohnehin `is-style-label` und
-   damit das Rot — zwei rote Elemente uebereinander waeren genau die Unruhe,
-   die ADR 004 abstellen wollte.
+   Der Punkt wird *nicht* die Markenfarbe. ADR 004 haelt das Rot fuer Labels,
+   den Primaerknopf und Zustaende frei; eine Zeitmarke ist keines davon. Die
+   Jahreszahl darueber traegt ohnehin `is-style-label` und damit das Rot —
+   zwei rote Elemente uebereinander waeren genau die Unruhe, die ADR 004
+   abstellen wollte.
+
+   Linie `ink-300` und Punkt `ink-400`, und nicht `ink-200` fuer die Linie, wie
+   der Rollenname „Linie" es nahelegt. Grund ist gemessen, nicht empfunden: die
+   Zeitleiste steht auf `surface-2` (#f4ede1), und `ink-200` (#e4daca) liegt
+   davor bei rund 1,1:1 — die Linie war schlicht nicht da. `ink-200` ist gegen
+   `surface` kalibriert, nicht gegen `surface-2`.
+
+   Das ist ein Befund ueber die Palette und nicht ueber diesen Baustein: er
+   trifft jede Haarlinie in einem abgesetzten Abschnitt, `is-style-karte`
+   eingeschlossen. Hier steht bewusst nur die lokale Abhilfe — eine Rolle der
+   Palette umzudeuten, ist keine Entscheidung, die nebenbei in einem
+   Block-Style faellt.
 
    Logische Eigenschaften wie beim Empfaenger: die Kante gehoert an den
    Textanfang, nicht an die linke Bildschirmseite.
@@ -1575,7 +1587,7 @@ p.is-style-kennzahl {
    absolut liegt. */
 .wp-block-group.is-style-zeitleiste-schritt {
   position: relative;
-  border-inline-start: 1px solid var(--wp--preset--color--ink-200);
+  border-inline-start: 1px solid var(--wp--preset--color--ink-300);
   padding-inline-start: var(--wp--preset--spacing--60);
   padding-block-end: var(--wp--preset--spacing--60);
 }
@@ -1588,7 +1600,7 @@ p.is-style-kennzahl {
   inline-size: 9px;
   block-size: 9px;
   border-radius: 50%;
-  background: var(--wp--preset--color--ink-300);
+  background: var(--wp--preset--color--ink-400);
 }
 
 .wp-block-group.is-style-zeitleiste-schritt > :first-child {
