@@ -4,7 +4,7 @@ Theme URI: https://somesunnymind.com/
 Update URI: https://github.com/somesunnymind/lotzwoo-theme-base
 Author: LotzApp Solutions
 Description: Minimales Block-Theme für B2B-Großhandelsshops auf WooCommerce. Trägt das Design-System in theme.json und sonst so wenig wie möglich — Kopfbereich, Fußbereich, zwei zuweisbare Seitenvorlagen. Alles Kundenspezifische gehört in ein Kindtheme.
-Version: 0.3.5
+Version: 0.3.6
 Requires at least: 6.6
 Tested up to: 7.0
 Requires PHP: 8.1
@@ -1527,8 +1527,21 @@ p.is-style-kennzahl {
    eines `is-layout-constrained`-Blocks bekommt von WordPress `margin-inline:
    auto` und stuende damit *mittig* im 960er-Raster — also eingerueckt
    gegenueber der Ueberschrift darueber, die die volle Breite nutzt. Das liest
-   als Versehen. Der Text beginnt an derselben Kante wie seine Ueberschrift. */
-.wp-block-group.is-style-lesebreite {
+   als Versehen. Der Text beginnt an derselben Kante wie seine Ueberschrift.
+
+   Der Klassenname steht doppelt, und das ist kein Tippfehler. WordPress'
+   Layoutregel fuer constrained-Kinder ist
+
+     .wp-block-group.is-layout-constrained > :where(:not(.alignleft)…)
+
+   und liegt wegen `:where()` bei denselben zwei Klassen wie diese Regel hier.
+   Bei gleicher Spezifitaet entscheidet die Reihenfolge, und die globalen
+   Stile stehen im `head` hinter dem Theme-Stylesheet — der Gleichstand ging
+   also verloren, und `margin-inline` blieb wirkungslos. Am Klon gemessen:
+   die Spalte stand bei 1006px statt bei 792px. Ein wiederholter Klassenname
+   ist die kleinste Erhoehung, die das dreht; `!important` waere die groessere
+   Zusage fuer dasselbe Ergebnis. */
+.wp-block-group.is-style-lesebreite.is-style-lesebreite {
   max-inline-size: 66ch;
   margin-inline: 0 auto;
 }
