@@ -563,11 +563,57 @@ if (!$kontext_typ instanceof WP_Block_Type) {
     $zeile('ok', 'Kontextleiste: `lotzwoo/context-slot` registriert (AP-29)');
 }
 
+/*
+ * Seit AP-32 steht der Block **nicht** mehr in `parts/header.html`, sondern in
+ * jeder Vorlage, direkt hinter dem Kopf-Part. Der Grund ist gemessen und nicht
+ * geschmacklich: die Leiste soll beim Scrollen kleben, ein `position: sticky`
+ * klebt nur innerhalb seines Containers, und WordPress legt um jeden
+ * Template-Part ein Element (`<header class="wp-block-template-part">`). Im
+ * Kopf-Part wäre der Container also genau so hoch wie der Kopf — die Leiste
+ * klebte an nichts.
+ *
+ * Der Preis ist eine Zeile in zehn Vorlagen statt einer in einem Part, und
+ * genau deshalb steht die Prüfung hier: **jede Vorlage, die den Kopf zieht,
+ * zieht auch die Leiste, und zwar genau einmal.** Eine neue Vorlage, die es
+ * vergisst, ist damit ein Fehlschlag und keine stille Lücke.
+ */
+$vorlagen = get_block_templates([], 'wp_template');
+$ohne_leiste = [];
+$doppelt = [];
+$mit_kopf = 0;
+
+foreach ($vorlagen as $vorlage) {
+    $inhalt = (string) $vorlage->content;
+
+    if (!str_contains($inhalt, 'wp:template-part {"slug":"header"')) {
+        continue;
+    }
+
+    $mit_kopf++;
+    $anzahl = substr_count($inhalt, 'wp:lotzwoo/context-slot');
+
+    if ($anzahl === 0) {
+        $ohne_leiste[] = $vorlage->slug;
+    } elseif ($anzahl > 1) {
+        $doppelt[] = $vorlage->slug;
+    }
+}
+
+if ($mit_kopf === 0) {
+    $zeile('fehler', 'Kontextleiste: keine Vorlage zieht den Kopf-Part — die Prüfung misst nichts');
+} elseif ($ohne_leiste !== []) {
+    $zeile('fehler', 'Kontextleiste: diese Vorlagen ziehen den Kopf, aber nicht `wp:lotzwoo/context-slot`: ' . implode(', ', $ohne_leiste));
+} elseif ($doppelt !== []) {
+    $zeile('fehler', 'Kontextleiste: doppelter Slot in ' . implode(', ', $doppelt) . ' — die Leiste stünde zweimal auf derselben Seite');
+} else {
+    $zeile('ok', "Kontextleiste: in allen {$mit_kopf} Vorlagen mit Kopf-Part verbaut, je genau einmal (AP-32)");
+}
+
 if ($eigenerkopf instanceof WP_Block_Template
-    && !str_contains((string) $eigenerkopf->content, 'wp:lotzwoo/context-slot')) {
-    $zeile('fehler', 'Kontextleiste: der Block steht nicht in `parts/header.html` — Lieferort und Termin haben dann außerhalb des Kurzcodes keinen Ort');
+    && str_contains((string) $eigenerkopf->content, 'wp:lotzwoo/context-slot')) {
+    $zeile('fehler', 'Kontextleiste: der Block steht (wieder) in `parts/header.html`. Dort kann er nicht kleben — WordPress legt um jeden Template-Part ein `<header>`, und ein sticky-Element klebt nur innerhalb seines Containers (AP-32)');
 } elseif ($eigenerkopf instanceof WP_Block_Template) {
-    $zeile('ok', 'Kontextleiste: im Kopf-Part verbaut, unter der Kopfzeile (AP-29)');
+    $zeile('ok', 'Kontextleiste: nicht im Kopf-Part — sie steht als eigene Bahn darunter und kann kleben (AP-32)');
 }
 
 $kontext_ausgabe = $kontext_typ instanceof WP_Block_Type && is_callable($kontext_typ->render_callback)

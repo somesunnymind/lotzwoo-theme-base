@@ -609,6 +609,38 @@ add_action('init', static function (): void {
  * Verworfen wurde nichts neu — Hooked Blocks, `wp_body_open` und ein Shortcode
  * sind beim Kopf-Slot mit Gründen abgelehnt worden, die hier unverändert
  * gelten.
+ *
+ * ## Seit AP-32: der Block steht in den Vorlagen, nicht in `parts/header.html`
+ *
+ * Der Auftraggeber hat am 2026-08-14 entschieden, dass die Leiste beim
+ * Scrollen **kleben** soll — und ausdrücklich nicht, dass der ganze Kopf
+ * klebt: der ist angemeldet 189 px hoch bei 1440 px und 341 px bei 390 px, und
+ * das wäre auf dem Telefon ein Drittel des Bildes, dauerhaft belegt von Logo
+ * und Navigation.
+ *
+ * Dafür musste der Block **aus dem Kopf-Part heraus**, und zwar aus einem
+ * Grund, der zweimal gilt. Ein `position: sticky` klebt nur innerhalb seines
+ * Containers. Der erste Container war die `constrained`-Gruppe des Kopfes; der
+ * zweite ist WordPress' eigener: `render_block_core_template_part()` legt um
+ * **jeden** Template-Part ein Element, für den Bereich „header" ein
+ * `<header class="wp-block-template-part">`. Am Klon nachgesehen, nicht
+ * angenommen — `<div class="wp-site-blocks"><header class="wp-block-template-part">`.
+ * Ein sticky-Element darin klebte an einem Kasten, der genau so hoch ist wie
+ * der Kopf, also an nichts.
+ *
+ * Deshalb steht `wp:lotzwoo/context-slot` jetzt in **jeder Vorlage**, direkt
+ * hinter dem Kopf-Part, und ist damit ein Geschwister von `<header>` in
+ * `.wp-site-blocks` — einem Container, der so hoch ist wie die Seite.
+ *
+ * Der Preis ist eine Zeile in zehn Vorlagen statt einer in einem Part.
+ * `scripts/check-frontend.php` hält ihn fest: jede Vorlage, die den Kopf
+ * zieht, zieht auch die Leiste, genau einmal. Eine neue Vorlage, die es
+ * vergisst, ist ein Fehlschlag und keine stille Lücke.
+ *
+ * Verworfen, mit Grund: **`display: contents` auf dem Template-Part-Wrapper**
+ * wäre eine CSS-Zeile statt zehn Markup-Zeilen gewesen — nimmt aber das
+ * `<header>` aus dem Kastenbaum und damit die `banner`-Landmarke ins Risiko,
+ * für einen Vorteil, der nur Schreibarbeit spart.
  */
 add_action('init', static function (): void {
     register_block_type(get_template_directory() . '/blocks/context-slot', [
