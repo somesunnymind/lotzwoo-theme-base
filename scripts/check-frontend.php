@@ -580,12 +580,27 @@ if (!$kontext_typ instanceof WP_Block_Type) {
 $vorlagen = get_block_templates([], 'wp_template');
 $ohne_leiste = [];
 $doppelt = [];
+$fremd = [];
 $mit_kopf = 0;
 
 foreach ($vorlagen as $vorlage) {
     $inhalt = (string) $vorlage->content;
 
     if (!str_contains($inhalt, 'wp:template-part {"slug":"header"')) {
+        continue;
+    }
+
+    /*
+     * Nur Vorlagen, die diesem Theme gehören. WooCommerce liefert eigene mit
+     * (`single-product`, `order-confirmation`), und die ziehen denselben
+     * Kopf-Part — ändern kann sie dieses Theme nur, indem es sie überschreibt.
+     * Beides ist hier ausdrücklich nicht gewollt: die Produktseite gehört
+     * laut AD-10 nicht zum Kaufweg, und auf der Danke-Seite stünde der
+     * *heutige* Kontext neben den eingefrorenen Werten der Bestellung
+     * (Ticket 15). Sie werden gezählt und genannt, nicht bemängelt.
+     */
+    if (($vorlage->source ?? '') === 'plugin') {
+        $fremd[] = $vorlage->slug;
         continue;
     }
 
@@ -606,7 +621,11 @@ if ($mit_kopf === 0) {
 } elseif ($doppelt !== []) {
     $zeile('fehler', 'Kontextleiste: doppelter Slot in ' . implode(', ', $doppelt) . ' — die Leiste stünde zweimal auf derselben Seite');
 } else {
-    $zeile('ok', "Kontextleiste: in allen {$mit_kopf} Vorlagen mit Kopf-Part verbaut, je genau einmal (AP-32)");
+    $zeile('ok', "Kontextleiste: in allen {$mit_kopf} Vorlagen dieses Themes mit Kopf-Part verbaut, je genau einmal (AP-32)");
+}
+
+if ($fremd !== []) {
+    $zeile('ok', 'Kontextleiste: ohne Leiste bleiben die Vorlagen fremder Plugins — ' . implode(', ', $fremd) . ' (Produktseite AD-10, Danke-Seite Ticket 15; dort wollte sie ohnehin niemand)');
 }
 
 if ($eigenerkopf instanceof WP_Block_Template
