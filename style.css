@@ -4,7 +4,7 @@ Theme URI: https://somesunnymind.com/
 Update URI: https://github.com/somesunnymind/lotzwoo-theme-base
 Author: LotzApp Solutions
 Description: Minimales Block-Theme für B2B-Großhandelsshops auf WooCommerce. Trägt das Design-System in theme.json und sonst so wenig wie möglich — Kopfbereich, Fußbereich, zwei zuweisbare Seitenvorlagen. Alles Kundenspezifische gehört in ein Kindtheme.
-Version: 0.3.4
+Version: 0.3.5
 Requires at least: 6.6
 Tested up to: 7.0
 Requires PHP: 8.1
@@ -1510,6 +1510,27 @@ p.is-style-kennzahl {
   border-inline-start: 3px solid var(--wp--preset--color--ink-200);
   padding-block: var(--wp--preset--spacing--40);
   padding-inline: var(--wp--preset--spacing--50) var(--wp--preset--spacing--40);
+}
+
+/* Laufender Text auf lesbarer Zeilenlaenge.
+
+   Gemessen an der Ueber-uns-Seite vor dem Umbau: 119 Zeichen je Zeile. Das
+   Raster steht auf 960px, und fuer eine Tabelle oder ein Kartenraster ist das
+   richtig — fuer laufenden Text nicht. Die Spanne, in der das Auge den
+   Zeilenanfang ohne Suchen zurueckfindet, liegt bei 50 bis 75 Zeichen.
+
+   `ch` und nicht Pixel: die Breite soll an der Schrift haengen, nicht an einer
+   Zahl. Aendert ein Kundentheme den Grundschriftgrad, wandert die Zeilenlaenge
+   mit, statt still falsch zu werden.
+
+   `margin-inline: 0 auto` ist der eigentliche Punkt dieser Regel. Ein Kind
+   eines `is-layout-constrained`-Blocks bekommt von WordPress `margin-inline:
+   auto` und stuende damit *mittig* im 960er-Raster — also eingerueckt
+   gegenueber der Ueberschrift darueber, die die volle Breite nutzt. Das liest
+   als Versehen. Der Text beginnt an derselben Kante wie seine Ueberschrift. */
+.wp-block-group.is-style-lesebreite {
+  max-inline-size: 66ch;
+  margin-inline: 0 auto;
 }
 
 /* Ein Schritt einer Zeitleiste: Haarlinie mit Punkt, Inhalt daneben.

@@ -692,6 +692,7 @@ add_action('init', static function (): void {
             'abgesetzt' => __('Abgesetzt', 'lotzwoo-theme-base'),
             'empfaenger' => __('Empfänger', 'lotzwoo-theme-base'),
             'zeitleiste-schritt' => __('Zeitleisten-Schritt', 'lotzwoo-theme-base'),
+            'lesebreite' => __('Lesebreite', 'lotzwoo-theme-base'),
         ],
     ];
 
