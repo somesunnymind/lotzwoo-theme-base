@@ -1054,12 +1054,21 @@ header .current-menu-item > .wp-block-navigation-item__content {
    am Warenkorb ist dann echt und nicht gemalt. */
 .lotzwoo-header-actions {
   align-items: center;
-  /* Rechts bleiben, auch wenn die Zeile umbricht. `space-between` gibt der
-     Gruppe auf einer eigenen Zeile keinen Partner mehr, gegen den sie sich
-     abstoessen koennte — sie stand dann links unter dem Logo. Gemessen am
-     2026-08-14: abgemeldet ab 1200px, angemeldet mit den drei
-     Plugin-Flaechen ab 1440px. Das automatische Aussenmass nimmt den freien
-     Platz vor `justify-content` auf und wirkt in beiden Faellen. */
+}
+
+/* Rechts bleiben, auch wenn die Zeile umbricht. `space-between` gibt der
+   Gruppe auf einer eigenen Zeile keinen Partner mehr, gegen den sie sich
+   abstoessen koennte — sie stand dann links unter dem Logo. Gemessen am
+   2026-08-14: abgemeldet ab 1200px, angemeldet mit den drei
+   Plugin-Flaechen ab 1440px. Das automatische Aussenmass nimmt den freien
+   Platz vor `justify-content` auf und wirkt in beiden Faellen.
+
+   Mit dem Elternteil davor, und das ist gemessen und nicht vorsorglich:
+   als blosses `.lotzwoo-header-actions` rechnete der Browser weiter mit
+   `margin-left: 0`. WordPress' eigene Layout-Regeln setzen das physische
+   `margin` spaeter im Stapel und bei gleicher Spezifitaet — eine logische
+   Eigenschaft verliert dagegen, obwohl sie auf dieselbe Kante zeigt. */
+.lotzwoo-header-row > .lotzwoo-header-actions {
   margin-inline-start: auto;
 }
 
@@ -2068,6 +2077,9 @@ p.is-style-kennzahl {
 
 .lotzwoo-headerareas__field {
   position: absolute;
+  /* `border-box`, sonst kommen Innenabstand und Rahmen zu `100%` hinzu und
+     die Klappe steht bei 390px genau um diese 18px links aus dem Bild. */
+  box-sizing: border-box;
   inset-inline-end: 0;
   top: calc(100% + 6px);
   z-index: 30;
