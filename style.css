@@ -1618,3 +1618,217 @@ p.is-style-kennzahl {
 #customer_login .lotzwoo-accordion {
   width: 100%;
 }
+
+/* ==================================================================
+   Kontextleiste — Lieferort und Liefertermin, unter dem Kopf
+   ================================================================== */
+
+/* Warum hier und nicht im Plugin.
+
+   Dieselbe Antwort wie bei `.lotzwoo-heldback` weiter oben: das Plugin
+   entscheidet, *was* dasteht, dieses Theme, *wie* es aussieht. Die Leiste
+   steht im Kopfbereich zwischen Logo, Navigation und Warenkorb — also
+   mitten in der Gestaltung dieses Themes — und ein Stylesheet aus dem
+   Plugin muesste dort gegen die Kopfregeln anschreiben.
+
+   Der Preis ist benannt: ohne dieses Theme kommt die Leiste ungestaltet.
+   Fuer eine Zeile aus zwei Beschriftungen, zwei Werten und einem Knopf ist
+   das lesbar und nicht kaputt — dasselbe Verhaeltnis, das die Sektion der
+   zurueckgehaltenen Positionen bis Ticket 15 hatte.
+
+   Gebaut nach ADR 004, „feine Linien statt Kaesten": eine Haarlinie
+   trennt die Leiste von der Kopfzeile darueber, die Werte stehen auf
+   dieser Linie statt in einer Karte, die Beschriftungen sind Versalien,
+   und das Rot bleibt dem Zustand vorbehalten. Kein Rahmen, keine Ecken,
+   kein Schatten — die Versuchung ist hier dieselbe wie beim Akkordeon. */
+.lotzwoo-contextbar {
+  border-top: 1px solid var(--wp--preset--color--ink-200);
+  margin-top: var(--wp--preset--spacing--30);
+  padding-top: var(--wp--preset--spacing--30);
+  font-size: var(--wp--preset--font-size--sm);
+  color: var(--wp--preset--color--ink-900);
+}
+
+/* Die Zeile selbst. `flex-wrap` statt einer Umbruchregel je Breite: die
+   Werte sind Kundendaten und koennen jede Laenge haben — „Wien 1100 —
+   Hauptfiliale" steht neben „Abholmarkt". */
+.lotzwoo-contextbar__inner {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--wp--preset--spacing--20) var(--wp--preset--spacing--50);
+}
+
+/* Die Tatsachen als Beschreibungsliste: „Lieferort" ist der Begriff, der
+   Ortsname die Beschreibung. Ein Screenreader liest das Paar zusammen,
+   waehrend zwei nebeneinandergestellte `span` nur zwei Woerter waeren. */
+.lotzwoo-contextbar__facts {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--wp--preset--spacing--20) var(--wp--preset--spacing--50);
+  margin: 0;
+}
+
+.lotzwoo-contextbar__fact {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5em;
+}
+
+/* Versalien-Label, ADR 004. Klein, leise, und mit Sperrung, weil Versalien
+   ohne sie zusammenkleben. */
+.lotzwoo-contextbar__fact dt {
+  font-size: var(--wp--preset--font-size--xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--wp--preset--color--ink-500);
+  white-space: nowrap;
+}
+
+.lotzwoo-contextbar__fact dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+/* Der Zustand steht rechts vom Termin und traegt die einzige Farbe der
+   Leiste. Kein Kasten, keine Kapsel — nur der Text in der Zustandsfarbe,
+   mit einer Haarlinie darunter, damit er auch ohne Farbe unterscheidbar
+   bleibt (Farbe allein ist keine Information). */
+.lotzwoo-contextbar__cutoff {
+  font-variant-numeric: tabular-nums;
+  color: var(--wp--preset--color--ink-700);
+}
+
+.lotzwoo-contextbar__cutoff--closed {
+  color: var(--wp--preset--color--err-700);
+  border-bottom: 1px solid currentColor;
+}
+
+/* Der Wechsler. Ein Textknopf mit rotem Unterstrich, genau wie ein
+   Fliesstext-Link auf dieser Website — die Geste „hier kann man klicken"
+   ist ueberall dieselbe, und ein Kasten waere der Bruch. `margin-inline-
+   start: auto` haelt ihn am rechten Rand, solange die Zeile nicht
+   umbricht. */
+.lotzwoo-contextbar__switch {
+  margin-inline-start: auto;
+  padding: 0;
+  border: 0;
+  border-bottom: 1px solid var(--wp--preset--color--brand-500);
+  background: none;
+  font: inherit;
+  color: var(--wp--preset--color--ink-900);
+  cursor: pointer;
+}
+
+.lotzwoo-contextbar__switch:hover,
+.lotzwoo-contextbar__switch:focus-visible {
+  color: var(--wp--preset--color--brand-600);
+}
+
+/* Der Satz aus `Context_Notice`, wenn der Kontext das Bestellen sperrt.
+   Er steht unter der Zeile und nicht darin: er ist ein Satz und keine
+   Angabe, und in der Zeile haette er jede Ausrichtung zerstoert. */
+.lotzwoo-contextbar__notice {
+  margin: var(--wp--preset--spacing--20) 0 0;
+  max-width: 70ch;
+  color: var(--wp--preset--color--ink-700);
+}
+
+.lotzwoo-contextbar__notice strong {
+  display: block;
+  color: var(--wp--preset--color--ink-900);
+}
+
+/* Die Klappe mit dem Waehler. Sichtbar wird sie durch das Entfernen von
+   `hidden`; das Skript setzt nichts an `style`. */
+.lotzwoo-contextbar__panel {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: var(--wp--preset--spacing--20) var(--wp--preset--spacing--40);
+  margin-top: var(--wp--preset--spacing--30);
+  padding-top: var(--wp--preset--spacing--30);
+  border-top: 1px solid var(--wp--preset--color--ink-200);
+}
+
+.lotzwoo-contextbar__panel[hidden] {
+  display: none;
+}
+
+.lotzwoo-contextbar__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35em;
+  min-width: 16rem;
+  flex: 1 1 16rem;
+}
+
+.lotzwoo-contextbar__field > span {
+  font-size: var(--wp--preset--font-size--xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--wp--preset--color--ink-500);
+}
+
+/* Auch das Auswahlfeld bekommt eine Linie statt eines Kastens. Ein
+   `<select>` bringt seinen eigenen Rahmen mit; `appearance: none` waere
+   der Punkt, an dem man den Pfeil selbst nachbauen muss — also bleibt der
+   Rahmen, aber nur unten. */
+.lotzwoo-contextbar__field select {
+  width: 100%;
+  padding: 0.4em 0;
+  border: 0;
+  border-bottom: 1px solid var(--wp--preset--color--ink-300);
+  border-radius: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+}
+
+.lotzwoo-contextbar__field select:disabled {
+  color: var(--wp--preset--color--ink-400);
+}
+
+.lotzwoo-contextbar__apply {
+  padding: 0.5em 1.2em;
+  border: 1px solid var(--wp--preset--color--brand-500);
+  background: var(--wp--preset--color--brand-500);
+  font: inherit;
+  color: var(--wp--preset--color--white);
+  cursor: pointer;
+}
+
+.lotzwoo-contextbar__apply[disabled] {
+  border-color: var(--wp--preset--color--ink-300);
+  background: var(--wp--preset--color--ink-300);
+  cursor: default;
+}
+
+/* Die Statuszeile der Klappe steht **in** der Klappe. Der Grund steht im
+   Browser-Durchgang zu Posten 9: auf 390px stand dieselbe Meldung einmal
+   944 Pixel ueber dem Knopf, der sie ausgeloest hatte, also ausserhalb des
+   Bildes. `flex-basis: 100%` gibt ihr eine eigene Zeile direkt darunter. */
+.lotzwoo-contextbar__say {
+  flex: 1 0 100%;
+  margin: 0;
+  color: var(--wp--preset--color--ink-700);
+}
+
+.lotzwoo-contextbar__say--err {
+  color: var(--wp--preset--color--err-700);
+}
+
+/* Auf schmalen Schirmen bekommt jede Tatsache ihre Zeile, und der
+   Wechsler ruecht unter die Werte statt neben sie: bei 390px teilen sich
+   „Wien 1100 — Hauptfiliale" und „Wechseln" sonst 22 Zeichen Platz. */
+@media (max-width: 600px) {
+  .lotzwoo-contextbar__facts {
+    flex-direction: column;
+    gap: 0.25em;
+  }
+
+  .lotzwoo-contextbar__switch {
+    margin-inline-start: 0;
+  }
+}

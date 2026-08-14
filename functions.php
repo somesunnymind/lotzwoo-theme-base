@@ -575,6 +575,48 @@ add_action('init', static function (): void {
 });
 
 /**
+ * `lotzwoo/context-slot` — die Fläche für Lieferort und Liefertermin.
+ *
+ * Dritter Slot, und er nimmt die Bauart des **Kopf**-Slots, nicht die des
+ * Warenkorbs: der Rückgabewert ist die **leere Zeichenkette**, das Plugin füllt
+ * ihn per `add_filter('render_block_lotzwoo/context-slot', …)`.
+ *
+ * Der Unterschied zum Warenkorb-Anker hat einen Grund, und es ist nicht der
+ * gleiche wie beim Kopf. Beim Kopf ging es um eine `blockGap`-Lücke im
+ * Flex-Container; hier steht der Block als eigene Bahn und hätte keinen
+ * Nachbarn zu verschieben. Ausschlaggebend ist, **wo dieser Part hängt**:
+ * `parts/header.html` wird von jeder Vorlage gezogen, also von jeder Seite
+ * dieser Website — Startseite, Über uns, Kontakt, 404. Ein Anker-`div` stünde
+ * damit leer auf Seiten, die mit dem B2B-Kaufweg nichts zu tun haben. Die leere
+ * Zeichenkette lässt dort **nichts** zurück, nicht einmal ein Element.
+ *
+ * Möglich ist das, weil der Inhalt serverseitig entsteht: Ort und Termin kennt
+ * das Plugin beim Rendern der Seite. Genau das konnte der Warenkorb nicht — die
+ * zurückgehaltenen Positionen liegen dort erst nach dem Store-API-Abruf vor,
+ * weshalb das Theme ihm einen Ort und keinen Inhalt gibt.
+ *
+ * **Welche Seiten die Leiste tragen, entscheidet das Plugin**, nicht dieses
+ * Theme. Der Block steht überall; wer ihn füllt, weiß als Einziger, was eine
+ * B2B-Seite ist, wer angemeldet ist und ob es überhaupt einen Kontext gibt.
+ * Das ist dieselbe Richtung wie bei den beiden anderen Slots (AD-8) und der
+ * Grund, warum eine Marketing-Seite ohne Plugin nicht anders aussieht als mit.
+ *
+ * Der Kopf-Slot bleibt, was er ist: er gehört Posten 3 der Karte
+ * `plugin-flaechen-kaufweg` (Schnellsuche, Favoriten-Zähler, Kundenchip) und
+ * ist ein Platz für Symbole in einer Zeile. Die Kontextleiste ist zwei
+ * Beschriftungen, zwei Werte und ein Knopf breit und hätte ihn aufgebraucht.
+ *
+ * Verworfen wurde nichts neu — Hooked Blocks, `wp_body_open` und ein Shortcode
+ * sind beim Kopf-Slot mit Gründen abgelehnt worden, die hier unverändert
+ * gelten.
+ */
+add_action('init', static function (): void {
+    register_block_type(get_template_directory() . '/blocks/context-slot', [
+        'render_callback' => static fn (): string => '',
+    ]);
+});
+
+/**
  * Die Editor-Seiten derselben Blöcke.
  *
  * Eine reine PHP-Registrierung genügt dem Website-Editor nicht: er braucht eine
@@ -591,7 +633,7 @@ add_action('init', static function (): void {
  * Version aus der Dateizeit, aus demselben Grund wie beim Stylesheet.
  */
 add_action('enqueue_block_editor_assets', static function (): void {
-    foreach (['header-slot', 'cart-slot'] as $slug) {
+    foreach (['header-slot', 'cart-slot', 'context-slot'] as $slug) {
         $script = get_template_directory() . "/blocks/{$slug}/index.js";
 
         if (!is_readable($script)) {

@@ -535,6 +535,53 @@ if ($aufgeloest === '/') {
     $zeile('ok', "Sortiment: aufgelöst auf {$aufgeloest}");
 }
 
+/**
+ * Kopplung 6: die Kontextleiste unter dem Kopf.
+ *
+ * Dritter Slot, und er misst sich wie der erste plus eine Prüfung, die es beim
+ * ersten nicht gab.
+ *
+ * Wie beim Kopf-Slot: der Block muss registriert sein und in `parts/header.html`
+ * stehen. Die dritte Prüfung ist die neue und die wichtigere — der
+ * `render_callback` muss die **leere Zeichenkette** liefern und nicht etwa ein
+ * leeres `<div>`. Dieser Part wird von jeder Vorlage gezogen, also von jeder
+ * Seite dieser Website; ein Anker-Div stünde leer auf der Startseite, unter
+ * „Über uns" und in der 404. Wer den Rückgabewert versehentlich auf einen Anker
+ * umstellt, bricht nichts — er hinterlässt nur auf jeder Seite ein Element, das
+ * niemand sucht. Genau dafür ist diese Zeile da.
+ *
+ * Was hier **nicht** geprüft wird: ob die Leiste erscheint. Das entscheidet das
+ * Plugin, und dieses Skript misst das Theme.
+ */
+$abschnitt('Die Kontextleiste (Kopplung 6)');
+
+$kontext_typ = WP_Block_Type_Registry::get_instance()->get_registered('lotzwoo/context-slot');
+
+if (!$kontext_typ instanceof WP_Block_Type) {
+    $zeile('fehler', 'Kontextleiste: der Block `lotzwoo/context-slot` ist nicht registriert (AP-29)');
+} else {
+    $zeile('ok', 'Kontextleiste: `lotzwoo/context-slot` registriert (AP-29)');
+}
+
+if ($eigenerkopf instanceof WP_Block_Template
+    && !str_contains((string) $eigenerkopf->content, 'wp:lotzwoo/context-slot')) {
+    $zeile('fehler', 'Kontextleiste: der Block steht nicht in `parts/header.html` — Lieferort und Termin haben dann außerhalb des Kurzcodes keinen Ort');
+} elseif ($eigenerkopf instanceof WP_Block_Template) {
+    $zeile('ok', 'Kontextleiste: im Kopf-Part verbaut, unter der Kopfzeile (AP-29)');
+}
+
+$kontext_ausgabe = $kontext_typ instanceof WP_Block_Type && is_callable($kontext_typ->render_callback)
+    ? (string) call_user_func($kontext_typ->render_callback, [], '', null)
+    : null;
+
+if ($kontext_ausgabe === null) {
+    $zeile('fehler', 'Kontextleiste: kein `render_callback` — der Block rendert dann sein gespeichertes Markup, und das gibt es nicht');
+} elseif ($kontext_ausgabe !== '') {
+    $zeile('fehler', 'Kontextleiste: der `render_callback` liefert Markup statt der leeren Zeichenkette. Der Kopf-Part hängt an **jeder** Seite — das stünde dann auch auf der Startseite und in der 404 (AP-29, Phase A Frage 1)');
+} else {
+    $zeile('ok', 'Kontextleiste: der `render_callback` liefert die leere Zeichenkette — ohne Plugin bleibt auf keiner Seite ein Element zurück (AD-8)');
+}
+
 // ---------------------------------------------------------------------------
 // 3. Was der Kunde wirklich bekommt.
 // ---------------------------------------------------------------------------
