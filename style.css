@@ -4,7 +4,7 @@ Theme URI: https://somesunnymind.com/
 Update URI: https://github.com/somesunnymind/lotzwoo-theme-base
 Author: LotzApp Solutions
 Description: Minimales Block-Theme für B2B-Großhandelsshops auf WooCommerce. Trägt das Design-System in theme.json und sonst so wenig wie möglich — Kopfbereich, Fußbereich, zwei zuweisbare Seitenvorlagen. Alles Kundenspezifische gehört in ein Kindtheme.
-Version: 0.3.8
+Version: 0.3.9
 Requires at least: 6.6
 Tested up to: 7.0
 Requires PHP: 8.1
@@ -1510,6 +1510,33 @@ p.is-style-kennzahl {
   border-inline-start: 3px solid var(--wp--preset--color--ink-200);
   padding-block: var(--wp--preset--spacing--40);
   padding-inline: var(--wp--preset--spacing--50) var(--wp--preset--spacing--40);
+}
+
+/* Eine Liste kurzer, gleichrangiger Stichworte auf zwei Spalten.
+
+   Acht einzeilige Eintraege untereinander laufen lang und lassen daneben die
+   halbe Rasterbreite leer. Zwei Spalten halbieren den Lauf.
+
+   `columns: 2 16em` und nicht `column-count: 2`, und das ist der ganze Punkt
+   dieser Regel. Mit beiden Werten nimmt der Browser die *kleinere* der beiden
+   Vorgaben: zwei Spalten, solange je 16em Platz sind, sonst eine. Auf einem
+   Telefon faellt die Liste damit von selbst einspaltig zurueck, ohne
+   Umbruchpunkt und ohne dass jemand einen pflegen muss. Ein blosses
+   `column-count: 2` haette bei 360px zwei Spalten zu je 160px erzwungen, in
+   denen „Frischfleisch, auch von alten Nutztierrassen" vierzeilig steht.
+
+   Warum das ueberhaupt ein Block-Style ist: WordPress' Block-Attribut
+   `textColumns` schreibt ausschliesslich `column-count` und kennt die
+   Mindestbreite nicht. Ueber das Attribut ist dieses Verhalten nicht
+   erreichbar. */
+.wp-block-list.is-style-zweispaltig {
+  columns: 2 16em;
+  gap: var(--wp--preset--spacing--60);
+}
+
+/* Ein Eintrag darf nicht ueber die Spaltengrenze zerrissen werden. */
+.wp-block-list.is-style-zweispaltig > li {
+  break-inside: avoid;
 }
 
 /* Laufender Text auf lesbarer Zeilenlaenge.

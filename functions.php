@@ -687,6 +687,9 @@ add_action('init', static function (): void {
             'label' => __('Label', 'lotzwoo-theme-base'),
             'kennzahl' => __('Kennzahl', 'lotzwoo-theme-base'),
         ],
+        'core/list' => [
+            'zweispaltig' => __('Zweispaltig', 'lotzwoo-theme-base'),
+        ],
         'core/group' => [
             'karte' => __('Karte', 'lotzwoo-theme-base'),
             'abgesetzt' => __('Abgesetzt', 'lotzwoo-theme-base'),
