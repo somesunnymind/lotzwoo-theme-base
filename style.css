@@ -1834,3 +1834,322 @@ p.is-style-kennzahl {
     margin-inline-start: 0;
   }
 }
+
+/* =====================================================================
+   Die drei Kopfflaechen des Plugins — `lotzwoo/header-slot`
+   (Kaufweg-Posten 3, AP-30)
+
+   Warum hier und nicht im Plugin: dieselbe Antwort wie bei
+   `.lotzwoo-contextbar` und `.lotzwoo-heldback`. Das Plugin entscheidet,
+   *was* dasteht — Schnellsuche, Favoriten-Zaehler, Kundenchip —, dieses
+   Theme, *wie* es aussieht. Die drei stehen in derselben Zeile wie das
+   Konto-Symbol und der Mini-Warenkorb, also mitten in der Kopfgestaltung
+   dieses Themes; ein Stylesheet aus dem Plugin muesste dort gegen die
+   Regeln oberhalb anschreiben.
+
+   Der Preis ist benannt: ohne dieses Theme kommen die drei ungestaltet.
+   Ein Suchknopf, ein Stern mit einer Zahl und zwei Zeilen Text sind dann
+   lesbar und nicht kaputt.
+
+   Gebaut nach ADR 004: der Kundenchip traegt ein Versalien-Label ueber
+   dem Namen und steht auf einer Linie statt in einer Karte, die
+   Trefferliste trennt ihre Zeilen mit Haarlinien, und das Rot bleibt der
+   Zahl am Zaehler vorbehalten — derselben Farbe, die der Mini-Warenkorb
+   daneben fuer seine Zahl schon nutzt.
+   ===================================================================== */
+.lotzwoo-headerareas {
+  display: flex;
+  align-items: center;
+  gap: var(--wp--preset--spacing--20);
+}
+
+/* Suchknopf und Zaehler sind quadratische Schaltflaechen von 36px — die
+   Form, die der Mini-Warenkorb in derselben Zeile schon hat. Sie hier zu
+   wiederholen statt seine Regel zu erweitern, ist Absicht: seine Regel
+   gehoert Woos Block, diese den Flaechen des Plugins, und ein
+   Woo-Update, das die eine bricht, soll nicht die andere mitnehmen. */
+.lotzwoo-headerareas__toggle,
+.lotzwoo-headerareas__favorites {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--wp--preset--color--ink-500);
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.lotzwoo-headerareas__toggle:hover,
+.lotzwoo-headerareas__toggle:focus-visible,
+.lotzwoo-headerareas__favorites:hover,
+.lotzwoo-headerareas__favorites:focus-visible,
+.lotzwoo-headerareas__customer:hover,
+.lotzwoo-headerareas__customer:focus-visible {
+  background: var(--wp--preset--color--ink-100);
+  color: var(--wp--preset--color--ink-900);
+  text-decoration: none;
+}
+
+/* Dieselbe Fokusanzeige wie bei Konto und Warenkorb weiter oben: die
+   Flaeche aus `ink-100` traegt sie nicht (1.17:1 gegen `surface`, WCAG
+   1.4.11 verlangt 3:1), also ein eigener Ring in der Markenfarbe. */
+.lotzwoo-headerareas__toggle:focus-visible,
+.lotzwoo-headerareas__favorites:focus-visible,
+.lotzwoo-headerareas__customer:focus-visible {
+  outline: 2px solid var(--wp--preset--color--brand-500);
+  outline-offset: 2px;
+}
+
+/* Die Zahl am Zaehler, gebaut wie die Zahl am Warenkorb: Markenfarbe,
+   weisser Rand gegen das Symbol darunter, tabellarische Ziffern, damit
+   sie beim Wechsel von 9 auf 10 nicht springt. */
+.lotzwoo-headerareas__badge {
+  position: absolute;
+  top: -2px;
+  inset-inline-end: -2px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border: 2px solid var(--wp--preset--color--white);
+  border-radius: 9px;
+  background: var(--wp--preset--color--brand-500);
+  color: var(--wp--preset--color--white);
+  font-size: 11px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 14px;
+  text-align: center;
+}
+
+/* Eine leere Merkliste bekommt keine rote Null. Die Zahl verschwindet,
+   der Stern bleibt — der Weg zur Liste soll auch dann dastehen, wenn
+   sie leer ist, sonst lernt niemand, dass es sie gibt. Dieselbe
+   Ueberlegung wie bei `Favorites_Service::sidebar_filter()`, die den
+   Filter ausgegraut anbietet statt ihn zu verstecken. */
+.lotzwoo-headerareas__favorites.is-empty .lotzwoo-headerareas__badge {
+  display: none;
+}
+
+/* Der Kundenchip: Versalien-Label ueber dem Namen, kein Kasten. Er ist
+   der einzige der drei mit Text, und er nennt die Antwort auf „fuer wen
+   kaufe ich hier ein" — deshalb steht sie fett und das Label leise. */
+.lotzwoo-headerareas__customer {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  max-width: 15ch;
+  padding: 4px 8px;
+  border-radius: 8px;
+  color: var(--wp--preset--color--ink-900);
+  line-height: 1.15;
+  text-decoration: none;
+}
+
+.lotzwoo-headerareas__customer-label {
+  font-size: var(--wp--preset--font-size--xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--wp--preset--color--ink-500);
+}
+
+.lotzwoo-headerareas__customer-name {
+  font-size: var(--wp--preset--font-size--sm);
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Die Preisklasse steht unter dem Namen und ist die leiseste Zeile im
+   Kopf. Sie beantwortet die zweite Haelfte derselben Frage — zu welchen
+   Konditionen — und ist bis heute nirgends sichtbar gewesen. */
+.lotzwoo-headerareas__customer-class {
+  font-size: var(--wp--preset--font-size--xs);
+  color: var(--wp--preset--color--ink-500);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Die Schnellsuche. Das Feld haengt als Klappe unter dem Knopf und
+   nicht in der Zeile: die Kopfzeile ist bei 390px bereits mit Logo,
+   Menue, Konto und Warenkorb belegt, und ein Eingabefeld, das dort
+   dauerhaft mitfaehrt, drueckt alles andere aus dem Bild. */
+.lotzwoo-headerareas__search {
+  position: relative;
+}
+
+.lotzwoo-headerareas__field {
+  position: absolute;
+  inset-inline-end: 0;
+  top: calc(100% + 6px);
+  z-index: 30;
+  width: min(28rem, calc(100vw - 2rem));
+  padding: var(--wp--preset--spacing--20);
+  border: 1px solid var(--wp--preset--color--ink-200);
+  border-radius: 10px;
+  background: var(--wp--preset--color--white);
+  box-shadow: 0 8px 24px rgba(27, 25, 22, 0.12);
+}
+
+.lotzwoo-headerareas__input {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--wp--preset--color--ink-300);
+  border-radius: 8px;
+  background: var(--wp--preset--color--white);
+  color: var(--wp--preset--color--ink-900);
+  font-size: var(--wp--preset--font-size--md);
+}
+
+.lotzwoo-headerareas__input:focus-visible {
+  outline: 2px solid var(--wp--preset--color--brand-500);
+  outline-offset: 1px;
+}
+
+/* Die Trefferliste. Haarlinien zwischen den Zeilen statt Kaesten um sie
+   herum, ADR 004. Die Hoehe ist gedeckelt, damit sieben Treffer bei
+   390px nicht ueber den Bildschirmrand hinauswachsen. */
+.lotzwoo-headerareas__results {
+  max-height: min(60vh, 24rem);
+  margin-top: var(--wp--preset--spacing--20);
+  overflow-y: auto;
+}
+
+.lotzwoo-headerareas__hit {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--wp--preset--spacing--20);
+  padding: 8px 4px;
+  border-top: 1px solid var(--wp--preset--color--ink-200);
+  color: var(--wp--preset--color--ink-900);
+  text-decoration: none;
+}
+
+.lotzwoo-headerareas__hit:first-child {
+  border-top: 0;
+}
+
+.lotzwoo-headerareas__hit:hover,
+.lotzwoo-headerareas__hit:focus-visible,
+.lotzwoo-headerareas__hit.is-active {
+  background: var(--wp--preset--color--ink-100);
+  outline: none;
+  text-decoration: none;
+}
+
+.lotzwoo-headerareas__hit-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.lotzwoo-headerareas__hit-name {
+  font-size: var(--wp--preset--font-size--sm);
+  font-weight: 600;
+}
+
+.lotzwoo-headerareas__hit-meta {
+  font-size: var(--wp--preset--font-size--xs);
+  color: var(--wp--preset--color--ink-500);
+}
+
+.lotzwoo-headerareas__hit-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  flex: none;
+}
+
+.lotzwoo-headerareas__hit-price {
+  font-size: var(--wp--preset--font-size--sm);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.lotzwoo-headerareas__hit-note {
+  font-size: var(--wp--preset--font-size--xs);
+  color: var(--wp--preset--color--ink-500);
+}
+
+/* Ein Treffer, der nicht bestellbar ist, verschwindet nicht — er steht
+   leiser da und nennt den Grund an der Stelle des Steuerhinweises.
+   Dieselbe Wahl wie in der Liste des Sortiments: ein Artikel, der
+   fehlt, ist eine Frage; einer mit Grund ist eine Antwort. */
+.lotzwoo-headerareas__hit.is-blocked .lotzwoo-headerareas__hit-name,
+.lotzwoo-headerareas__hit.is-blocked .lotzwoo-headerareas__hit-price {
+  color: var(--wp--preset--color--ink-500);
+}
+
+.lotzwoo-headerareas__hit.is-blocked .lotzwoo-headerareas__hit-note {
+  color: var(--wp--preset--color--err-700);
+}
+
+/* Der Weg zu allem, was die Klappe nicht fasst. Er steht unter den
+   Treffern statt neben dem Suchfeld: gelesen wird von oben nach unten,
+   und wer nach sieben Zeilen nicht das Richtige gefunden hat, sucht
+   genau dort weiter. Textknopf mit rotem Unterstrich — dieselbe Geste
+   wie ein Fliesstext-Link, ADR 004. */
+.lotzwoo-headerareas__all {
+  display: block;
+  margin-top: var(--wp--preset--spacing--20);
+  padding-top: var(--wp--preset--spacing--20);
+  border-top: 1px solid var(--wp--preset--color--ink-200);
+  color: var(--wp--preset--color--ink-900);
+  font-size: var(--wp--preset--font-size--sm);
+  font-weight: 500;
+  text-align: center;
+  text-decoration: underline;
+  text-decoration-color: var(--wp--preset--color--brand-500);
+  text-underline-offset: 3px;
+}
+
+.lotzwoo-headerareas__all:hover,
+.lotzwoo-headerareas__all:focus-visible {
+  color: var(--wp--preset--color--brand-500);
+}
+
+.lotzwoo-headerareas__hint {
+  margin: var(--wp--preset--spacing--20) 0 0;
+  font-size: var(--wp--preset--font-size--sm);
+  color: var(--wp--preset--color--ink-700);
+}
+
+/* Auf schmalen Schirmen schrumpft der Kundenchip, er verschwindet
+   nicht. Bei 390px teilen sich Logo, Menuetaste, Suchknopf, Zaehler,
+   Konto und Warenkorb eine Zeile von 343px, und ein Firmenname wie
+   "Bersta Naturkost Grosshandel" braucht davon allein die Haelfte —
+   also faellt weg, was der Kunde ohnehin weiss (das Wort "Kunde") und
+   was ihn eine Antippbewegung entfernt auf der Kontoseite erwartet
+   (die Preisklasse). Was bleibt, ist die Antwort auf die Frage: fuer
+   wen.
+
+   Weggeblendet und nicht entfernt: beide Zeilen stehen weiter im
+   Markup und werden weiter vorgelesen. Ein Screenreader auf einem
+   Telefon hoert dasselbe wie einer auf einem Schreibtisch. */
+@media (max-width: 782px) {
+  .lotzwoo-headerareas__customer {
+    max-width: 9ch;
+    padding-inline: 4px;
+  }
+
+  .lotzwoo-headerareas__customer-label,
+  .lotzwoo-headerareas__customer-class {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
