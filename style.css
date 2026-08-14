@@ -1696,7 +1696,9 @@ p.is-style-kennzahl {
    mit einer Haarlinie darunter, damit er auch ohne Farbe unterscheidbar
    bleibt (Farbe allein ist keine Information). */
 .lotzwoo-contextbar__cutoff {
+  margin-inline-start: 0.35em;
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
   color: var(--wp--preset--color--ink-700);
 }
 
