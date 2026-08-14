@@ -1598,3 +1598,23 @@ p.is-style-kennzahl {
     transition: none;
   }
 }
+
+/* Die Klappe reagiert auf den Zeiger mit Raum, nicht nur mit Flaeche. Der
+   Innenabstand waechst zur Seite hin, damit die Schrift beim Ueberfahren vom
+   Rand wegrueckt — eine Geste, die auf einer Auswahl aus zwei Tueren deutlicher
+   ist als eine blosse Faerbung. Vom Auftraggeber so gesetzt. */
+.lotzwoo-accordion > details > summary {
+  padding-right: 4px;
+  transition: 0.3s;
+}
+
+.lotzwoo-accordion > details > summary:hover {
+  padding: 12px 12px 12px 8px !important;
+  transition: 0.3s;
+}
+
+/* Woos zweispaltiges Raster gibt jeder Spalte die halbe Breite. Untereinander
+   liegende Klappen brauchen die ganze. */
+#customer_login .lotzwoo-accordion {
+  width: 100%;
+}
