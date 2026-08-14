@@ -1054,6 +1054,13 @@ header .current-menu-item > .wp-block-navigation-item__content {
    am Warenkorb ist dann echt und nicht gemalt. */
 .lotzwoo-header-actions {
   align-items: center;
+  /* Rechts bleiben, auch wenn die Zeile umbricht. `space-between` gibt der
+     Gruppe auf einer eigenen Zeile keinen Partner mehr, gegen den sie sich
+     abstoessen koennte — sie stand dann links unter dem Logo. Gemessen am
+     2026-08-14: abgemeldet ab 1200px, angemeldet mit den drei
+     Plugin-Flaechen ab 1440px. Das automatische Aussenmass nimmt den freien
+     Platz vor `justify-content` auf und wirkt in beiden Faellen. */
+  margin-inline-start: auto;
 }
 
 /* Zwei Formen, nicht eine — so trennt der Prototyp sie auch. Der
@@ -1860,7 +1867,10 @@ p.is-style-kennzahl {
 .lotzwoo-headerareas {
   display: flex;
   align-items: center;
-  gap: var(--wp--preset--spacing--20);
+  /* Enger als der Abstand der Gruppe (spacing-20): die drei gehoeren
+     zusammen und sollen als ein Block neben Konto und Warenkorb lesbar
+     sein, nicht als drei einzelne Nachbarn. */
+  gap: 8px;
 }
 
 /* Suchknopf und Zaehler sind quadratische Schaltflaechen von 36px — die
@@ -1981,7 +1991,18 @@ p.is-style-kennzahl {
    nicht in der Zeile: die Kopfzeile ist bei 390px bereits mit Logo,
    Menue, Konto und Warenkorb belegt, und ein Eingabefeld, das dort
    dauerhaft mitfaehrt, drueckt alles andere aus dem Bild. */
-.lotzwoo-headerareas__search {
+/* Die Klappe haengt an der **Kopfzeile**, nicht am Suchknopf — und das
+   ist keine Feinheit, sondern gemessen. Mit `.lotzwoo-headerareas__search`
+   als Bezug stand ihre rechte Kante bei 390px auf x=52, ihre linke also
+   bei -306: die Klappe hing zur Haelfte links aus dem Bild. Der Knopf ist
+   36px breit, die Klappe 343 — ein Bezug, der schmaler ist als das, was
+   an ihm haengt, kann nur schiefgehen.
+
+   `.lotzwoo-header-row` ist genau die Inhaltsbreite. Rechtsbuendig daran
+   ausgerichtet steht die Klappe bei jeder Breite im Bild, und `top: 100%`
+   setzt sie unter die Kopfzeile statt unter den Knopf — auch dann, wenn
+   die Zeile umbricht. */
+.lotzwoo-header-row {
   position: relative;
 }
 
@@ -1990,7 +2011,7 @@ p.is-style-kennzahl {
   inset-inline-end: 0;
   top: calc(100% + 6px);
   z-index: 30;
-  width: min(28rem, calc(100vw - 2rem));
+  width: min(28rem, 100%);
   padding: var(--wp--preset--spacing--20);
   border: 1px solid var(--wp--preset--color--ink-200);
   border-radius: 10px;
