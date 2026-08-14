@@ -1495,3 +1495,106 @@ p.is-style-kennzahl {
   padding-block: var(--wp--preset--spacing--40);
   padding-inline: var(--wp--preset--spacing--50) var(--wp--preset--spacing--40);
 }
+
+/* ==================================================================
+   Akkordeon — eine Wahl, bei der nur eine Antwort offen steht
+   ================================================================== */
+
+/* Warum `<details>` und kein Skript.
+
+   Ein Akkordeon ist eine der wenigen Oberflaechen, die der Browser fertig
+   mitbringt: Tastatur, Screenreader, Aufklappzustand und die Suche im
+   Dokument sind bereits richtig. Jede Nachbildung mit `aria-expanded` und
+   Klick-Zuhoerern muss das alles noch einmal bauen, und die meisten bauen es
+   halb. Dazu kommt der Fall, der diese Entscheidung traegt: faellt das Skript
+   aus, ist eine nachgebaute Loesung ein Stapel unerreichbarer Absaetze — ein
+   `<details>` ist dann schlicht aufgeklappt.
+
+   Das `name`-Attribut macht die Gruppe wechselseitig: oeffnet man eines,
+   schliesst der Browser das andere, ohne eine Zeile JavaScript. Browser, die
+   das noch nicht kennen, lassen beide offen — das ist die richtige Richtung
+   zu scheitern, denn beide Formulare sind dann sichtbar statt keines.
+
+   Warum keine Karte. ADR 004 sagt „feine Linien statt Kaesten", und ein
+   Akkordeon ist die Stelle, an der die Versuchung am groessten ist: Rahmen,
+   Ecken, Schatten, damit „man sieht, dass es klickbar ist". Sichtbar macht es
+   der Zeiger, der Marker und die Flaeche, die auf Hover reagiert — nicht ein
+   Kasten. Die Trennung uebernimmt dieselbe 1px-Linie in `ink-200`, die auf
+   dieser Website ohnehin ueberall die Trennung uebernimmt. */
+.lotzwoo-accordion > details {
+  border-top: 1px solid var(--wp--preset--color--ink-200);
+}
+
+.lotzwoo-accordion > details:last-of-type {
+  border-bottom: 1px solid var(--wp--preset--color--ink-200);
+}
+
+/* Der Kopf. `list-style: none` und der WebKit-Zwilling entfernen den
+   Standard-Pfeil; er sitzt je nach Browser woanders und laesst sich nicht
+   ausrichten. Der eigene Marker steht rechts, wo ihn eine Liste von
+   Auswahlmoeglichkeiten erwarten laesst. */
+.lotzwoo-accordion > details > summary {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--wp--preset--spacing--30);
+  padding: var(--wp--preset--spacing--30) 0;
+  cursor: pointer;
+  list-style: none;
+  font-size: var(--wp--preset--font-size--md);
+  font-weight: 600;
+  color: var(--wp--preset--color--ink-900);
+}
+
+.lotzwoo-accordion > details > summary::-webkit-details-marker {
+  display: none;
+}
+
+/* Die Flaeche reagiert, der Kasten bleibt weg: derselbe Griff wie in der
+   Kopfnavigation, damit „hier kann man klicken" auf der ganzen Website
+   dieselbe Geste ist. */
+.lotzwoo-accordion > details > summary:hover,
+.lotzwoo-accordion > details > summary:focus-visible {
+  background: var(--wp--preset--color--ink-100);
+}
+
+/* Die Zusatzzeile im Kopf sagt, fuer wen die Klappe gedacht ist. Sie steht im
+   selben Element, damit der Screenreader sie beim Aufklappen mitliest statt
+   sie hinter der Klappe zu verstecken. */
+.lotzwoo-accordion__hint {
+  font-size: var(--wp--preset--font-size--sm);
+  font-weight: 400;
+  color: var(--wp--preset--color--ink-500);
+}
+
+/* Der Marker: zwei Striche zu einem Winkel gedreht — dieselbe Haarlinie wie
+   die Trennung, kein Zeichensatz-Glyph und kein Bild. */
+.lotzwoo-accordion > details > summary::after {
+  content: "";
+  flex: none;
+  width: 0.5em;
+  height: 0.5em;
+  margin-inline-start: auto;
+  border-right: 1px solid currentColor;
+  border-bottom: 1px solid currentColor;
+  transform: rotate(45deg) translate(-0.15em, -0.15em);
+  transition: transform 150ms ease;
+}
+
+.lotzwoo-accordion > details[open] > summary::after {
+  transform: rotate(225deg) translate(-0.15em, -0.15em);
+}
+
+/* Der Inhalt. Der Abstand sitzt unten am Panel und nicht oben am ersten Kind,
+   sonst summiert er sich mit dem Aussenabstand des Formulars. */
+.lotzwoo-accordion__panel {
+  padding-bottom: var(--wp--preset--spacing--40);
+}
+
+/* Wer Bewegung abbestellt hat, bekommt den Winkel ohne Drehung. Das Akkordeon
+   selbst klappt weiterhin — das ist ein Zustandswechsel, keine Animation. */
+@media (prefers-reduced-motion: reduce) {
+  .lotzwoo-accordion > details > summary::after {
+    transition: none;
+  }
+}
