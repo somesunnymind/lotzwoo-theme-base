@@ -4,7 +4,7 @@ Theme URI: https://somesunnymind.com/
 Update URI: https://github.com/somesunnymind/lotzwoo-theme-base
 Author: LotzApp Solutions
 Description: Minimales Block-Theme für B2B-Großhandelsshops auf WooCommerce. Trägt das Design-System in theme.json und sonst so wenig wie möglich — Kopfbereich, Fußbereich, zwei zuweisbare Seitenvorlagen. Alles Kundenspezifische gehört in ein Kindtheme.
-Version: 0.3.9
+Version: 0.4.0
 Requires at least: 6.6
 Tested up to: 7.0
 Requires PHP: 8.1
@@ -1576,12 +1576,12 @@ p.is-style-kennzahl {
   margin-inline: 0 auto !important;
 }
 
-/* Ein Schritt einer Zeitleiste: Haarlinie mit Punkt, Inhalt daneben.
+/* Ein Schritt einer Zeitleiste: Knoten, Verbindung zum naechsten, Inhalt daneben.
 
-   Warum das hier steht und nicht als Inline-Style im Website-Repo: der Punkt
-   ist ein Pseudoelement, und ein Block-Attribut kann keines erzeugen. Alles
-   andere an diesem Baustein waere inline moeglich gewesen — der Punkt ist der
-   Grund, aus dem er ueberhaupt ein Block-Style ist.
+   Warum das hier steht und nicht als Inline-Style im Website-Repo: Knoten und
+   Verbindung sind Pseudoelemente, und ein Block-Attribut kann keines erzeugen.
+   Alles andere an diesem Baustein waere inline moeglich gewesen — die beiden
+   sind der Grund, aus dem er ueberhaupt ein Block-Style ist.
 
    Warum ueberhaupt eine Zeitleiste im Basis-Theme: „ein Schritt in einer
    zeitlichen Folge" ist eine Rolle, keine Kundengestaltung — dieselbe
@@ -1614,11 +1614,25 @@ p.is-style-kennzahl {
    absolut liegt. */
 .wp-block-group.is-style-zeitleiste-schritt {
   position: relative;
-  border-inline-start: 1px solid var(--wp--preset--color--ink-300);
   padding-inline-start: var(--wp--preset--spacing--60);
   padding-block-end: var(--wp--preset--spacing--60);
 }
 
+/* Kein Abstand zwischen den Schritten. WordPress gibt jedem Kind eines
+   Layout-Blocks ein `margin-block-start`, und genau dort zeichnete die
+   Verbindung nicht — die Linie hatte Luecken zwischen den Punkten. Der
+   Zwischenraum kommt jetzt aus dem `padding-block-end` oben, und das gehoert
+   zum Kasten, ueber den die Verbindung laufen kann. */
+.wp-block-group.is-style-zeitleiste-schritt {
+  margin-block-start: 0;
+}
+
+.wp-block-group.is-style-zeitleiste-schritt > :first-child {
+  margin-block-start: 0;
+}
+
+/* Der Knoten. `0.4em` von oben setzt ihn auf die Grundlinie der Jahresmarke
+   daneben, nicht auf die Oberkante des Kastens. */
 .wp-block-group.is-style-zeitleiste-schritt::before {
   content: "";
   position: absolute;
@@ -1630,18 +1644,42 @@ p.is-style-kennzahl {
   background: var(--wp--preset--color--ink-400);
 }
 
-.wp-block-group.is-style-zeitleiste-schritt > :first-child {
-  margin-block-start: 0;
+/* Die Verbindung von diesem Knoten zum naechsten.
+
+   Frueher war das die `border-inline-start` des Kastens. Das war der Fehler:
+   eine Kante beginnt an der Oberkante und endet an der Unterkante, der Knoten
+   sitzt aber 0.4em tiefer — und ueber den Aussenabstand zum naechsten Schritt
+   kam sie ohnehin nicht hinueber. Ergebnis waren Striche, die weder am einen
+   noch am anderen Punkt ankamen.
+
+   Als eigenes Element laesst sich beides sagen: beginne unter diesem Knoten
+   (`0.4em` Versatz plus die 9px des Knotens), und laufe bis 0.4em *unter* die
+   Unterkante — dort faengt der naechste Knoten an. Der negative Wert ist der
+   Punkt der ganzen Regel; ohne ihn bliebe wieder eine Luecke von der Hoehe des
+   Versatzes.
+
+   `-0.5px` bei 1px Breite setzt die Linie mittig unter die Knoten, die bei
+   -4.5px mit 9px Breite ebenfalls auf 0 zentriert sind. */
+.wp-block-group.is-style-zeitleiste-schritt::after {
+  content: "";
+  position: absolute;
+  inset-inline-start: -0.5px;
+  inset-block-start: calc(0.4em + 9px);
+  inset-block-end: -0.4em;
+  inline-size: 1px;
+  background: var(--wp--preset--color--ink-300);
 }
 
+/* Beim letzten Schritt keine Verbindung — sie zeigte ins Leere und behauptete
+   einen vierten Eintrag. */
 .wp-block-group.is-style-zeitleiste-schritt:last-child {
-  border-inline-start-color: transparent;
   padding-block-end: 0;
 }
 
-/* Das Zitat im Zeitleisten-Schritt traegt die eigene Kante nicht noch einmal —
-   die Zeitleiste stellt links schon eine. Zwei parallele Linien im Abstand von
-   einem Zeichen lesen als Fehler, nicht als Struktur. */
+.wp-block-group.is-style-zeitleiste-schritt:last-child::after {
+  content: none;
+}
+
 .wp-block-group.is-style-zeitleiste-schritt .wp-block-quote {
   border-inline-start: none;
   padding-inline-start: 0;
