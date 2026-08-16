@@ -37,6 +37,23 @@
  * hat die Seite Kopf und Fuß, steht kein Woo-Katalog darin. Die Auflösungsebene
  * hätte den fehlenden Kassen-Kopf aus Ticket 09 nie gefunden.
  *
+ * ## Der B2B-Riegel gehört zur Erwartung, nicht gegen sie
+ *
+ * Seit AP-46 antwortet das Plugin auf Produktseite, Produktarchiv, Produktsuche
+ * und Produkt-Taxonomien mit **404**, sobald die Installation ein B2B-Shop ist
+ * (`Product_Access_Gate`, gehängt an `template_redirect`); seit AP-49 hängt das
+ * am Schalter `b2b_enabled`. Diese Prüfung fährt **anonym** — `wp_remote_get()`
+ * schickt keinen Anmeldekeks —, und anonym kommt niemand durch den Riegel. Drei
+ * Abrufe unten waren damit vom 2026-08-16 an bei jedem Theme-Deploy rot, ohne
+ * dass am Theme etwas kaputt war.
+ *
+ * Die Erwartung ist deshalb an den Modus gekoppelt, statt die Messung
+ * angemeldet zu fahren: ein Anmeldekeks wäre eine Schreiboperation, und der
+ * Absatz darunter sagt zu, dass diese Datei nicht schreibt. Die Kopplung misst
+ * außerdem mehr — unter dem Riegel ist die 404 die **zugesagte** Antwort, und
+ * dass sie mit Kopf und Fuß aus der `404`-Vorlage dieses Themes kommt, ist
+ * genau die Aussage, für die es den Abschnitt gibt.
+ *
  * ## Was es nicht tut
  *
  * Es schreibt nicht. Kein Warenkorb wird gefüllt, keine Bestellung angelegt,
@@ -675,12 +692,41 @@ $gewoehnliche = get_posts([
     'order' => 'ASC',
 ]);
 
+/**
+ * Steht diese Installation auf B2B — sperrt der Riegel also die Produktflächen?
+ *
+ * Gefragt wird die Klasse des Plugins und nicht die Option: `B2B_Mode::is_on()`
+ * ist die eine Stelle, die diese Frage beantwortet, und der Filter
+ * `lotzwoo/b2b_enabled` gehört dazu. Fehlt die Klasse — kein Plugin, oder eines
+ * vor AP-49 —, bleibt die Erwartung die alte.
+ *
+ * Beide Prozesse lesen dieselbe Option: dieser hier und der, den `wp_remote_get()`
+ * gleich anspricht. Auseinander liefen sie nur, wenn jemand den Filter allein im
+ * CLI hinge — das tut niemand, und ein Lauf, der es doch täte, sähe es sofort an
+ * der Zeile unter dieser.
+ */
+$riegel_an = class_exists('Lotzwoo\\B2B\\Access\\B2B_Mode')
+    && \Lotzwoo\B2B\Access\B2B_Mode::is_on();
+
+echo 'B2B-Modus: ' . ($riegel_an ? 'an' : 'aus') . ' — die Produktflächen werden anonym mit '
+    . ($riegel_an ? '404 erwartet (AP-46/AP-49)' : '200 erwartet') . "\n";
+
+/**
+ * Pfad · Zweck · kein Woo-Katalog erlaubt · Code ohne Riegel · vom Riegel gesperrt
+ *
+ * Die letzte Spalte ist der Befund aus `Product_Access_Gate::locks_current_view()`,
+ * nicht eine Vermutung über Adressen: `is_shop()`, `is_search()` mit
+ * `post_type=product` und `is_tax()` auf einer Produkt-Taxonomie. Der Warenkorb,
+ * die Startseite und eine gewöhnliche Seite stehen dort nicht — sie bleiben in
+ * beiden Modi 200, und dass das so bleibt, ist die halbe Aussage dieses
+ * Abschnitts.
+ */
 $abrufe = [
-    ['/', 'Startseite — hier das Sortiment (page-full-width)', true],
-    [wp_make_link_relative(wc_get_page_permalink('shop')), 'Woos Shop-Seite (archive-product)', false],
-    ['/?s=apfel&post_type=product', 'Produktsuche (product-search-results)', false],
-    [wp_make_link_relative(wc_get_page_permalink('cart')), 'Warenkorb (eigenes Template mit dem Slot; Ticket 15)', true],
-    ['/diese-seite-gibt-es-nicht-' . substr(md5(get_stylesheet()), 0, 6) . '/', 'Eine Adresse ohne Seite (404)', true],
+    ['/', 'Startseite — hier das Sortiment (page-full-width)', true, 200, false],
+    [wp_make_link_relative(wc_get_page_permalink('shop')), 'Woos Shop-Seite (archive-product)', false, 200, true],
+    ['/?s=apfel&post_type=product', 'Produktsuche (product-search-results)', false, 200, true],
+    [wp_make_link_relative(wc_get_page_permalink('cart')), 'Warenkorb (eigenes Template mit dem Slot; Ticket 15)', true, 200, false],
+    ['/diese-seite-gibt-es-nicht-' . substr(md5(get_stylesheet()), 0, 6) . '/', 'Eine Adresse ohne Seite (404)', true, 404, false],
 ];
 
 $kategorien = get_terms(['taxonomy' => 'product_cat', 'hide_empty' => false, 'number' => 1]);
@@ -690,6 +736,8 @@ if (!is_wp_error($kategorien) && $kategorien !== []) {
         wp_make_link_relative(get_term_link($kategorien[0])),
         'Produktkategorie „' . $kategorien[0]->name . '" (fällt auf archive-product)',
         false,
+        200,
+        true,
     ];
 }
 
@@ -698,10 +746,17 @@ if ($gewoehnliche !== []) {
         wp_make_link_relative(get_permalink($gewoehnliche[0])),
         'Eine gewöhnliche Seite („' . $gewoehnliche[0]->post_title . '", page)',
         true,
+        200,
+        false,
     ];
 }
 
-foreach ($abrufe as [$pfad, $zweck, $katalog_verboten]) {
+foreach ($abrufe as [$pfad, $zweck, $katalog_verboten, $grundcode, $gesperrt]) {
+    // Der Riegel greift nur, wenn beides zutrifft: die Fläche steht auf seiner
+    // Liste **und** der Modus ist an. Sonst gilt der Code ohne Riegel.
+    $unter_riegel = $gesperrt && $riegel_an;
+    $erwarteter_code = $unter_riegel ? 404 : $grundcode;
+
     $antwort = wp_remote_get(home_url($pfad), ['timeout' => 20, 'redirection' => 3]);
 
     if (is_wp_error($antwort)) {
@@ -712,11 +767,19 @@ foreach ($abrufe as [$pfad, $zweck, $katalog_verboten]) {
     $code = wp_remote_retrieve_response_code($antwort);
     $html = wp_remote_retrieve_body($antwort);
 
-    // Ein 404 ist auf der 404-Adresse die richtige Antwort; überall sonst nicht.
-    $erwarteter_code = str_contains($pfad, 'diese-seite-gibt-es-nicht') ? 404 : 200;
-
     if ($code !== $erwarteter_code) {
-        $zeile('fehler', "{$pfad}: HTTP {$code}, erwartet {$erwarteter_code} — {$zweck}");
+        // Beide Richtungen sagen, was sie meinen. Ein blosses „erwartet 200"
+        // hat am 2026-08-16 drei Stunden gekostet, weil niemand den Riegel
+        // dahinter vermutet hat.
+        $warum = '';
+
+        if ($unter_riegel) {
+            $warum = '. Der B2B-Modus steht **an** — der Riegel müsste diese Fläche anonym auf 404 setzen (AP-46/AP-49)';
+        } elseif ($gesperrt) {
+            $warum = '. Der B2B-Modus steht **aus** — diese Antwort kommt dann nicht vom Riegel';
+        }
+
+        $zeile('fehler', "{$pfad}: HTTP {$code}, erwartet {$erwarteter_code} — {$zweck}{$warum}");
         continue;
     }
 
@@ -748,7 +811,9 @@ foreach ($abrufe as [$pfad, $zweck, $katalog_verboten]) {
         continue;
     }
 
-    $zeile('ok', "{$pfad}: Kopf und Fuß da, kein Katalog — {$zweck}");
+    $zeile('ok', $unter_riegel
+        ? "{$pfad}: 404 mit Kopf und Fuß, kein Katalog — der B2B-Riegel sperrt anonym, wie AP-46 es zusagt (ohne Riegel: {$zweck})"
+        : "{$pfad}: Kopf und Fuß da, kein Katalog — {$zweck}");
 }
 
 // ---------------------------------------------------------------------------
