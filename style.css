@@ -2212,7 +2212,6 @@ p.is-style-kennzahl {
    wiederholen statt seine Regel zu erweitern, ist Absicht: seine Regel
    gehoert Woos Block, diese den Flaechen des Plugins, und ein
    Woo-Update, das die eine bricht, soll nicht die andere mitnehmen. */
-.lotzwoo-headerareas__toggle,
 .lotzwoo-headerareas__favorites {
   position: relative;
   display: flex;
@@ -2229,8 +2228,6 @@ p.is-style-kennzahl {
   text-decoration: none;
 }
 
-.lotzwoo-headerareas__toggle:hover,
-.lotzwoo-headerareas__toggle:focus-visible,
 .lotzwoo-headerareas__favorites:hover,
 .lotzwoo-headerareas__favorites:focus-visible,
 .lotzwoo-headerareas__customer:hover,
@@ -2243,7 +2240,6 @@ p.is-style-kennzahl {
 /* Dieselbe Fokusanzeige wie bei Konto und Warenkorb weiter oben: die
    Flaeche aus `ink-100` traegt sie nicht (1.17:1 gegen `surface`, WCAG
    1.4.11 verlangt 3:1), also ein eigener Ring in der Markenfarbe. */
-.lotzwoo-headerareas__toggle:focus-visible,
 .lotzwoo-headerareas__favorites:focus-visible,
 .lotzwoo-headerareas__customer:focus-visible {
   outline: 2px solid var(--wp--preset--color--brand-500);
@@ -2321,135 +2317,12 @@ p.is-style-kennzahl {
   white-space: nowrap;
 }
 
-/* Die Schnellsuche. Das Feld haengt als Klappe unter dem Knopf und
-   nicht in der Zeile: die Kopfzeile ist bei 390px bereits mit Logo,
-   Menue, Konto und Warenkorb belegt, und ein Eingabefeld, das dort
-   dauerhaft mitfaehrt, drueckt alles andere aus dem Bild. */
-/* Die Klappe haengt an der **Kopfzeile**, nicht am Suchknopf — und das
-   ist keine Feinheit, sondern gemessen. Mit `.lotzwoo-headerareas__search`
-   als Bezug stand ihre rechte Kante bei 390px auf x=52, ihre linke also
-   bei -306: die Klappe hing zur Haelfte links aus dem Bild. Der Knopf ist
-   36px breit, die Klappe 343 — ein Bezug, der schmaler ist als das, was
-   an ihm haengt, kann nur schiefgehen.
-
-   `.lotzwoo-header-row` ist genau die Inhaltsbreite. Rechtsbuendig daran
-   ausgerichtet steht die Klappe bei jeder Breite im Bild, und `top: 100%`
-   setzt sie unter die Kopfzeile statt unter den Knopf — auch dann, wenn
-   die Zeile umbricht. */
+/* AP-48: hier stand die Schnellsuche des Kopfes und die Begruendung, warum
+   ihre Klappe an der Kopfzeile hing und nicht am Suchknopf. Beides ist mit ihr
+   entfallen. `position: relative` bleibt — die Zeile ist weiter der Bezug fuer
+   alles, was unter ihr aufklappt. */
 .lotzwoo-header-row {
   position: relative;
-}
-
-.lotzwoo-headerareas__field {
-  position: absolute;
-  /* `border-box`, sonst kommen Innenabstand und Rahmen zu `100%` hinzu und
-     die Klappe steht bei 390px genau um diese 18px links aus dem Bild. */
-  box-sizing: border-box;
-  inset-inline-end: 0;
-  top: calc(100% + 6px);
-  z-index: 30;
-  width: min(28rem, 100%);
-  padding: var(--wp--preset--spacing--20);
-  border: 1px solid var(--wp--preset--color--ink-200);
-  border-radius: 10px;
-  background: var(--wp--preset--color--white);
-  box-shadow: 0 8px 24px rgba(27, 25, 22, 0.12);
-}
-
-.lotzwoo-headerareas__input {
-  width: 100%;
-  padding: 8px 10px;
-  border: 1px solid var(--wp--preset--color--ink-300);
-  border-radius: 8px;
-  background: var(--wp--preset--color--white);
-  color: var(--wp--preset--color--ink-900);
-  font-size: var(--wp--preset--font-size--md);
-}
-
-.lotzwoo-headerareas__input:focus-visible {
-  outline: 2px solid var(--wp--preset--color--brand-500);
-  outline-offset: 1px;
-}
-
-/* Die Trefferliste. Haarlinien zwischen den Zeilen statt Kaesten um sie
-   herum, ADR 004. Die Hoehe ist gedeckelt, damit sieben Treffer bei
-   390px nicht ueber den Bildschirmrand hinauswachsen. */
-.lotzwoo-headerareas__results {
-  max-height: min(60vh, 24rem);
-  margin-top: var(--wp--preset--spacing--20);
-  overflow-y: auto;
-}
-
-.lotzwoo-headerareas__hit {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--wp--preset--spacing--20);
-  padding: 8px 4px;
-  border-top: 1px solid var(--wp--preset--color--ink-200);
-  color: var(--wp--preset--color--ink-900);
-  text-decoration: none;
-}
-
-.lotzwoo-headerareas__hit:first-child {
-  border-top: 0;
-}
-
-.lotzwoo-headerareas__hit:hover,
-.lotzwoo-headerareas__hit:focus-visible,
-.lotzwoo-headerareas__hit.is-active {
-  background: var(--wp--preset--color--ink-100);
-  outline: none;
-  text-decoration: none;
-}
-
-.lotzwoo-headerareas__hit-main {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-
-.lotzwoo-headerareas__hit-name {
-  font-size: var(--wp--preset--font-size--sm);
-  font-weight: 600;
-}
-
-.lotzwoo-headerareas__hit-meta {
-  font-size: var(--wp--preset--font-size--xs);
-  color: var(--wp--preset--color--ink-500);
-}
-
-.lotzwoo-headerareas__hit-side {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 2px;
-  flex: none;
-}
-
-.lotzwoo-headerareas__hit-price {
-  font-size: var(--wp--preset--font-size--sm);
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-}
-
-.lotzwoo-headerareas__hit-note {
-  font-size: var(--wp--preset--font-size--xs);
-  color: var(--wp--preset--color--ink-500);
-}
-
-/* Ein Treffer, der nicht bestellbar ist, verschwindet nicht — er steht
-   leiser da und nennt den Grund an der Stelle des Steuerhinweises.
-   Dieselbe Wahl wie in der Liste des Sortiments: ein Artikel, der
-   fehlt, ist eine Frage; einer mit Grund ist eine Antwort. */
-.lotzwoo-headerareas__hit.is-blocked .lotzwoo-headerareas__hit-name,
-.lotzwoo-headerareas__hit.is-blocked .lotzwoo-headerareas__hit-price {
-  color: var(--wp--preset--color--ink-500);
-}
-
-.lotzwoo-headerareas__hit.is-blocked .lotzwoo-headerareas__hit-note {
-  color: var(--wp--preset--color--err-700);
 }
 
 /* Der Weg zu allem, was die Klappe nicht fasst. Er steht unter den
