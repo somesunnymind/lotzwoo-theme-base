@@ -2601,6 +2601,20 @@ a.lotzwoo-headerphone:focus-visible {
   position: relative;
 }
 
+/* **`hidden` allein versteckt hier nichts, und das ist gemessen.** Das
+   Attribut wirkt ueber eine Regel des Browsers (`[hidden] { display: none }`),
+   und jede Autorenregel schlaegt sie — der Kern setzt auf
+   `.wp-block-navigation-item` ein `display: flex`. Ergebnis am 2026-08-17 bei
+   1440 px: „mehr" stand da, mit leerem Untermenue, obwohl alle sechs Punkte in
+   der Leiste waren. Eine Tuer in einen leeren Raum, und sie sah aus wie eine
+   Regel, die greift.
+
+   Derselbe Fehler wie beim Untermenue eine Regel tiefer, nur andersherum
+   gefunden: dort war er vorsorglich verhindert, hier hat er zugeschlagen. */
+.lotzwoo-mehr[hidden] {
+  display: none !important;
+}
+
 .lotzwoo-mehr__knopf {
   display: flex;
   align-items: center;
