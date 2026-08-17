@@ -2861,10 +2861,17 @@ a.lotzwoo-headerphone:focus-visible {
    dieselbe Geste gibt.
    ------------------------------------------------------------------- */
 
+/* **Der Dialog uebernimmt den Rhythmus der Kopfzeile**, damit beim Oeffnen
+   nichts springt: dort steht die Marke bei x = 16 und y = 17, in einer 40 px
+   hohen Zeile, die bei y = 12 beginnt. Also 16 px seitlich (`spacing--40`,
+   derselbe Wert, den der Inhaltscontainer des Kopfs nimmt) und 12 px oben —
+   die Marke sitzt dann in der Zeile mit dem 40 px hohen Schliessen-Knopf
+   wieder auf derselben Hoehe wie zuvor. Gemessen, beide Zustaende. */
 .wp-block-navigation__responsive-container.is-menu-open
   .wp-block-navigation__responsive-dialog {
-  padding-inline: var(--wp--preset--spacing--30);
-  padding-block-end: var(--wp--preset--spacing--30);
+  padding-inline: var(--wp--preset--spacing--40);
+  padding-block-start: var(--wp--preset--spacing--30);
+  padding-block-end: var(--wp--preset--spacing--40);
 }
 
 /* Die Liste traegt die volle Breite, damit die Eintraege es koennen.
@@ -2962,13 +2969,48 @@ header .wp-block-navigation__responsive-container.is-menu-open
   border-radius: 8px;
 }
 
-/* Und er richtet sich an derselben Kante aus wie die Eintraege darunter. Der
-   Kern setzt ihn buendig in die Ecke; mit dem Innenabstand des Dialogs stand
-   er als einziges Element 12 px weiter rechts als alles andere — gemessen:
-   Eintraege enden bei x = 378, der Knopf bei 390. */
-.wp-block-navigation__responsive-container.is-menu-open
+/* **Und er kommt zurueck in den Fluss.** Der Kern heftet ihn mit `position:
+   absolute` in die obere rechte Ecke des Overlays — deshalb ignorierte er
+   sowohl den Innenabstand des Dialogs als auch dessen Flex-Zeile: gemessen
+   sass er auf y = 0, waehrend die Marke daneben auf y = 12 stand. Erst als
+   `static` wird er ein Geschwister der Marke und steht wirklich in einer Zeile
+   mit ihr.
+
+   Damit ist auch der Aussenrand entfallen, den er vorher brauchte, um an
+   derselben Kante zu enden wie die Eintraege — der Innenabstand des Dialogs
+   traegt ihn jetzt fuer beide. */
+header .wp-block-navigation__responsive-container.is-menu-open
   .wp-block-navigation__responsive-container-close {
-  margin-inline-end: var(--wp--preset--spacing--30);
+  position: static;
+}
+
+/* --- Die Marke im Overlay ------------------------------------------
+
+   Logo und Site-Titel wandern beim Oeffnen hierher (`kopfleiste.js`), weil
+   der Titel der Weg ins Sortiment ist und das Overlay ihn sonst zudeckte:
+   sechs Menuepunkte, eine Rufnummer, und kein Weg zurueck in den Katalog
+   ausser ueber das Schliessen.
+
+   Sie stehen links, der Schliessen-Knopf rechts, beide in **einer** Zeile.
+   Der Dialog wird dafuer zur umbrechenden Zeile: Marke und Knopf teilen sich
+   die erste, die Punkteliste bekommt mit `flex-basis: 100%` die zweite. */
+header .wp-block-navigation__responsive-container.is-menu-open
+  .wp-block-navigation__responsive-dialog {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--wp--preset--spacing--20);
+}
+
+header .wp-block-navigation__responsive-container.is-menu-open
+  .lotzwoo-header-marke {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+header .wp-block-navigation__responsive-container.is-menu-open
+  .wp-block-navigation__responsive-container-content {
+  flex: 0 0 100%;
 }
 
 .wp-block-navigation__responsive-container-close:hover {
@@ -3055,7 +3097,11 @@ header .wp-block-navigation__responsive-container.is-menu-open
   z-index: 40;
   min-width: 12rem;
   margin: 0;
-  padding: var(--wp--preset--spacing--20);
+  /* Kein Innenabstand: die Eintraege gehen bis an den Rand. Was die runden
+     Ecken aussen haelt, ist `overflow: hidden` — die Flaeche eines Eintrags
+     wird an ihnen beschnitten, statt sie zu ueberdecken. */
+  padding: 0;
+  overflow: hidden;
   border: 1px solid var(--wp--preset--color--ink-200);
   border-radius: 8px;
   background: var(--wp--preset--color--surface);
@@ -3071,9 +3117,40 @@ header .wp-block-navigation__responsive-container.is-menu-open
   display: none;
 }
 
+/* Dieselbe Handschrift wie im Overlay: ein Eintrag ist so gross wie eine
+   Trefferflaeche und nimmt die **ganze** Breite des Kastens. Damit seine
+   Flaeche die runden Ecken nicht ueberdeckt, hat der Kasten keinen
+   Innenabstand mehr und clippt stattdessen (`overflow: hidden`, oben).
+
+   **Und deshalb liegt der Fokusring hier nach innen.** Ein clippender
+   Vorfahre schneidet einen `outline` ab; das steht weiter oben schon einmal
+   fuer den Schliessen-Knopf des Overlays, dreimal unabhaengig gemessen. Wer
+   `overflow` setzt, schuldet dem Ring einen negativen Versatz. */
 .lotzwoo-mehr__menue > li {
   display: block;
-  padding: 6px 4px;
+  width: 100%;
+}
+
+.lotzwoo-mehr__menue > li > * {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 44px;
+  padding-inline: 12px;
+  text-decoration: none;
+}
+
+.lotzwoo-mehr__menue > li > *:hover,
+.lotzwoo-mehr__menue > li > *:focus-visible {
+  background: var(--wp--preset--color--ink-100);
+  color: var(--wp--preset--color--ink-900);
+  text-decoration: none;
+}
+
+.lotzwoo-mehr__menue > li > *:focus-visible {
+  outline: 2px solid var(--wp--preset--color--brand-500);
+  outline-offset: -2px;
 }
 
 /* Die Nummer im „mehr" darf ausschreiben — hier ist der Platz da, den sie

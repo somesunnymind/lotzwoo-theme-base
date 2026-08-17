@@ -379,6 +379,62 @@
 		schliessen(false);
 	});
 
+	/* --- Die Marke wandert mit ins Overlay -----------------------------
+	 *
+	 * **Der Weg ins Sortiment fehlte dort.** Der Site-Titel ist er — er zeigt
+	 * auf die Startseite, und die *ist* das Sortiment. Solange das Overlay
+	 * offen war, deckte es den Kopf vollstaendig ab: sechs Menuepunkte, eine
+	 * Rufnummer, und kein Weg zurueck in den Katalog ausser ueber das
+	 * Schliessen.
+	 *
+	 * Verschoben, nicht kopiert — dieselbe Regel wie bei den Menuepunkten und
+	 * der Nummer. Eine zweite Fassung im Dokument waere ein zweiter Knoten mit
+	 * demselben Ziel, und `kopfflaechen.mjs` zaehlt solche Dinge.
+	 *
+	 * Der Umschalter ist nicht ein eigener Klick-Zuhoerer auf dem Oeffner,
+	 * sondern die Klasse, die der Kern selbst setzt (`is-menu-open`, ueber
+	 * seine Interaktivitaets-API). Wer stattdessen den Knopf abhoert, verpasst
+	 * jedes Schliessen per Escape und jedes, das der Kern von sich aus macht.
+	 */
+	var behaelter = document.querySelector('.wp-block-navigation__responsive-container');
+	var marke = document.querySelector('.lotzwoo-header-marke');
+	var markeHeimat = marke ? marke.parentNode : null;
+	var markeNachbar = marke ? marke.nextSibling : null;
+
+	function markeUmhaengen(hinein) {
+		if (!behaelter || !marke || !markeHeimat) {
+			return;
+		}
+
+		var dialog = behaelter.querySelector('.wp-block-navigation__responsive-dialog');
+		var knopf = behaelter.querySelector('.wp-block-navigation__responsive-container-close');
+
+		if (hinein && dialog && knopf) {
+			// **Vor** den Schliessen-Knopf: er steht im Dialog an erster
+			// Stelle, und die Marke gehoert links neben ihn. Das Stylesheet
+			// legt beide in eine Zeile.
+			dialog.insertBefore(marke, knopf);
+
+			return;
+		}
+
+		if (!hinein && marke.parentNode !== markeHeimat) {
+			// An dieselbe Stelle zurueck, nicht ans Ende: rechts von der Marke
+			// steht die Navigation, und `insertBefore(…, null)` haenge sie
+			// dahinter.
+			markeHeimat.insertBefore(marke, markeNachbar);
+		}
+	}
+
+	if (behaelter && marke) {
+		var beobachter = new MutationObserver(function () {
+			markeUmhaengen(behaelter.classList.contains('is-menu-open'));
+		});
+
+		beobachter.observe(behaelter, { attributes: true, attributeFilter: ['class'] });
+		markeUmhaengen(behaelter.classList.contains('is-menu-open'));
+	}
+
 	var angemeldet = false;
 
 	function anstossen() {
