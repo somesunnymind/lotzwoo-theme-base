@@ -116,12 +116,14 @@
 	/**
 	 * Ab wann der Hamburger übernimmt.
 	 *
-	 * Drei: bei zweien hat die Leiste aufgehört, eine Leiste zu sein.
-	 * Entscheidung des Auftraggebers vom 2026-08-17. Die Zahl steht hier und
-	 * nicht als Breite im Stylesheet — die Menüpunkte stehen im Kindtheme und
-	 * sind vom Kunden änderbar, eine Breite wäre morgen falsch.
+	 * Zwei: „mehr" bleibt einen Menüpunkt länger stehen, als es zuerst gebaut
+	 * war — erst wenn nur noch **einer** ausgeschrieben bliebe, übernimmt der
+	 * Hamburger. Entscheidung des Auftraggebers vom 2026-08-17, nachgeschärft
+	 * am selben Abend. Die Zahl steht hier und nicht als Breite im Stylesheet
+	 * — die Menüpunkte stehen im Kindtheme und sind vom Kunden änderbar, eine
+	 * Breite wäre morgen falsch.
 	 */
-	var MINDESTENS_IN_DER_LEISTE = 3;
+	var MINDESTENS_IN_DER_LEISTE = 2;
 
 	var BURGER = 'lotzwoo-kopf--burger';
 	var MESSEN = 'lotzwoo-misst';
