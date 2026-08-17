@@ -112,6 +112,35 @@ add_action('wp_enqueue_scripts', static function (): void {
 });
 
 /**
+ * Das Skript, das die Kopfzeile ihre Punkte verteilen lässt (AP-53).
+ *
+ * Im Fußbereich und ohne Abhängigkeiten: es liest den Kopf, den es vorfindet,
+ * und braucht weder `wp-element` noch jQuery. Version aus der Dateizeit, aus
+ * demselben Grund wie beim Stylesheet — ein Theme wird weit häufiger bearbeitet
+ * als veröffentlicht.
+ *
+ * **Kein Riegel auf eine Seitenart.** Der Kopf steht auf jeder Seite, und die
+ * Bestellannahme darin ausdrücklich auch auf Inhaltsseiten und für Abgemeldete.
+ * Ein `is_singular()` davor wäre genau die Ausnahme, die dieser Auftrag im
+ * Plugin herausgenommen hat, eine Etage höher wieder eingebaut.
+ */
+add_action('wp_enqueue_scripts', static function (): void {
+    $skript = get_template_directory() . '/assets/js/kopfleiste.js';
+
+    if (!is_readable($skript)) {
+        return;
+    }
+
+    wp_enqueue_script(
+        'lotzwoo-kopfleiste',
+        get_template_directory_uri() . '/assets/js/kopfleiste.js',
+        [],
+        (string) filemtime($skript),
+        true
+    );
+});
+
+/**
  * Die zugewiesene Seitenvorlage auf den `<body>` schreiben.
  *
  * Block-Themes vergeben für eine `customTemplates`-Vorlage von sich aus keine
@@ -223,51 +252,71 @@ add_filter('render_block_woocommerce/customer-account', static function (string 
 }, 10, 1);
 
 /**
- * Die Menütaste behält ihr Wort (AP-48, Punkt 5).
+ * `mehr` — der Menüpunkt, hinter dem die Menüpunkte stehen (AP-53).
  *
- * **Was Woo/WordPress hier von allein tut, und warum das nicht reicht.** Der
- * Öffner des `core/navigation`-Blocks
- * (`.wp-block-navigation__responsive-container-open`) enthält ausschließlich
- * ein `<svg>`. Unterhalb der Schwelle steht damit ein Symbol ohne Wort da, und
- * ein Symbol allein sagt nicht, was dahinterliegt — genau die Auskunft, die im
- * Kopf am knappsten ist.
+ * **Was hier vorher stand und warum es weg ist.** Bis zum 2026-08-17 hängte
+ * ein Filter an dieser Stelle das Wort „Menü" an Woos Öffner (AP-48, Punkt 5).
+ * Der Öffner kommt nicht mehr vor: `overlayMenu` steht auf `never`, und `mehr`
+ * ersetzt die Menütaste bis 320 px hinunter — **Entscheidung des
+ * Auftraggebers vom 2026-08-17**. Ein Filter auf ein Element, das nie mehr
+ * gerendert wird, ist kein harmloser Rest; er ist die Zeile, die beim nächsten
+ * Lesen fünf Minuten kostet.
  *
- * **Warum ein Filter und kein `::after { content: "Menü" }`.** Text aus CSS ist
- * nicht übersetzbar, steht in keinem Dokument und wird von Vorlesewerkzeugen
- * uneinheitlich behandelt. Der Weg über den Filter legt das Wort **ins
- * Markup**, wo es hingehört, und lässt es durch `__()` laufen.
+ * **Warum der Kern das nicht kann.** `core/navigation` kennt genau zweierlei:
+ * ausgeschriebene Leiste, oder ganze Leiste hinter einer Overlay-Taste. Ein
+ * „Priority+"-Muster — so viele Punkte wie passen, der Rest hinter einem
+ * Eintrag — gibt es dort nicht. Also Eigenbau.
  *
- * Angefasst wird nur der Öffner, und nur wenn er noch kein Wort trägt —
- * derselbe Vorsatz wie beim Symbol-Tausch darüber: ein Blockfilter, der mehr
+ * **Warum das Markup hier entsteht und nicht im Skript.** Aus demselben Grund,
+ * aus dem das Wort „Menü" hier entstand statt in einem `::after`: Text aus CSS
+ * oder aus einer JavaScript-Zeichenkette ist nicht übersetzbar. Der Weg über
+ * den Filter legt das Wort ins Markup und lässt es durch `__()` laufen. Das
+ * Skript verteilt nur noch, es erfindet nichts.
+ *
+ * **`hidden` von Anfang an, und das ist die ehrliche Vorgabe.** Ohne
+ * JavaScript ist nichts ausgelagert, und ein leerer Eintrag „mehr" wäre eine
+ * Tür in einen leeren Raum. Das Skript nimmt das Attribut ab, sobald es etwas
+ * hineingehängt hat.
+ *
+ * Angefasst wird nur der Abschluss der Punkteliste — ein Blockfilter, der mehr
  * anfasst als nötig, bricht beim nächsten Kern-Update an einer Stelle, die
- * niemand mit ihm in Verbindung bringt.
+ * niemand mit ihm in Verbindung bringt. Das **letzte** `</ul>` ist der
+ * Abschluss des äußeren Behälters, auch wenn eines Tages Untermenüs
+ * dazukommen: die schließen vor ihm.
  *
- * Die Schwelle selbst (880 px statt Woos 600) und die Trefferfläche von
- * mindestens 40 × 40 px stehen im `style.css`, bei den Verdichtungsstufen.
+ * Lucide `chevron-down` (https://lucide.dev), ISC-Lizenz — dieselbe Familie
+ * und dieselbe Strichstärke wie die Nachbarsymbole im Kopf.
  */
 add_filter('render_block_core/navigation', static function (string $content): string {
-    if (!str_contains($content, 'wp-block-navigation__responsive-container-open')) {
+    if (!str_contains($content, 'wp-block-navigation__container')) {
         return $content;
     }
 
-    if (str_contains($content, 'lotzwoo-navi-wort')) {
+    if (str_contains($content, 'lotzwoo-mehr')) {
         return $content;
     }
 
-    $wort = '<span class="lotzwoo-navi-wort">'
-        . esc_html__('Menü', 'lotzwoo-theme-base')
-        . '</span>';
+    $schluss = strrpos($content, '</ul>');
 
-    // Vor das schließende Tag des Öffners, also hinter das Symbol. Das Muster
-    // greift den Öffner samt Inhalt und hängt das Wort ans Ende seines Rumpfs.
-    $ersetzt = preg_replace_callback(
-        '#(<button[^>]*wp-block-navigation__responsive-container-open[^>]*>)(.*?)(</button>)#is',
-        static fn (array $t): string => $t[1] . $t[2] . $wort . $t[3],
-        $content,
-        1
-    );
+    if ($schluss === false) {
+        return $content;
+    }
 
-    return is_string($ersetzt) ? $ersetzt : $content;
+    $winkel = '<svg class="lotzwoo-mehr__winkel" width="16" height="16" viewBox="0 0 24 24"'
+        . ' fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"'
+        . ' stroke-linejoin="round" aria-hidden="true" focusable="false">'
+        . '<path d="m6 9 6 6 6-6"/></svg>';
+
+    $eintrag = '<li class="wp-block-navigation-item lotzwoo-mehr" data-lotzwoo-mehr hidden>'
+        . '<button type="button" class="lotzwoo-mehr__knopf"'
+        . ' aria-expanded="false" aria-controls="lotzwoo-mehr-menue">'
+        . '<span class="lotzwoo-mehr__wort">' . esc_html__('mehr', 'lotzwoo-theme-base') . '</span>'
+        . $winkel
+        . '</button>'
+        . '<ul class="lotzwoo-mehr__menue" id="lotzwoo-mehr-menue" hidden></ul>'
+        . '</li>';
+
+    return substr($content, 0, $schluss) . $eintrag . substr($content, $schluss);
 }, 10, 1);
 
 /**

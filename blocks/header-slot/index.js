@@ -35,7 +35,12 @@
 		supports: {
 			html: false,
 			reusable: false,
-			multiple: false,
+			// `true` seit AP-53, und `block.json` sagte es die ganze Zeit
+			// schon: der Kopf trägt seit der mittleren Bahn **zwei** dieser
+			// Flächen — den Chip rechts und die Bestellannahme in der Mitte.
+			// Mit `false` hätte der Website-Editor die zweite als Fehler
+			// markiert, während der Server sie klaglos rendert.
+			multiple: true,
 			interactivity: false,
 		},
 

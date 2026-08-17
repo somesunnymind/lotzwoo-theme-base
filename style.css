@@ -1787,6 +1787,13 @@ p.is-style-kennzahl {
   .lotzwoo-accordion > details > summary::after {
     transition: none;
   }
+
+  /* Derselbe Satz fuer den Winkel am „mehr" (AP-53): das Untermenue klappt
+     weiterhin auf — das ist ein Zustandswechsel, keine Animation. Nur die
+     Drehung entfaellt. */
+  .lotzwoo-mehr__winkel {
+    transition: none;
+  }
 }
 
 /* Die Klappe reagiert auf den Zeiger mit Raum, nicht nur mit Flaeche. Der
@@ -2479,35 +2486,222 @@ main:has(> .lotzwoo-contextbar) {
   min-height: 40px;
 }
 
-/* --- Stufe 1040 --------------------------------------------------- */
-@media (max-width: 1040px) {
-  /* `.wp-block-navigation` davor, weil der Kern die Menuepunkte mit zwei
-     Klassen adressiert und eine einzelne Klasse dagegen verliert. Gemessen am
-     2026-08-17: mit `.lotzwoo-navi--sekundaer` allein standen „Ueber uns" und
-     „Aktuelles" bei 1040 und bei 1000 px unveraendert da und verschwanden erst
-     auf der 880er-Stufe — mit der ganzen Menueleiste. Die Stufe war gebaut und
-     tot, und **das sieht man einer Regel nicht an**; man misst es. */
-  .wp-block-navigation .lotzwoo-navi--sekundaer {
-    display: none;
-  }
+/* =====================================================================
+   Drei Bahnen, und kein Punkt fliegt raus (AP-53)
+
+   Die Zeile hatte zwei Kinder und `flex-wrap: wrap`: links Logo, Titel
+   und Navigation, rechts die Aktionsgruppe. Ein drittes Kind dazwischen
+   klebt an der linken Gruppe — `space-between` verteilt Zwischenraeume,
+   es zentriert nichts. Die mittlere Bahn bekommt deshalb `flex: 1` und
+   zentriert selbst: die Nummer steht damit in der Mitte der **Zeile** und
+   nicht in der Mitte des Rests.
+
+   **`nowrap`, und die Warnung dazu ist teuer bezahlt.** Ein Ueberlaufmenue
+   und eine umbrechende Zeile arbeiten gegeneinander; die Zeile muss also
+   auf `nowrap`. Genau diese Umstellung hat am 2026-08-17 eine Etage
+   tiefer die Leiste bei 390 px Fenster auf 452 px hinausgeschoben — vier
+   Pruefungen meldeten es. Nachgeben muessen die **Inhalte**: `min-width: 0`
+   und Auslassungspunkte. Deshalb steht beides hier, und nicht nur das
+   `nowrap`.
+   ===================================================================== */
+
+/* Ohne das schrumpft kein Flex-Kind je unter seinen Inhalt — und dann
+   laeuft die Zeile waagrecht ueber, statt zu verdichten. */
+.lotzwoo-header-row > * {
+  min-width: 0;
 }
 
-/* --- Stufe 880: die Menueleiste wird eine Taste ---------------------
-
-   Woos eigene Schwelle liegt bei 600 px. Zwischen 600 und 880 kehren die
-   beiden Regeln des Kerns hier um: der Oeffner kommt zurueck, die
-   ausgeschriebene Leiste geht. Der geoeffnete Zustand (`is-menu-open`)
-   ist davon unberuehrt — den regelt der Kern ausserhalb seiner
-   Medienbedingung, und daran wird nicht gedreht. */
-@media (min-width: 600px) and (max-width: 879.98px) {
-  .lotzwoo-header-row .wp-block-navigation__responsive-container-open:not(.always-shown) {
-    display: flex;
-  }
-
-  .lotzwoo-header-row .wp-block-navigation__responsive-container:not(.hidden-by-default):not(.is-menu-open) {
-    display: none;
-  }
+/* Die mittlere Bahn. `flex: 1 1 0` und nicht `auto`: nur mit Basis 0
+   teilen sich die Bahn und der freie Platz so auf, dass die Mitte der
+   Zeile auch die Mitte bleibt, wenn links und rechts verschieden breit
+   sind. */
+.lotzwoo-header-mitte {
+  flex: 1 1 0;
+  justify-content: center;
+  min-width: 0;
 }
+
+/* **Leeres Feld heisst nichts im Dokument.** Das Plugin gibt bei
+   ungepflegter Nummer die leere Zeichenkette zurueck — der Gruppenkasten
+   des Themes bliebe aber stehen und waere genau der leere Kasten, den die
+   leere Zeichenkette vermeiden sollte, eine Etage hoeher: mit `blockGap`
+   verschoebe er Konto-Chip und Warenkorb um eine Luecke.
+
+   Zwei Regeln und nicht eine, und sie stehen getrennt: `:empty` verliert,
+   sobald zwischen den Tags ein Zeilenumbruch steht, `:has()` nicht — und
+   ein Browser ohne `:has()` wuerfe eine gemeinsame Regel ganz weg. */
+.lotzwoo-header-mitte:empty {
+  display: none;
+}
+
+.lotzwoo-header-mitte:not(:has(*)) {
+  display: none;
+}
+
+/* Die Bestellannahme selbst. Sie gibt nach, statt die Zeile zu sprengen —
+   und wenn sie ganz weichen muss, holt das Skript sie ins „mehr". */
+.lotzwoo-headerphone {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--wp--preset--color--ink-900);
+  font-size: var(--wp--preset--font-size--sm);
+  font-weight: 500;
+  text-decoration: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+a.lotzwoo-headerphone:hover,
+a.lotzwoo-headerphone:focus-visible {
+  color: var(--wp--preset--color--brand-500);
+}
+
+a.lotzwoo-headerphone:focus-visible {
+  outline: 2px solid var(--wp--preset--color--brand-500);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* --- Der Messzustand ------------------------------------------------
+
+   **Ein Kasten, der nachgibt, meldet nie einen Ueberlauf.** Genau das ist
+   der Sinn der drei Regeln darueber — und genau deshalb kann das Skript
+   im Normalzustand nicht messen, ob die Punkte passen: `min-width: 0` und
+   `flex-shrink` sorgen dafuer, dass immer alles „passt", nur eben
+   abgeschnitten.
+
+   Fuer die Dauer **eines** Animationsbildes nimmt diese Klasse dem Kopf
+   das Nachgeben ab. Dann steht jedes Kind auf seiner natuerlichen Breite,
+   und die Frage „passt das?" hat eine Antwort. Gemalt wird zwischendurch
+   nicht — das Skript setzt, misst und raeumt im selben Durchlauf.
+
+   `!important`, und das ist hier kein Notnagel: die Regeln, die
+   ueberstimmt werden, sind die zwei Zeilen darueber und WordPress' eigene
+   Layout-Ausgaben. Ein Messzustand, der von der naechsten Layout-Regel
+   ausgehebelt wird, misst still das Falsche. */
+.lotzwoo-header-row.lotzwoo-misst,
+.lotzwoo-header-row.lotzwoo-misst * {
+  flex-grow: 0 !important;
+  flex-shrink: 0 !important;
+  flex-basis: auto !important;
+  min-width: auto !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+}
+
+/* --- „mehr" ---------------------------------------------------------
+
+   Der Kern kennt kein Priority+. `core/navigation` kann genau zweierlei:
+   ausgeschriebene Leiste, oder ganze Leiste hinter einer Overlay-Taste.
+   Das hier ist Eigenbau — Markup aus `functions.php`, Verteilung aus
+   `assets/js/kopfleiste.js`, Aussehen von hier.
+
+   Trefferflaeche mindestens 40 x 40 px, wie beim Oeffner, den es abloest. */
+.lotzwoo-mehr {
+  position: relative;
+}
+
+.lotzwoo-mehr__knopf {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 40px;
+  min-height: 40px;
+  padding: 4px 8px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  line-height: 1;
+}
+
+.lotzwoo-mehr__knopf:hover {
+  color: var(--wp--preset--color--brand-500);
+}
+
+.lotzwoo-mehr__knopf:focus-visible {
+  background: var(--wp--preset--color--ink-100);
+  color: var(--wp--preset--color--ink-900);
+  outline: 2px solid var(--wp--preset--color--brand-500);
+  outline-offset: 2px;
+}
+
+/* Der Winkel dreht sich beim Oeffnen. Er sagt damit dasselbe wie
+   `aria-expanded`, nur fuer die Augen. */
+.lotzwoo-mehr__winkel {
+  transition: transform 0.2s;
+}
+
+.lotzwoo-mehr__knopf[aria-expanded="true"] .lotzwoo-mehr__winkel {
+  transform: rotate(180deg);
+}
+
+.lotzwoo-mehr__menue {
+  position: absolute;
+  inset-block-start: calc(100% + 4px);
+  inset-inline-end: 0;
+  z-index: 40;
+  min-width: 12rem;
+  margin: 0;
+  padding: var(--wp--preset--spacing--20);
+  border: 1px solid var(--wp--preset--color--ink-200);
+  border-radius: 8px;
+  background: var(--wp--preset--color--surface);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  list-style: none;
+}
+
+/* Ausdruecklich, weil die Regel darueber `display` nicht setzt und ein
+   Reset des Kerns es jederzeit tun koennte. Ein Untermenue, das trotz
+   `hidden` sichtbar bleibt, ist die Sorte Fehler, die nur auf einer
+   fremden Installation auftritt. */
+.lotzwoo-mehr__menue[hidden] {
+  display: none;
+}
+
+.lotzwoo-mehr__menue > li {
+  display: block;
+  padding: 6px 4px;
+}
+
+/* Die Nummer im „mehr" darf ausschreiben — hier ist der Platz da, den sie
+   in der Zeile nicht hatte. */
+.lotzwoo-mehr__telefon .lotzwoo-headerphone {
+  overflow: visible;
+  text-overflow: clip;
+}
+
+/* --- Stufe 1040: zurueckgebaut (AP-53) -----------------------------
+
+   Hier stand `display: none` auf `.lotzwoo-navi--sekundaer` — und das war
+   genau das, was AP-53 abstellt: **zwei Menuepunkte flogen raus**, und
+   niemand kam mehr an sie heran. „Ueber uns" und „Aktuelles" waren ab
+   1040 px nicht verdichtet, sondern weg.
+
+   Die Klasse bleibt, die Regel geht. Aus einer Ausblendung wird eine
+   **Rangordnung**: was `.lotzwoo-navi--sekundaer` traegt, wandert zuerst
+   ins „mehr" (`assets/js/kopfleiste.js` liest sie). Die redaktionelle
+   Entscheidung dahinter bleibt damit erhalten und bekommt eine bessere
+   Wirkung als vorher — erreichbar statt fort.
+
+   Entscheidung des Auftraggebers vom 2026-08-17.
+   ------------------------------------------------------------------- */
+
+/* --- Stufe 880: zurueckgebaut (AP-53) ------------------------------
+
+   Hier kehrten zwischen 600 und 880 px die beiden Regeln des Kerns um:
+   der Oeffner kam zurueck, die ausgeschriebene Leiste ging. **„mehr"
+   ersetzt die Menuetaste bis 320 px hinunter** — Entscheidung des
+   Auftraggebers vom 2026-08-17 —, es gibt unterhalb keiner Breite zwei
+   Menues nebeneinander. `overlayMenu` steht im Kindtheme auf `never`,
+   damit der Kern bei 600 px nicht seine eigene Meinung hat.
+
+   Was von der 880er-Stufe bleibt, steht gleich darunter: die
+   Beschriftungen ueber Ort und Termin. Die haben mit dem Menue nichts zu
+   tun und sind gemessen.
+   ------------------------------------------------------------------- */
 
 @media (max-width: 880px) {
   /* Hier trat bis zum 2026-08-17 die Preisklasse zurueck. Sie steht seither
@@ -2529,25 +2723,18 @@ main:has(> .lotzwoo-contextbar) {
   }
 }
 
-/* --- Die Menuetaste behaelt ihr Wort (Punkt 5) ----------------------
+/* --- Der Oeffner und sein Wort sind entfallen (AP-53) ---------------
 
-   Woos Oeffner rendert nur ein Symbol; das Wort haengt der Filter in
-   `functions.php` daneben. Trefferflaeche mindestens 40 x 40 px — und das
-   Wort bleibt bis 320 px hinunter stehen, denn ein Symbol allein sagt
-   nicht, was dahinterliegt. */
-.wp-block-navigation__responsive-container-open {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  min-width: 40px;
-  min-height: 40px;
-  padding: 4px 8px;
-}
+   Hier stand die Groesse von Woos Oeffner und die Schrift des Wortes
+   „Menue" daneben (AP-48, Punkt 5). Beides ist fort, weil der Oeffner
+   fort ist: `overlayMenu: "never"`. Der Filter, der das Wort anhing, ist
+   in `functions.php` durch den Filter ersetzt, der „mehr" baut — eine
+   Regel auf ein Element, das nie mehr gerendert wird, ist kein harmloser
+   Rest.
 
-.lotzwoo-navi-wort {
-  font-size: var(--wp--preset--font-size--sm);
-  line-height: 1;
-}
+   Die Trefferflaeche von mindestens 40 x 40 px ist **nicht** entfallen;
+   sie steht jetzt am Knopf „mehr", weiter unten.
+   ------------------------------------------------------------------- */
 
 /* --- Stufe 700: der Ort nimmt seine Kurzform ------------------------
 
