@@ -2529,6 +2529,26 @@ main:has(> .lotzwoo-contextbar) {
 /* Was der Chip abschneidet, ist der Firmenname — und der ist die Angabe, die
    sich am ehesten verkuerzen laesst, ohne dass die Auskunft verlorengeht.
    Vorgelesen wird er weiter vollstaendig. */
+/* **Ein Bedienelement gibt nicht nach — nachgeben ist Sache der Angaben.**
+   Dieselbe Regel, die eine Etage tiefer schon steht („Favoriten, Warenkorb und
+   Wechsler behalten ihre Groesse, ein halber Knopf ist keiner"), gilt hier fuer
+   das Menue: bei 390 px abgemeldet war der Knopf „mehr" auf 39 px gequetscht,
+   bei 40 px Mindestbreite — 34 px liefen aus seinem Kasten heraus und schoben
+   das Dokument um 15 px hinaus. Gemessen am 2026-08-17; angemeldet trat es
+   **nicht** auf, weil die Aktionsgruppe auf Inhaltsseiten leer ist und der
+   Platz dann reicht.
+
+   Was stattdessen nachgibt, steht daneben: der Seitentitel. Er ist die
+   laengste und die verzichtbarste Angabe der linken Gruppe. */
+.lotzwoo-header-row .wp-block-template-part {
+  flex-shrink: 0;
+}
+
+/* Und die Kehrseite derselben Regel: was schrumpfen **darf**, muss auch
+   abschneiden. Ein Flex-Kind mit `min-width: 0` wird schmaler als sein Text,
+   und der Text laeuft dann heraus — sichtbar nicht, messbar sehr wohl. Der
+   Anmeldelink lief so um 32 px ueber seinen Kasten hinaus. */
+.lotzwoo-header-actions .lotzwoo-headerareas__login,
 .lotzwoo-header-actions .lotzwoo-headerareas__customer-name {
   display: block;
   overflow: hidden;
