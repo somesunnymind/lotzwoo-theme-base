@@ -1896,6 +1896,30 @@ p.is-style-kennzahl {
    haette sonst eine Rinne zu viel. */
 .wp-site-blocks > .lotzwoo-contextbar {
   padding-inline: var(--wp--style--root--padding-left) var(--wp--style--root--padding-right);
+
+  /* Buendig unter dem Kopf, Fall A: als eigene Bahn ist die Leiste ein
+     Geschwister im Fluss von `wp-site-blocks` und bekommt dessen
+     Block-Abstand als `margin-block-start` — gemessen 24 px am Warenkorb.
+     Eine klebende Leiste, die im Ruhezustand 24 px unter dem Kopf schwebt,
+     sieht aus wie ein Element, das noch nicht angekommen ist. */
+  margin-block-start: 0;
+}
+
+/* Buendig unter dem Kopf, Fall B: im Sortiment steckt die Leiste in der
+   Inhaltsspalte des Kurzcodes, und `main` legt 24 px Rand plus 16 px Polster
+   darueber — gemessen 40 px zwischen Kopf-Unterkante (95) und
+   Leisten-Oberkante (135).
+
+   Genommen wird das Polster von `main` und nicht per negativem Rand von der
+   Leiste: ein negativer Rand von 40 px waere eine Zahl, die stillschweigend
+   falsch wird, sobald jemand am Abstandsraster dreht. `:has()` fragt
+   stattdessen nach der Tatsache — traegt diese Seite die Leiste, faengt sie
+   oben ohne Abstand an. Der Inhalt **unter** der Leiste behaelt seinen
+   eigenen; ihn traegt die Leiste selbst, nicht `main`. */
+main:has(> * .lotzwoo-contextbar),
+main:has(> .lotzwoo-contextbar) {
+  margin-block-start: 0;
+  padding-block-start: 0;
 }
 
 /* Die Zeile. `flex-wrap`, weil die Werte Kundendaten sind und jede Laenge
