@@ -2506,9 +2506,35 @@ main:has(> .lotzwoo-contextbar) {
    ===================================================================== */
 
 /* Ohne das schrumpft kein Flex-Kind je unter seinen Inhalt — und dann
-   laeuft die Zeile waagrecht ueber, statt zu verdichten. */
-.lotzwoo-header-row > * {
+   laeuft die Zeile waagrecht ueber, statt zu verdichten.
+
+   **Und es reicht nicht an den direkten Kindern**, was am 2026-08-17 gemessen
+   wurde und den Fehler vom selben Tag um ein Haar wiederholt haette: bei
+   400 px stand der Kundenchip mit seiner rechten Kante auf 405 und schob das
+   Dokument um 5 px hinaus, bei 320 px um 13. Vorher brach die Zeile an dieser
+   Stelle um — mit `nowrap` tut sie es nicht mehr, und dann muss **jede**
+   Ebene bis zum Text hinunter nachgeben duerfen. `min-width` ist nicht
+   vererbbar; eine Ebene ohne die Zeile bricht die Kette.
+
+   Die Ist-Messung vom 2026-08-16 hatte auf allen 161 Breiten **keinen**
+   waagrechten Ueberlauf. Das war kein Zufall, sondern eine Eigenschaft, die
+   zu halten ist. */
+.lotzwoo-header-row > *,
+.lotzwoo-header-row > * > *,
+.lotzwoo-header-actions .lotzwoo-headerareas,
+.lotzwoo-header-actions .lotzwoo-headerareas__customer {
   min-width: 0;
+}
+
+/* Was der Chip abschneidet, ist der Firmenname — und der ist die Angabe, die
+   sich am ehesten verkuerzen laesst, ohne dass die Auskunft verlorengeht.
+   Vorgelesen wird er weiter vollstaendig. */
+.lotzwoo-header-actions .lotzwoo-headerareas__customer-name,
+.lotzwoo-header-row .wp-block-site-title a {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* Die mittlere Bahn. `flex: 1 1 0` und nicht `auto`: nur mit Basis 0
