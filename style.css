@@ -2519,9 +2519,40 @@ p.is-style-kennzahl {
     display: block;
   }
 
-  /* Einzeilig: die Leiste legt ihre Angaben nicht mehr untereinander. */
+  /* Einzeilig — aber nachgeben muessen die **Angaben**, nicht die Leiste.
+     Erster Anlauf war `flex-wrap: nowrap` allein: dann schob der
+     `actions`-Platz die Zeile auf 452 px hinaus, bei 390 px Fenster. Vier
+     Pruefungen von `kopfflaechen.mjs` haben das gemeldet, und sie hatten
+     recht — die Ist-Messung vom 2026-08-16 hatte auf allen 161 Breiten
+     **keinen** waagrechten Ueberlauf, und das war kein Zufall, sondern eine
+     Eigenschaft, die zu halten ist.
+
+     Also: die Angaben duerfen schrumpfen (`min-width: 0` ist noetig, sonst
+     schrumpft ein Flex-Kind nie unter seinen Inhalt) und schneiden mit
+     Auslassungspunkten ab. Favoriten, Warenkorb und Wechsler behalten ihre
+     Groesse — sie sind Bedienelemente, und ein halber Knopf ist keiner. */
   .lotzwoo-contextbar__inner {
     flex-wrap: nowrap;
+  }
+
+  .lotzwoo-contextbar__facts {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .lotzwoo-contextbar__fact {
+    min-width: 0;
+  }
+
+  .lotzwoo-contextbar__fact dd {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .lotzwoo-contextbar__actions {
+    flex: 0 0 auto;
   }
 
   .lotzwoo-contextbar__pair {
