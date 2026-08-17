@@ -2448,7 +2448,13 @@ main:has(> .lotzwoo-contextbar) {
 
 /* --- Stufe 1040 --------------------------------------------------- */
 @media (max-width: 1040px) {
-  .lotzwoo-navi--sekundaer {
+  /* `.wp-block-navigation` davor, weil der Kern die Menuepunkte mit zwei
+     Klassen adressiert und eine einzelne Klasse dagegen verliert. Gemessen am
+     2026-08-17: mit `.lotzwoo-navi--sekundaer` allein standen „Ueber uns" und
+     „Aktuelles" bei 1040 und bei 1000 px unveraendert da und verschwanden erst
+     auf der 880er-Stufe — mit der ganzen Menueleiste. Die Stufe war gebaut und
+     tot, und **das sieht man einer Regel nicht an**; man misst es. */
+  .wp-block-navigation .lotzwoo-navi--sekundaer {
     display: none;
   }
 }
