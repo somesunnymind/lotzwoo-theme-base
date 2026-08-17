@@ -2325,17 +2325,102 @@ main:has(> .lotzwoo-contextbar) {
    Der Chip sitzt auf 1920 px am rechten Rand und auf 320 px auch — eine
    Stelle, die sich mit der Breite verschiebt, ist eine Stelle, die man
    suchen muss. */
+/* Symbol und Beschriftung nebeneinander, Name und Ziel untereinander. Das
+   Symbol steht im Ruhezustand nicht da — es ist die Ersatzfassung fuer den
+   Fall, dass der Name keinen Platz mehr hat (weiter unten). */
 .lotzwoo-headerareas__customer {
   display: flex;
-  flex-direction: column;
-  gap: 1px;
+  align-items: center;
+  gap: 8px;
   margin-inline-start: auto;
-  max-width: 15ch;
+  max-width: 24ch;
   padding: 4px 8px;
   border-radius: 8px;
   color: var(--wp--preset--color--ink-900);
   line-height: 1.15;
   text-decoration: none;
+}
+
+.lotzwoo-headerareas__customer-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+/* „Mein Konto" — die leiseste Zeile im Kopf, und die einzige, die sagt, wohin
+   der Klick fuehrt. Sie steht **unter** dem Namen und nicht darueber: oben
+   stand bis AP-48 „Kunde", ein Wort, das den Namen benannte, den man schon
+   liest. Kleiner und ruhiger gesetzt, damit der Name die Zeile fuehrt.
+
+   `ink-600` traegt die 4.5:1 aus WCAG 1.4.3 in beiden Themes mit Abstand —
+   nachgerechnet gegen die Flaeche, auf der die Zeile wirklich liegt, weil sie
+   die kleinste Schrift im Kopf hat:
+
+     #3a4759 auf `surface` #ffffff (Basistheme)   9.44:1
+     #534d46 auf `surface` #fbf7f0 (Bersta)       7.81:1 */
+.lotzwoo-headerareas__customer-role {
+  color: var(--wp--preset--color--ink-600);
+  font-size: var(--wp--preset--font-size--xs);
+  font-weight: 400;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* --- Die Ersatzfassung: das Symbol ---------------------------------
+
+   Reicht der Platz fuer den Namen nicht mehr, tritt an seine Stelle Lucides
+   `circle-user`. Wann das ist, entscheidet **keine Breite**, sondern die
+   Messung in `kopfleiste.js` — dieselbe Begruendung wie beim Menue: der Name
+   kommt aus dem Kundenkonto, „Musterfirma GmbH & Co KG" und „M. Muster"
+   brauchen nicht dieselbe Schwelle.
+
+   Der Chip ist dabei das **letzte**, was nachgibt: erst wandern die
+   Menuepunkte, dann die Bestellannahme, dann uebernimmt der Hamburger, und
+   erst danach wird aus dem Namen ein Symbol.
+
+   Der Text bleibt im Dokument und wird weiter vorgelesen — versteckt wird er
+   mit `clip-path`, nicht mit `display: none`. Ein Symbol allein saehe fuer
+   einen Screenreader aus wie ein Link ohne Namen. */
+/* **Beide Regeln tragen `.lotzwoo-header-actions` mit, und das ist kein
+   Zierrat.** Weiter oben steht `.lotzwoo-header-actions svg { display: block }`
+   fuer die Symbole der Aktionsgruppe — (0,1,1). Ein blosses
+   `.lotzwoo-headerareas__customer-icon` ist (0,1,0) und verliert: gemessen am
+   2026-08-17 stand das Konto-Symbol auf **jeder** Breite da, neben dem Namen.
+   Dritter Fall dieser Art in zwei Tagen; einer Regel sieht man das nicht an. */
+.lotzwoo-header-actions .lotzwoo-headerareas__customer-icon {
+  display: none;
+}
+
+.lotzwoo-kopf--kontoicon .lotzwoo-header-actions .lotzwoo-headerareas__customer-icon {
+  display: block;
+}
+
+.lotzwoo-kopf--kontoicon .lotzwoo-headerareas__customer-text {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Ohne Beschriftung ist der Chip ein Knopf und kein Textblock: die
+   Trefferflaeche von 40 x 40 px steht dann fuer sich, und `max-width` hat
+   nichts mehr zu begrenzen. Dieselbe Groesse wie beim Menue-Oeffner und beim
+   Anmeldelink daneben. */
+/* Auch hier die laengere Kette: `.lotzwoo-header-actions .…__customer` setzt
+   weiter unten `min-width: 0`, damit der Chip schrumpfen **darf** — bei
+   Gleichstand gewinnt die spaetere, und der Chip stand auf 320 px auf 26 px
+   gequetscht, mit einem 24-px-Symbol darin. */
+.lotzwoo-kopf--kontoicon .lotzwoo-header-actions .lotzwoo-headerareas__customer {
+  box-sizing: border-box;
+  justify-content: center;
+  max-width: none;
+  min-width: 40px;
+  min-height: 40px;
 }
 
 
@@ -2744,6 +2829,160 @@ a.lotzwoo-headerphone:focus-visible {
 .lotzwoo-navi-wort {
   font-size: var(--wp--preset--font-size--sm);
   line-height: 1;
+}
+
+/* --- Das Overlay des Hamburgers ------------------------------------
+
+   Gemessen am 2026-08-17 auf 390 px, Overlay offen, bevor hier etwas stand:
+   die Menuepunkte begannen bei **x = 0** — buendig an der Fensterkante, ohne
+   jeden Innenabstand —, ihre Links waren **22 px** hoch, und der
+   Schliessen-Knopf sass als 24 x 24 grosse Flaeche in der Ecke, ohne
+   Mauszustand. Der Kern gestaltet dieses Overlay nicht; er oeffnet es nur.
+
+   Drei Dinge macht dieser Abschnitt, und alle drei nur im **geoeffneten**
+   Zustand (`.is-menu-open`): die ausgeschriebene Leiste benutzt denselben
+   Behaelter, und was hier steht, hat in einer waagrechten Zeile nichts zu
+   suchen.
+
+   **1 · Die Punkte ruecken vom Rand.** Innenabstand am Dialog, nicht an jedem
+   Eintrag — sonst sitzt der Schliessen-Knopf weiter buendig und die Kante
+   bleibt uneinheitlich.
+
+   **2 · Ein Eintrag ist so gross wie eine Trefferflaeche.** 44 px hoch statt
+   22, und der Link nimmt die **ganze** Zeilenbreite: ein Menuepunkt, bei dem
+   nur die sechs Buchstaben treffen, ist auf einem Telefon eine Zumutung. Das
+   sind dieselben 44 px, die WCAG 2.5.8 als Zielgroesse nennt — der Kopf
+   selbst arbeitet mit 40, aber dort steht ein Knopf neben dem anderen und
+   nicht eine Liste, durch die gescrollt wird.
+
+   **3 · Ein Mauszustand.** Bis hierher gab es nur `:focus-visible`; wer mit
+   der Maus daruberfuhr, sah nichts. Dieselbe Flaeche `ink-100` wie beim
+   Anmeldelink und beim Zaehler, damit es im Kopf nicht drei Antworten auf
+   dieselbe Geste gibt.
+   ------------------------------------------------------------------- */
+
+.wp-block-navigation__responsive-container.is-menu-open
+  .wp-block-navigation__responsive-dialog {
+  padding-inline: var(--wp--preset--spacing--30);
+  padding-block-end: var(--wp--preset--spacing--30);
+}
+
+/* Die Liste traegt die volle Breite, damit die Eintraege es koennen.
+
+   **Kein `gap` hier.** Ein erster Anlauf setzte 2 px und blieb wirkungslos:
+   der Navigation-Block schreibt seinen Zwischenraum als **Inline-Stil** an die
+   Liste, und dagegen gewinnt kein Selektor. Gemessen — die Regel stand da und
+   die 4 px des Blocks blieben stehen. Eine Regel, die nichts tut, ist beim
+   naechsten Lesen eine Falschauskunft; die 4 px sind ausserdem in Ordnung. */
+.wp-block-navigation__responsive-container.is-menu-open
+  .wp-block-navigation__container {
+  width: 100%;
+}
+
+.wp-block-navigation__responsive-container.is-menu-open
+  .wp-block-navigation-item {
+  width: 100%;
+}
+
+/* **Diese lange Kette ist nachgemessen, nicht geraten.** Der Kern setzt im
+   offenen Overlay `padding: 0` auf denselben Knoten, und zwar mit
+
+     .wp-block-navigation__responsive-container.is-menu-open
+       :where(:not(.disable-default-overlay))
+       .wp-block-navigation__responsive-container-content
+       .wp-block-navigation-item__content
+
+   — das sind **(0,4,0)**; `:where()` zaehlt null. Zwei Anlaeufe sind daran
+   gescheitert: ohne `header` stand die Regel bei (0,2,0) und verlor ueber die
+   Ladereihenfolge, mit `header` bei (0,3,1) und verlor immer noch. Die
+   Eintraege waren dabei jedes Mal 44 px hoch — die Hoehe kam durch, der
+   Einzug nicht —, und die Bestellannahme darunter war als einzige
+   eingerueckt. Erst mit dem `…-content` in der Kette steht sie bei (0,4,1).
+
+   Die Lehre steht schon dreimal in dieser Datei und hier zum vierten Mal: eine
+   Regel, die halb durchkommt, sieht aus wie eine, die wirkt. */
+header .wp-block-navigation__responsive-container.is-menu-open
+  .wp-block-navigation__responsive-container-content
+  .wp-block-navigation-item__content {
+  display: flex;
+  align-items: center;
+  /* `width: 100%` **und** Innenabstand: ohne `border-box` addiert sich beides,
+     und der Link stand 24 px breiter da als sein Listeneintrag — auf 390 px
+     also 12 px ueber den rechten Rand hinaus. Gemessen zwischen zwei
+     Durchlaeufen. */
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 44px;
+  padding-inline: 12px;
+  border-radius: 8px;
+  text-decoration: none;
+}
+
+header .wp-block-navigation__responsive-container.is-menu-open
+  .wp-block-navigation__responsive-container-content
+  .wp-block-navigation-item__content:hover,
+header .wp-block-navigation__responsive-container.is-menu-open
+  .wp-block-navigation__responsive-container-content
+  .wp-block-navigation-item__content:focus-visible {
+  background: var(--wp--preset--color--ink-100);
+  color: var(--wp--preset--color--ink-900);
+  text-decoration: none;
+}
+
+/* Die Bestellannahme ist der einzige Eintrag, der keine Navigation ist —
+   sie wandert nur hierher, wenn die Zeile sie nicht mehr traegt. Eine
+   Haarlinie darueber sagt das, ohne ein Wort dafuer auszugeben. */
+.wp-block-navigation__responsive-container.is-menu-open .lotzwoo-mehr__telefon {
+  width: 100%;
+  margin-block-start: var(--wp--preset--spacing--20);
+  padding-block-start: var(--wp--preset--spacing--20);
+  border-block-start: 1px solid var(--wp--preset--color--ink-200);
+}
+
+header .wp-block-navigation__responsive-container.is-menu-open
+  .lotzwoo-mehr__telefon
+  > * {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding-inline: 12px;
+}
+
+/* Der Schliessen-Knopf bekommt dieselbe Trefferflaeche wie der Oeffner, den
+   er zurueckdreht — 40 x 40 —, und denselben Mauszustand wie alles andere
+   hier. Sein Fokusring bleibt nach innen versetzt: der Kern haelt ihn per
+   `position` in der Ecke, und der Grund dafuer steht dort, wo der Ring
+   gesetzt wird. */
+.wp-block-navigation__responsive-container-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  min-height: 40px;
+  border-radius: 8px;
+}
+
+/* Und er richtet sich an derselben Kante aus wie die Eintraege darunter. Der
+   Kern setzt ihn buendig in die Ecke; mit dem Innenabstand des Dialogs stand
+   er als einziges Element 12 px weiter rechts als alles andere — gemessen:
+   Eintraege enden bei x = 378, der Knopf bei 390. */
+.wp-block-navigation__responsive-container.is-menu-open
+  .wp-block-navigation__responsive-container-close {
+  margin-inline-end: var(--wp--preset--spacing--30);
+}
+
+.wp-block-navigation__responsive-container-close:hover {
+  background: var(--wp--preset--color--ink-100);
+  color: var(--wp--preset--color--ink-900);
+}
+
+/* Und derselbe Mauszustand fuer den Oeffner. Bis zum 2026-08-17 stand im
+   Kommentar zum Fokusring, der Ruhe- und Mauszustand der beiden Knoepfe sei
+   „Gestaltung und laeuft als Stream F" — er ist jetzt beauftragt und hier. */
+.wp-block-navigation__responsive-container-open:hover {
+  background: var(--wp--preset--color--ink-100);
+  color: var(--wp--preset--color--ink-900);
+  border-radius: 8px;
 }
 
 /* --- „mehr" ---------------------------------------------------------

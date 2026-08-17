@@ -127,6 +127,13 @@
 
 	var BURGER = 'lotzwoo-kopf--burger';
 	var MESSEN = 'lotzwoo-misst';
+	var KONTOICON = 'lotzwoo-kopf--kontoicon';
+
+	// Der Konto-Chip (`data-lotzwoo-customer`, gesetzt vom Plugin). Findet
+	// dieses Skript ihn nicht, verteilt es eben nur Menuepunkte — dieselbe
+	// Richtung wie bei der Bestellannahme: die Sonde darf das Plugin kennen,
+	// das Plugin nie die Sonde.
+	var konto = document.querySelector('[data-lotzwoo-customer]');
 
 	// Sekundäre zuerst, danach von hinten nach vorn.
 	var rang = punkte
@@ -178,6 +185,11 @@
 
 		telefonTraeger = null;
 		menue.textContent = '';
+
+		// Auch der Chip geht in den vollen Zustand zurueck — sonst gilt Falle 1
+		// fuer ihn: ein Chip, der schon Symbol ist, misst die Breite seines
+		// Symbols, und die Zeile scheint fuer immer zu passen.
+		zeile.classList.remove(KONTOICON);
 	}
 
 	function auslagern(li) {
@@ -211,6 +223,28 @@
 		}
 
 		ziel.appendChild(telefonTraeger);
+	}
+
+	/**
+	 * Der Konto-Chip wird zum Symbol — die **letzte** Stufe.
+	 *
+	 * Er gibt nach, wenn alles andere schon nachgegeben hat: Menuepunkte
+	 * gewandert, Bestellannahme gewandert, Hamburger uebernommen. Der Grund
+	 * ist derselbe, aus dem die Nummer vor ihm geht — sie hat einen zweiten
+	 * Weg (das Overlay), der Chip hat keinen: er ist der einzige Kontoweg im
+	 * Kopf, seit AP-48 Woos `customer-account` entfallen ist.
+	 *
+	 * Gemessen wird, nicht geschwellt: der Name kommt aus dem Kundenkonto, und
+	 * „Musterfirma GmbH & Co KG" und „M. Muster" brauchen nicht dieselbe
+	 * Breite. Eine Zahl im Stylesheet waere fuer den einen zu frueh und fuer
+	 * den anderen zu spaet.
+	 */
+	function kontoNachgeben() {
+		if (!konto || !laeuftUeber()) {
+			return;
+		}
+
+		zeile.classList.add(KONTOICON);
 	}
 
 	function abschliessen(offen, burger) {
@@ -261,6 +295,7 @@
 				telefonAuslagern(menue, null);
 			}
 
+			kontoNachgeben();
 			abschliessen(offen, false);
 
 			return;
@@ -282,6 +317,7 @@
 			telefonAuslagern(liste, eintrag);
 		}
 
+		kontoNachgeben();
 		abschliessen(offen, true);
 	}
 
