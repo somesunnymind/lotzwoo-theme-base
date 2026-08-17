@@ -252,15 +252,67 @@ add_filter('render_block_woocommerce/customer-account', static function (string 
 }, 10, 1);
 
 /**
+ * Woos Öffner behält sein Wort (AP-48, Punkt 5 — zurück seit AP-53).
+ *
+ * **Warum das hier zweimal seine Meinung geändert hat, und wo sie jetzt steht.**
+ * AP-48 hängte das Wort „Menü" an den Öffner. AP-53 nahm es zunächst heraus,
+ * weil `overlayMenu: "never"` den Öffner überhaupt nicht mehr rendern ließ —
+ * eine Regel auf ein Element, das es nicht gibt, ist kein harmloser Rest. Mit
+ * der Klarstellung des Auftraggebers vom 2026-08-17 ist der Öffner zurück:
+ * unterhalb der Stelle, an der nur noch zwei Menüpunkte ausgeschrieben
+ * blieben, übernimmt der Hamburger. Damit ist auch die Begründung von AP-48
+ * wieder gültig, und zwar unverändert:
+ *
+ * Der Öffner (`.wp-block-navigation__responsive-container-open`) enthält
+ * ausschließlich ein `<svg>`. Ein Symbol allein sagt nicht, was dahinterliegt
+ * — genau die Auskunft, die im Kopf am knappsten ist. Sein `aria-label`
+ * („Menü öffnen") trägt sie für Vorlesewerkzeuge längst; sichtbar fehlte sie.
+ *
+ * **Warum ein Filter und kein `::after { content: "Menü" }`.** Text aus CSS ist
+ * nicht übersetzbar, steht in keinem Dokument und wird von Vorlesewerkzeugen
+ * uneinheitlich behandelt. Der Weg über den Filter legt das Wort **ins
+ * Markup**, wo es hingehört, und lässt es durch `__()` laufen. Dasselbe
+ * Argument gilt für den Eintrag „mehr" darunter — deshalb entsteht auch der
+ * hier und nicht im Skript.
+ *
+ * Angefasst wird nur der Öffner, und nur wenn er noch kein Wort trägt.
+ */
+function lotzwoo_navi_oeffner_wort(string $content): string
+{
+    if (!str_contains($content, 'wp-block-navigation__responsive-container-open')) {
+        return $content;
+    }
+
+    if (str_contains($content, 'lotzwoo-navi-wort')) {
+        return $content;
+    }
+
+    $wort = '<span class="lotzwoo-navi-wort">'
+        . esc_html__('Menü', 'lotzwoo-theme-base')
+        . '</span>';
+
+    // Vor das schließende Tag des Öffners, also hinter das Symbol.
+    $ersetzt = preg_replace_callback(
+        '#(<button[^>]*wp-block-navigation__responsive-container-open[^>]*>)(.*?)(</button>)#is',
+        static fn (array $t): string => $t[1] . $t[2] . $wort . $t[3],
+        $content,
+        1
+    );
+
+    return is_string($ersetzt) ? $ersetzt : $content;
+}
+
+/**
  * `mehr` — der Menüpunkt, hinter dem die Menüpunkte stehen (AP-53).
  *
- * **Was hier vorher stand und warum es weg ist.** Bis zum 2026-08-17 hängte
- * ein Filter an dieser Stelle das Wort „Menü" an Woos Öffner (AP-48, Punkt 5).
- * Der Öffner kommt nicht mehr vor: `overlayMenu` steht auf `never`, und `mehr`
- * ersetzt die Menütaste bis 320 px hinunter — **Entscheidung des
- * Auftraggebers vom 2026-08-17**. Ein Filter auf ein Element, das nie mehr
- * gerendert wird, ist kein harmloser Rest; er ist die Zeile, die beim nächsten
- * Lesen fünf Minuten kostet.
+ * **Wo `mehr` aufhört.** Es ersetzt die Menütaste **nicht** bis 320 px
+ * hinunter. Unterhalb der Stelle, an der nur noch zwei Punkte ausgeschrieben
+ * blieben, übernimmt der Hamburger, und dieser Eintrag verschwindet —
+ * Klarstellung des Auftraggebers vom 2026-08-17. Eine Leiste aus zwei Punkten
+ * und einem „mehr", hinter dem vier liegen, ist keine Leiste mehr.
+ *
+ * Welche der beiden Darstellungen gilt, entscheidet `assets/js/kopfleiste.js`
+ * aus der gemessenen Verteilung, nicht eine Breite.
  *
  * **Warum der Kern das nicht kann.** `core/navigation` kennt genau zweierlei:
  * ausgeschriebene Leiste, oder ganze Leiste hinter einer Overlay-Taste. Ein
@@ -295,6 +347,8 @@ add_filter('render_block_core/navigation', static function (string $content): st
     if (str_contains($content, 'lotzwoo-mehr')) {
         return $content;
     }
+
+    $content = lotzwoo_navi_oeffner_wort($content);
 
     $schluss = strrpos($content, '</ul>');
 

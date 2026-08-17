@@ -2655,6 +2655,87 @@ a.lotzwoo-headerphone:focus-visible {
   text-overflow: clip !important;
 }
 
+/* --- Zwei Darstellungen, und Kerns 600 px sind keine davon ----------
+
+   Der Kern kennt genau eine Schwelle: `@media (min-width: 600px)` blendet
+   den Oeffner aus und macht aus dem Overlay-Behaelter eine gewoehnliche
+   Zeile. Die 600 beschreiben nichts an diesem Kopf — sie sind Woos Zahl,
+   so wie 782 die der Admin-Bar war (AP-48 hat sie aus demselben Grund
+   herausgenommen).
+
+   Umgeschaltet wird deshalb ueber eine Klasse, die `kopfleiste.js` aus der
+   **Verteilung** setzt: sobald weniger als drei Punkte ausgeschrieben
+   blieben, uebernimmt der Hamburger. Entscheidung des Auftraggebers vom
+   2026-08-17.
+
+   Das kostet vier Regeln, weil Kerns Medienregeln in **beide** Richtungen
+   umgekehrt werden muessen: ueber 600 px den Oeffner einblenden, unter
+   600 px die ausgeschriebene Leiste stehen lassen. Die Spezifitaeten sind
+   nachgerechnet und nicht geschaetzt — Kerns Behaelter-Regel steht bei
+   (0,3,0), und ein Gleichstand haenge sonst an der Ladereihenfolge zweier
+   Stylesheets.
+   ------------------------------------------------------------------- */
+
+/* Ohne Hamburger: der Oeffner bleibt weg, auch unter 600 px. */
+.lotzwoo-header-row:not(.lotzwoo-kopf--burger) .wp-block-navigation__responsive-container-open {
+  display: none;
+}
+
+/* Ohne Hamburger: die Punkte stehen ausgeschrieben, auch unter 600 px.
+   Dieselben fuenf Angaben, mit denen der Kern das ueber 600 px tut. */
+.lotzwoo-header-row:not(.lotzwoo-kopf--burger)
+  .wp-block-navigation__responsive-container:not(.is-menu-open) {
+  position: relative;
+  z-index: auto;
+  display: block;
+  width: 100%;
+  background-color: inherit;
+}
+
+/* Mit Hamburger: der Oeffner kommt, auf jeder Breite. */
+.lotzwoo-header-row.lotzwoo-kopf--burger
+  .wp-block-navigation__responsive-container-open:not(.always-shown) {
+  display: flex;
+}
+
+/* Mit Hamburger: die ausgeschriebene Leiste geht. Der **geoeffnete**
+   Zustand ist davon unberuehrt — den regelt der Kern ueber `is-menu-open`,
+   und daran wird nicht gedreht. */
+.lotzwoo-header-row.lotzwoo-kopf--burger
+  .wp-block-navigation__responsive-container:not(.is-menu-open):not(.hidden-by-default) {
+  display: none;
+}
+
+/* Mit Hamburger gibt es kein „mehr". Zwei Menues nebeneinander waeren zwei
+   Wege zu denselben sechs Punkten, und die Zusicherung lautet **genau
+   eines**. */
+.lotzwoo-header-row.lotzwoo-kopf--burger .lotzwoo-mehr {
+  display: none !important;
+}
+
+/* --- Der Oeffner traegt sein Wort wieder (AP-48, Punkt 5) -----------
+
+   Er war mit `overlayMenu: "never"` entfallen und ist mit der
+   Klarstellung vom 2026-08-17 zurueck — also auch die Begruendung von
+   AP-48: Woos Oeffner rendert nur ein Symbol, und ein Symbol allein sagt
+   nicht, was dahinterliegt. Das Wort haengt der Filter in `functions.php`
+   daneben; hier steht nur seine Groesse.
+
+   Trefferflaeche mindestens 40 x 40 px, und das Wort bleibt bis 320 px
+   hinunter stehen. */
+.wp-block-navigation__responsive-container-open {
+  align-items: center;
+  gap: 6px;
+  min-width: 40px;
+  min-height: 40px;
+  padding: 4px 8px;
+}
+
+.lotzwoo-navi-wort {
+  font-size: var(--wp--preset--font-size--sm);
+  line-height: 1;
+}
+
 /* --- „mehr" ---------------------------------------------------------
 
    Der Kern kennt kein Priority+. `core/navigation` kann genau zweierlei:
@@ -2803,17 +2884,13 @@ a.lotzwoo-headerphone:focus-visible {
   }
 }
 
-/* --- Der Oeffner und sein Wort sind entfallen (AP-53) ---------------
+/* --- Stufe 880: der Oeffner kam an eine Breite gebunden (AP-53) -----
 
-   Hier stand die Groesse von Woos Oeffner und die Schrift des Wortes
-   „Menue" daneben (AP-48, Punkt 5). Beides ist fort, weil der Oeffner
-   fort ist: `overlayMenu: "never"`. Der Filter, der das Wort anhing, ist
-   in `functions.php` durch den Filter ersetzt, der „mehr" baut — eine
-   Regel auf ein Element, das nie mehr gerendert wird, ist kein harmloser
-   Rest.
-
-   Die Trefferflaeche von mindestens 40 x 40 px ist **nicht** entfallen;
-   sie steht jetzt am Knopf „mehr", weiter unten.
+   Hier stand die Groesse von Woos Oeffner, und weiter oben eine
+   Medienbedingung, die ihn zwischen 600 und 880 px einblendete. Beides ist
+   fort: **wann** er erscheint, entscheidet seit dem 2026-08-17 nicht mehr
+   eine Breite, sondern die gemessene Verteilung. Seine Groesse und sein
+   Wort stehen bei den zwei Darstellungen weiter oben.
    ------------------------------------------------------------------- */
 
 /* --- Stufe 700: der Ort nimmt seine Kurzform ------------------------
