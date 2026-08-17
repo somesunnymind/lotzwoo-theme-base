@@ -2584,13 +2584,23 @@ main:has(> .lotzwoo-contextbar) {
    verschoebe er Konto-Chip und Warenkorb um eine Luecke.
 
    Zwei Regeln und nicht eine, und sie stehen getrennt: `:empty` verliert,
-   sobald zwischen den Tags ein Zeilenumbruch steht, `:has()` nicht — und
-   ein Browser ohne `:has()` wuerfe eine gemeinsame Regel ganz weg. */
-.lotzwoo-header-mitte:empty {
+   sobald zwischen den Tags ein Zeilenumbruch steht — und genau das steht dort,
+   die Vorlage rueckt ein. `:has()` verliert daran nicht. Getrennt stehen sie,
+   damit ein Browser ohne `:has()` nicht beide wegwirft.
+
+   **Und der Elternteil davor ist gemessen, nicht vorsorglich.** `:has(*)`
+   zaehlt fuer die Spezifitaet wie sein Argument, und `*` zaehlt null: die Regel
+   stand damit bei (0,1,0) — gleichauf mit WordPress' erzeugter Layoutklasse
+   `.wp-container-core-group-is-layout-…`, die spaeter im Stapel steht und
+   deshalb gewann. Am 2026-08-17 nachgemessen: der Selektor **traf**
+   (`matches()` sagte ja) und `display` stand trotzdem auf `flex`. Eine Regel,
+   die gegen den Kern verliert, sieht aus wie eine Regel — dieselbe Falle wie
+   bei der 1040er-Stufe, nur an einer anderen Stelle. */
+.lotzwoo-header-row > .lotzwoo-header-mitte:empty {
   display: none;
 }
 
-.lotzwoo-header-mitte:not(:has(*)) {
+.lotzwoo-header-row > .lotzwoo-header-mitte:not(:has(*)) {
   display: none;
 }
 
