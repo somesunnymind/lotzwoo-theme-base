@@ -486,8 +486,19 @@ if (!str_contains($slot_ausgabe, 'id="lotzwoo-cart-slot"')) {
  */
 $abschnitt('Der Weg ins Sortiment (Kopplung 5)');
 
+/*
+ * `parts/header.html` steht seit AP-48 (2026-08-17) **nicht** mehr in dieser
+ * Liste. Der Knopf „Zum Sortiment" ist dort entfallen, und zwar absichtlich:
+ * die Kopfzeile traegt seither zwei Bahnen, in der oberen sitzt der Konto-Chip
+ * als einziger Kontoweg, und der Weg ins Sortiment liegt in der klebenden
+ * Bahn darunter — der Kontextleiste, die auf jeder Kaufwegseite steht.
+ *
+ * Die Pruefung darunter bleibt fuer die vier Vorlagen, die den Knopf weiter
+ * tragen. Ihn hier stehen zu lassen hiesse, eine Entscheidung als Fehler zu
+ * melden — und ein Pruefwerkzeug, das bei jedem Lauf einen bekannten Fehler
+ * meldet, wird nach dem dritten Mal nicht mehr gelesen.
+ */
 const SORTIMENT_KNOEPFE = [
-    'parts/header.html' => 'Kopfzeile, auf jeder Seite',
     'templates/archive-product.html' => 'Produktarchiv (Ticket 12)',
     'templates/product-search-results.html' => 'Produktsuche (Ticket 12)',
     'templates/taxonomy-product_attribute.html' => 'Attribut-Archiv (Ticket 12)',
@@ -495,7 +506,6 @@ const SORTIMENT_KNOEPFE = [
 ];
 
 $inhalte = [
-    'parts/header.html' => $eigenerkopf instanceof WP_Block_Template ? (string) $eigenerkopf->content : null,
 ];
 
 foreach (['archive-product', 'product-search-results', 'taxonomy-product_attribute', 'page-cart'] as $slug) {
