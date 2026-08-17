@@ -2322,6 +2322,46 @@ main:has(> .lotzwoo-contextbar) {
 }
 
 
+/* Der Weg hinein fuer Abgemeldete (Entscheidung vom 2026-08-17).
+
+   Er steht an der Stelle, an der fuer angemeldete Kunden der Chip steht, und
+   ist das **einzige** Kind der Aktionsgruppe. Deshalb ohne
+   `margin-inline-start: auto`: der Chip braucht es, weil neben ihm etwas
+   stehen kann; hier schoebe es den Link von der linken Kante der Gruppe weg,
+   und `kopfflaechen.mjs` misst genau diesen Versatz auf 0.
+
+   Trefferflaeche mindestens 40 x 40 px, wie beim Menue-Oeffner. Ein Wort
+   statt eines Symbols, weil „Anmelden" die Auskunft ist, die ein Besucher
+   ohne Konto zuerst braucht — dasselbe Wort wie in `login_notice()`. */
+.lotzwoo-headerareas__login {
+  display: flex;
+  align-items: center;
+  min-width: 40px;
+  min-height: 40px;
+  padding: 4px 8px;
+  border-radius: 8px;
+  color: var(--wp--preset--color--ink-900);
+  font-size: var(--wp--preset--font-size--sm);
+  font-weight: 600;
+  line-height: 1.15;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.lotzwoo-headerareas__login:hover,
+.lotzwoo-headerareas__login:focus-visible {
+  background: var(--wp--preset--color--ink-100);
+  color: var(--wp--preset--color--ink-900);
+  text-decoration: none;
+}
+
+/* Dieselbe Begruendung wie beim Zaehler und beim Chip: die Flaeche aus
+   `ink-100` traegt 1.17:1 gegen `surface` und genuegt WCAG 1.4.11 nicht. */
+.lotzwoo-headerareas__login:focus-visible {
+  outline: 2px solid var(--wp--preset--color--brand-500);
+  outline-offset: 2px;
+}
+
 .lotzwoo-headerareas__customer-name {
   font-size: var(--wp--preset--font-size--sm);
   font-weight: 600;
