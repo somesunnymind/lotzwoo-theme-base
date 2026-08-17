@@ -2529,9 +2529,19 @@ main:has(> .lotzwoo-contextbar) {
 /* Was der Chip abschneidet, ist der Firmenname — und der ist die Angabe, die
    sich am ehesten verkuerzen laesst, ohne dass die Auskunft verlorengeht.
    Vorgelesen wird er weiter vollstaendig. */
-.lotzwoo-header-actions .lotzwoo-headerareas__customer-name,
-.lotzwoo-header-row .wp-block-site-title a {
+.lotzwoo-header-actions .lotzwoo-headerareas__customer-name {
   display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Der Seitentitel schneidet ebenfalls ab — aber am **Absatz**, nicht am Link
+   darin. `display: block` auf dem `<a>` gab ihm die volle Breite des
+   Elternteils statt der seines Textes, und bei 320 px stand das Dokument
+   danach auf 344. Eine Regel gegen einen Ueberlauf, die einen groesseren
+   erzeugt: gemessen am 2026-08-17, zwischen zwei Durchlaeufen. */
+.lotzwoo-header-row .wp-block-site-title {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
