@@ -1919,7 +1919,6 @@ p.is-style-kennzahl {
 main:has(> * .lotzwoo-contextbar),
 main:has(> .lotzwoo-contextbar) {
   margin-block-start: 0;
-  padding-block-start: 0;
 }
 
 /* Die Zeile. `flex-wrap`, weil die Werte Kundendaten sind und jede Laenge
