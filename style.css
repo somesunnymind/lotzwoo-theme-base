@@ -75,6 +75,7 @@ Tags: block-theme, full-site-editing, e-commerce
 .lotzwoo-reorder,
 .lotzwoo-favorites,
 .lotzwoo-locations,
+.lotzwoo-standing-orders,
 .lotzwoo-ordercontext,
 .lotzwoo-heldback {
   --lwb-brand-50:  var(--wp--preset--color--brand-50,  #eaf6f1);
@@ -209,6 +210,7 @@ Tags: block-theme, full-site-editing, e-commerce
 .lotzwoo-reorder,
 .lotzwoo-favorites,
 .lotzwoo-locations,
+.lotzwoo-standing-orders,
 .lotzwoo-ordercontext,
 .lotzwoo-heldback {
   font-family: var(--wp--preset--font-family--sans, "Inter", "Segoe UI", system-ui, sans-serif);
