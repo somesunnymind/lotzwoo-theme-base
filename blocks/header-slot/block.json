@@ -5,14 +5,30 @@
   "title": "Kopfbereich — Plugin-Fläche",
   "category": "theme",
   "icon": "screenoptions",
-  "description": "Leere Fläche im Kopfbereich, die das Plugin lotzapp-for-woocommerce füllt: Schnellsuche, Favoriten-Zähler, Kundenchip. Ohne Plugin rendert sie nichts.",
-  "keywords": ["lotzapp", "plugin", "schnellsuche", "favoriten"],
+  "description": "Fläche im Kopfbereich, die das Plugin lotzapp-for-woocommerce füllt. `bereich` entscheidet, welche Hälfte: `kunde` der Konto-Chip, `favoriten` der Favoriten-Zähler, `alle` beide. Ohne Plugin rendert sie nichts.",
+  "keywords": [
+    "lotzapp",
+    "plugin",
+    "favoriten",
+    "kundenchip"
+  ],
   "textdomain": "lotzwoo-theme-base",
   "supports": {
     "html": false,
     "reusable": false,
-    "multiple": false,
+    "multiple": true,
     "inserter": true,
     "interactivity": false
+  },
+  "attributes": {
+    "bereich": {
+      "type": "string",
+      "default": "alle",
+      "enum": [
+        "alle",
+        "kunde",
+        "favoriten"
+      ]
+    }
   }
 }

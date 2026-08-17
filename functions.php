@@ -223,6 +223,54 @@ add_filter('render_block_woocommerce/customer-account', static function (string 
 }, 10, 1);
 
 /**
+ * Die Menütaste behält ihr Wort (AP-48, Punkt 5).
+ *
+ * **Was Woo/WordPress hier von allein tut, und warum das nicht reicht.** Der
+ * Öffner des `core/navigation`-Blocks
+ * (`.wp-block-navigation__responsive-container-open`) enthält ausschließlich
+ * ein `<svg>`. Unterhalb der Schwelle steht damit ein Symbol ohne Wort da, und
+ * ein Symbol allein sagt nicht, was dahinterliegt — genau die Auskunft, die im
+ * Kopf am knappsten ist.
+ *
+ * **Warum ein Filter und kein `::after { content: "Menü" }`.** Text aus CSS ist
+ * nicht übersetzbar, steht in keinem Dokument und wird von Vorlesewerkzeugen
+ * uneinheitlich behandelt. Der Weg über den Filter legt das Wort **ins
+ * Markup**, wo es hingehört, und lässt es durch `__()` laufen.
+ *
+ * Angefasst wird nur der Öffner, und nur wenn er noch kein Wort trägt —
+ * derselbe Vorsatz wie beim Symbol-Tausch darüber: ein Blockfilter, der mehr
+ * anfasst als nötig, bricht beim nächsten Kern-Update an einer Stelle, die
+ * niemand mit ihm in Verbindung bringt.
+ *
+ * Die Schwelle selbst (880 px statt Woos 600) und die Trefferfläche von
+ * mindestens 40 × 40 px stehen im `style.css`, bei den Verdichtungsstufen.
+ */
+add_filter('render_block_core/navigation', static function (string $content): string {
+    if (!str_contains($content, 'wp-block-navigation__responsive-container-open')) {
+        return $content;
+    }
+
+    if (str_contains($content, 'lotzwoo-navi-wort')) {
+        return $content;
+    }
+
+    $wort = '<span class="lotzwoo-navi-wort">'
+        . esc_html__('Menü', 'lotzwoo-theme-base')
+        . '</span>';
+
+    // Vor das schließende Tag des Öffners, also hinter das Symbol. Das Muster
+    // greift den Öffner samt Inhalt und hängt das Wort ans Ende seines Rumpfs.
+    $ersetzt = preg_replace_callback(
+        '#(<button[^>]*wp-block-navigation__responsive-container-open[^>]*>)(.*?)(</button>)#is',
+        static fn (array $t): string => $t[1] . $t[2] . $wort . $t[3],
+        $content,
+        1
+    );
+
+    return is_string($ersetzt) ? $ersetzt : $content;
+}, 10, 1);
+
+/**
  * Die aktuelle Seite im Kopfbereich markieren.
  *
  * Die Navigation in `parts/header.html` steht **inline** — sechs

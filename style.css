@@ -2276,13 +2276,20 @@ p.is-style-kennzahl {
   display: none;
 }
 
-/* Der Kundenchip: Versalien-Label ueber dem Namen, kein Kasten. Er ist
-   der einzige der drei mit Text, und er nennt die Antwort auf „fuer wen
-   kaufe ich hier ein" — deshalb steht sie fett und das Label leise. */
+/* Der Kundenchip: kein Kasten, kein Wort darueber. Er nennt die Antwort
+   auf „fuer wen kaufe ich hier ein" — deshalb steht der Name fett und die
+   Preisklasse leise darunter. Das Label „Kunde" ist mit AP-48 entfallen;
+   was es sagte, sagt jetzt das `aria-label` der Verknuepfung.
+
+   AP-48 Punkt 1: `margin-inline-start: auto` steht **ohne Medienbedingung**.
+   Der Chip sitzt auf 1920 px am rechten Rand und auf 320 px auch — eine
+   Stelle, die sich mit der Breite verschiebt, ist eine Stelle, die man
+   suchen muss. */
 .lotzwoo-headerareas__customer {
   display: flex;
   flex-direction: column;
   gap: 1px;
+  margin-inline-start: auto;
   max-width: 15ch;
   padding: 4px 8px;
   border-radius: 8px;
@@ -2291,12 +2298,6 @@ p.is-style-kennzahl {
   text-decoration: none;
 }
 
-.lotzwoo-headerareas__customer-label {
-  font-size: var(--wp--preset--font-size--xs);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--wp--preset--color--ink-500);
-}
 
 .lotzwoo-headerareas__customer-name {
   font-size: var(--wp--preset--font-size--sm);
@@ -2367,13 +2368,87 @@ p.is-style-kennzahl {
    Weggeblendet und nicht entfernt: beide Zeilen stehen weiter im
    Markup und werden weiter vorgelesen. Ein Screenreader auf einem
    Telefon hoert dasselbe wie einer auf einem Schreibtisch. */
-@media (max-width: 782px) {
-  .lotzwoo-headerareas__customer {
-    max-width: 9ch;
-    padding-inline: 4px;
+/* AP-48 Punkt 4: der 782er-Block ist ersatzlos entfallen. Er presste den
+   Chip auf 9ch und blendete Label und Preisklasse weg — eine Schwelle, die
+   niemand gemessen hatte (782 px ist Woos Admin-Bar-Grenze, nicht die
+   dieses Kopfes). Was hier stand, uebernehmen die fuenf Verdichtungsstufen
+   weiter unten, und die stehen an gemessenen Sprungstellen. */
+
+/* =====================================================================
+   Fuenf Verdichtungsstufen (AP-48, Punkt 4)
+
+   Vorher: zwei Haltepunkte, 600 und 782 — beides Woos Zahlen, keine
+   dieses Kopfes. Der Kopf brach dazwischen um, statt zurueckzutreten, und
+   die Hoehe ueber der ersten Artikelzeile nahm einundzwanzig verschiedene
+   Werte an. Die schlimmste Breite war dabei **nicht das Telefon**, sondern
+   das kleine Notebook: bei 720–760 px stand die Kopfzeile mit 233 px am
+   hoechsten, weil das Menue noch ausgeschrieben war und die Aktionsgruppe
+   schon umgebrochen.
+
+   Sechs Stufen waren geplant; es sind fuenf. Die 1260er hatte nur die
+   Bestellannahme zu verstecken, und die entfaellt ersatzlos (Entscheidung
+   des Auftraggebers, 2026-08-16).
+
+     1040  zwei Menuepunkte
+      880  Menueleiste wird Taste, Preisklasse, Beschriftungen ueber Ort
+           und Termin
+      700  Ort auf die Kurzform, Leiste einzeilig
+      480  Favoriten-Stern (der Warenkorb hat keinen zweiten Weg, der
+           Stern schon)
+      400  Wochentag im Termin
+
+   **Zurueckgetreten, nicht entfernt.** Jede dieser Angaben bleibt im
+   Dokument und wird weiter vorgelesen. Wer den Kopf hoert statt ihn zu
+   sehen, hoert auf 320 px dasselbe wie auf 1920.
+   ===================================================================== */
+
+/* --- Der `actions`-Platz: Favoriten und Warenkorb in der klebenden Bahn --- */
+
+/* Der Behaelter der Kopfflaeche soll hier keine eigene Reihe aufmachen —
+   seine Kinder gehoeren direkt in die Flex-Reihe der Leiste. */
+.lotzwoo-contextbar__actions .lotzwoo-headerareas {
+  display: contents;
+}
+
+/* Auf dem dunklen Grund der Leiste erben beide die Schrift der Leiste.
+   Die Kopffassung setzt `ink-500` — auf `ink-900` waere das unlesbar. */
+.lotzwoo-contextbar__actions .lotzwoo-headerareas__favorites,
+.lotzwoo-contextbar__actions .wp-block-woocommerce-mini-cart,
+.lotzwoo-contextbar__actions .wc-block-mini-cart__button {
+  color: inherit;
+}
+
+.lotzwoo-contextbar__actions .wc-block-mini-cart__button {
+  min-width: 40px;
+  min-height: 40px;
+}
+
+/* --- Stufe 1040 --------------------------------------------------- */
+@media (max-width: 1040px) {
+  .lotzwoo-navi--sekundaer {
+    display: none;
+  }
+}
+
+/* --- Stufe 880: die Menueleiste wird eine Taste ---------------------
+
+   Woos eigene Schwelle liegt bei 600 px. Zwischen 600 und 880 kehren die
+   beiden Regeln des Kerns hier um: der Oeffner kommt zurueck, die
+   ausgeschriebene Leiste geht. Der geoeffnete Zustand (`is-menu-open`)
+   ist davon unberuehrt — den regelt der Kern ausserhalb seiner
+   Medienbedingung, und daran wird nicht gedreht. */
+@media (min-width: 600px) and (max-width: 879.98px) {
+  .lotzwoo-header-row .wp-block-navigation__responsive-container-open:not(.always-shown) {
+    display: flex;
   }
 
-  .lotzwoo-headerareas__customer-label,
+  .lotzwoo-header-row .wp-block-navigation__responsive-container:not(.hidden-by-default):not(.is-menu-open) {
+    display: none;
+  }
+}
+
+@media (max-width: 880px) {
+  /* Die Preisklasse tritt zurueck — die leiseste Zeile zuerst. */
   .lotzwoo-headerareas__customer-class {
     position: absolute;
     width: 1px;
@@ -2382,5 +2457,98 @@ p.is-style-kennzahl {
     overflow: hidden;
     clip-path: inset(50%);
     white-space: nowrap;
+  }
+
+  /* Die Beschriftungen ueber Ort und Termin. Der Wert benennt sich selbst
+     — „Wien 1100" braucht kein Wort „Lieferort" darueber, sobald der Platz
+     knapp wird. Vorgelesen wird beides weiter. */
+  .lotzwoo-contextbar__fact dt {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+
+/* --- Die Menuetaste behaelt ihr Wort (Punkt 5) ----------------------
+
+   Woos Oeffner rendert nur ein Symbol; das Wort haengt der Filter in
+   `functions.php` daneben. Trefferflaeche mindestens 40 x 40 px — und das
+   Wort bleibt bis 320 px hinunter stehen, denn ein Symbol allein sagt
+   nicht, was dahinterliegt. */
+.wp-block-navigation__responsive-container-open {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 40px;
+  min-height: 40px;
+  padding: 4px 8px;
+}
+
+.lotzwoo-navi-wort {
+  font-size: var(--wp--preset--font-size--sm);
+  line-height: 1;
+}
+
+/* --- Stufe 700: der Ort nimmt seine Kurzform ------------------------
+
+   Ohne sie stuende hier „Wien 1…", weil abgeschnitten wird, was nicht
+   passt — also genau die Angabe, die den Ort identifiziert. Beide
+   Fassungen stehen im Dokument (`Location::short_label()`); getauscht
+   wird nur, welche sichtbar ist. Die volle bleibt fuer Vorlesewerkzeuge
+   die maßgebliche, deshalb traegt die kurze `aria-hidden`. */
+.lotzwoo-contextbar__location-short {
+  display: none;
+}
+
+@media (max-width: 700px) {
+  .lotzwoo-contextbar__facts [data-lotzwoo-contextbar-location] {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .lotzwoo-contextbar__location-short {
+    display: block;
+  }
+
+  /* Einzeilig: die Leiste legt ihre Angaben nicht mehr untereinander. */
+  .lotzwoo-contextbar__inner {
+    flex-wrap: nowrap;
+  }
+
+  .lotzwoo-contextbar__pair {
+    flex-direction: row;
+    align-items: baseline;
+    gap: 4px;
+  }
+}
+
+/* --- Stufe 480: der Favoriten-Stern --------------------------------
+
+   Er geht und der Warenkorb bleibt, weil der Stern einen zweiten Weg hat
+   (die Favoritenseite, aus dem Konto erreichbar) und der Warenkorb keinen.
+   Punkt 6 verlangt ausdruecklich, dass der Warenkorb auf **jeder** Breite
+   an derselben Stelle steht. */
+@media (max-width: 480px) {
+  .lotzwoo-contextbar__actions .lotzwoo-headerareas__favorites {
+    display: none;
+  }
+}
+
+/* --- Stufe 400: der Wochentag --------------------------------------
+
+   „Sa., 15.08.2026" wird „15.08.2026". Das Datum traegt den Wochentag
+   ohnehin; auf 390 px ist er die teuerste Silbe im Kopf. */
+@media (max-width: 400px) {
+  .lotzwoo-contextbar__weekday {
+    display: none;
   }
 }
