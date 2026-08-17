@@ -2333,13 +2333,6 @@ main:has(> .lotzwoo-contextbar) {
 /* Die Preisklasse steht unter dem Namen und ist die leiseste Zeile im
    Kopf. Sie beantwortet die zweite Haelfte derselben Frage — zu welchen
    Konditionen — und ist bis heute nirgends sichtbar gewesen. */
-.lotzwoo-headerareas__customer-class {
-  font-size: var(--wp--preset--font-size--xs);
-  color: var(--wp--preset--color--ink-500);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
 
 /* AP-48: hier stand die Schnellsuche des Kopfes und die Begruendung, warum
    ihre Klappe an der Kopfzeile hing und nicht am Suchknopf. Beides ist mit ihr
@@ -2477,16 +2470,10 @@ main:has(> .lotzwoo-contextbar) {
 }
 
 @media (max-width: 880px) {
-  /* Die Preisklasse tritt zurueck — die leiseste Zeile zuerst. */
-  .lotzwoo-headerareas__customer-class {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    margin: -1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-    white-space: nowrap;
-  }
+  /* Hier trat bis zum 2026-08-17 die Preisklasse zurueck. Sie steht seither
+     ueberhaupt nicht mehr im Chip — in welche Kundenklasse ein Kunde faellt,
+     gehoert nicht in den Shop. Eine Stufe, die etwas wegblendet, das es nicht
+     gibt, ist eine Zeile, die beim naechsten Lesen Fragen aufwirft. */
 
   /* Die Beschriftungen ueber Ort und Termin. Der Wert benennt sich selbst
      — „Wien 1100" braucht kein Wort „Lieferort" darueber, sobald der Platz
