@@ -1934,12 +1934,46 @@ main:has(> .lotzwoo-contextbar) {
    haben koennen — „Wien 1100 — Hauptfiliale" steht neben „Abholmarkt".
    Die Hoehe haelt `min-height`: solange die Leiste eine Zeile bleibt,
    zentriert `align-items` den Inhalt darin. */
+/* **`nowrap`, und zwar ohne Medienbedingung.** Der Entwurf, auf den sich der
+   Auftraggeber festgelegt hat, sagt einen Satz, der keine Ausnahme kennt:
+   „sechs Verdichtungsstufen, **keine einzige davon ein Umbruch**." Seine
+   Buehne kennt deshalb gar kein `flex-wrap` — Flex ist von sich aus `nowrap`.
+
+   Hier stand `wrap`, und der Umbruch war messbar: bei 900 px war die Leiste
+   **92 px** hoch und bei 800 px **118 px**, weil erst die Bedienelemente und
+   dann die Angaben selbst in die naechste Zeile rutschten (gemessen am
+   2026-08-17). Zwei Stufen weiter unten wurde das mit `nowrap` in einer
+   Medienbedingung repariert — und damit nur unterhalb 700 px.
+
+   Nachgeben duerfen die Angaben, nicht die Zeile: `min-width: 0` an den
+   Faechern, Auslassungspunkte am Wert, feste Groesse an den Bedienelementen.
+   Das steht gleich darunter und gilt jetzt ebenfalls auf jeder Breite. */
 .lotzwoo-contextbar__inner {
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: var(--wp--preset--spacing--40);
   min-height: 44px;
+}
+
+.lotzwoo-contextbar__facts {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.lotzwoo-contextbar__fact {
+  min-width: 0;
+}
+
+.lotzwoo-contextbar__fact dd {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lotzwoo-contextbar__actions {
+  flex: 0 0 auto;
 }
 
 /* Die Tatsachen als Beschreibungsliste: „Lieferort" ist der Begriff, der
@@ -1950,7 +1984,7 @@ main:has(> .lotzwoo-contextbar) {
 .lotzwoo-contextbar__facts {
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: var(--wp--preset--spacing--40);
   margin: 0;
 }
@@ -3210,6 +3244,22 @@ header .wp-block-navigation__responsive-container.is-menu-open
     clip-path: inset(50%);
     white-space: nowrap;
   }
+
+  /* Der Trenner zwischen Ort und Termin. Er trennte zwei Bloecke, die
+     untereinander standen — sobald sie in **einer** Zeile stehen, trennt sie
+     der Abstand, und der Strich kostet nur Platz. */
+  .lotzwoo-contextbar__sep {
+    display: none;
+  }
+
+  /* Ohne Beschriftung darueber steht der Wert allein — das Paar wird zur
+     Zeile. Der Rest (nicht umbrechen, abschneiden statt wachsen) gilt seit
+     dem 2026-08-17 ohne Medienbedingung und steht beim Grundstil. */
+  .lotzwoo-contextbar__pair {
+    flex-direction: row;
+    align-items: baseline;
+    gap: 4px;
+  }
 }
 
 /* --- Stufe 880: der Oeffner kam an eine Breite gebunden (AP-53) -----
@@ -3232,6 +3282,15 @@ header .wp-block-navigation__responsive-container.is-menu-open
   display: none;
 }
 
+/* Dieselbe Bauart, zwei Stufen weiter unten angewandt: der Winkel des
+   Schalters und der Bestellschluss ohne sein Wort stehen im Dokument und
+   warten auf ihre Stufe. Was hier `display: none` traegt, ist die
+   Ersatzfassung — nie die Angabe selbst. */
+.lotzwoo-contextbar__switch-winkel,
+.lotzwoo-contextbar__cutoff-short {
+  display: none;
+}
+
 @media (max-width: 700px) {
   .lotzwoo-contextbar__facts [data-lotzwoo-contextbar-location] {
     position: absolute;
@@ -3247,7 +3306,10 @@ header .wp-block-navigation__responsive-container.is-menu-open
     display: block;
   }
 
-  /* Einzeilig — aber nachgeben muessen die **Angaben**, nicht die Leiste.
+  /* Einzeilig ist die Leiste schon eine Stufe hoeher (880). Was hier
+     dazukommt, ist die Antwort auf die Frage, **wer** nachgibt, wenn es
+     trotzdem eng wird.
+
      Erster Anlauf war `flex-wrap: nowrap` allein: dann schob der
      `actions`-Platz die Zeile auf 452 px hinaus, bei 390 px Fenster. Vier
      Pruefungen von `kopfflaechen.mjs` haben das gemeldet, und sie hatten
@@ -3255,38 +3317,74 @@ header .wp-block-navigation__responsive-container.is-menu-open
      **keinen** waagrechten Ueberlauf, und das war kein Zufall, sondern eine
      Eigenschaft, die zu halten ist.
 
-     Also: die Angaben duerfen schrumpfen (`min-width: 0` ist noetig, sonst
-     schrumpft ein Flex-Kind nie unter seinen Inhalt) und schneiden mit
-     Auslassungspunkten ab. Favoriten, Warenkorb und Wechsler behalten ihre
-     Groesse — sie sind Bedienelemente, und ein halber Knopf ist keiner. */
+     Die Antwort war bis zum 2026-08-17: die Angaben schneiden ab, die
+     Bedienelemente behalten ihre Groesse. Das war die halbe Miete und im
+     Ergebnis falsch herum — der Entwurf des Auftraggebers laesst statt der
+     Angabe den **Knopf** nachgeben: „der Knopf ‚Wechseln' entfaellt, weil die
+     Leiste selbst antippbar wird — die 95 px, die er braucht, sind genau die,
+     die dem Ortsnamen fehlen." Unten steht, wie das gebaut ist. */
+
+  /* Der Zwischenraum wird schmaler. 8 px statt 16 — bei einer Leiste, die
+     ihre Angaben abschneiden muss, ist jede Rinne ein Zeichen weniger. */
   .lotzwoo-contextbar__inner {
-    flex-wrap: nowrap;
+    gap: 8px;
+    padding-inline: 10px;
   }
 
   .lotzwoo-contextbar__facts {
-    flex: 1 1 auto;
-    min-width: 0;
-    overflow: hidden;
+    gap: 8px;
   }
 
-  .lotzwoo-contextbar__fact {
-    min-width: 0;
-  }
+  /* **Der Schalter verliert sein Wort und behaelt seine Aufgabe.**
+     Aus „Wechseln" (94 px gemessen) wird ein Winkel in einer Trefferflaeche
+     von 40 x 40 — 54 px, die den Angaben zugutekommen. Das Wort verschwindet
+     nur optisch und wird weiter vorgelesen; `aria-expanded` am selben Knopf
+     sagt unveraendert, was er tut.
 
-  .lotzwoo-contextbar__fact dd {
+     Der Entwurf zeichnet hier zwei Elemente und blendet je eines aus. Gebaut
+     ist **einer** mit zwei Fassungen darin — die Begruendung steht in
+     `templates/context-bar.php`: zwei Ausloeser waeren zwei Zustaende, die
+     auseinanderlaufen koennen. */
+  .lotzwoo-contextbar__switch-wort {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
     overflow: hidden;
-    text-overflow: ellipsis;
+    clip-path: inset(50%);
     white-space: nowrap;
   }
 
-  .lotzwoo-contextbar__actions {
-    flex: 0 0 auto;
+  .lotzwoo-contextbar__switch {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    min-width: 40px;
+    min-height: 40px;
+    padding: 0;
   }
 
-  .lotzwoo-contextbar__pair {
-    flex-direction: row;
-    align-items: baseline;
-    gap: 4px;
+  .lotzwoo-contextbar__switch-winkel {
+    display: block;
+  }
+
+  /* Die Langformen treten zurueck: das Zeitfenster hinter dem Datum und das
+     Wort „Bestellschluss" vor der Uhrzeit. Beides steht in der Klappe, die
+     der Schalter daneben oeffnet, und beides bleibt im Dokument stehen —
+     weggeblendet wird es fuer die Augen, nicht fuers Vorlesen. */
+  .lotzwoo-contextbar__lang {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .lotzwoo-contextbar__cutoff-short {
+    display: inline;
   }
 }
 
@@ -3299,6 +3397,24 @@ header .wp-block-navigation__responsive-container.is-menu-open
 @media (max-width: 480px) {
   .lotzwoo-contextbar__actions .lotzwoo-headerareas__favorites {
     display: none;
+  }
+
+  /* Und die Rinnen enger. Der Entwurf beziffert, was das bringt: „die 14 px
+     sind genau die, die zwischen ‚Wien 11…' und ‚Wien 1100' liegen" — auf
+     390 px gemessen. Eine Stufe, die nur etwas wegnimmt, verschenkt den
+     Platz, den das Wegnehmen frei macht. */
+  .lotzwoo-contextbar__inner {
+    gap: 6px;
+    padding-inline: 8px;
+  }
+
+  .lotzwoo-contextbar__facts {
+    gap: 6px;
+  }
+
+  .lotzwoo-contextbar__cutoff {
+    margin-inline-start: 0.35em;
+    padding: 2px 6px;
   }
 }
 
