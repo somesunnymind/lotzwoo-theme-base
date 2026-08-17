@@ -3335,6 +3335,65 @@ header .wp-block-navigation__responsive-container.is-menu-open
     gap: 8px;
   }
 
+  /* **Nachgeben darf der Ort, nicht der Termin.** Die Regel steht so im
+     Entwurf und ist die, ohne die alles andere nichts nuetzt: solange beide
+     Faecher gleichermassen schrumpfen durften, wurde der Termin auf 96 px
+     gequetscht und der Bestellschluss darin — 252 px breit — von
+     `overflow: hidden` einfach abgeschnitten. Auf 390 px stand dort ein
+     Uhrsymbol ohne Uhrzeit.
+
+     Der Termin ist die Angabe mit der Frist daran; der Ortsname ist die, die
+     sich kuerzen laesst, ohne dass die Auskunft verlorengeht — und fuer ihn
+     steht die Kurzform bereit. */
+  .lotzwoo-contextbar__fact {
+    flex: 0 1 auto;
+    min-width: 0;
+  }
+
+  /* Der Ort gibt **zuerst** nach, und zwar viermal so schnell. Ein blosses
+     „der Termin schrumpft gar nicht" (so steht es im Entwurf) rechnet mit
+     dessen Zeichenketten: dort steht „Sa., 15.08." und „16:03", hier
+     „Do., 20.08.2026" und „19.08.2026, 15:33" — 274 px statt 190. Gemessen
+     stand der Termin damit auf 390 px ueber den Rand hinaus und der
+     Bestellschluss wurde abgeschnitten, also genau die Angabe mit der Frist
+     daran. Beide duerfen jetzt nachgeben, der Ort viel frueher. */
+  .lotzwoo-contextbar__fact:first-child {
+    flex-shrink: 4;
+    /* **Aber nie auf null.** „Viermal so schnell" heisst ohne Untergrenze:
+       auf 320 px war der Ortsname 0 px breit, und `eine-kontextleiste.mjs`
+       hat genau das gemeldet — die Zusicherung dort verlangt, dass beide
+       Angaben Flaeche haben, und sie hat recht: ein Lieferort, den man nicht
+       sieht, ist der Befund, gegen den dieser ganze Umbau angetreten ist.
+
+       6ch sind gemessen die Breite, ab der die Kurzform noch etwas sagt
+       („Wien 1…", „Mödling"). Was darunter fehlt, nimmt sich der Termin vom
+       eigenen Datum — sein Abzeichen mit der Frist bleibt davon unberuehrt. */
+    min-width: 6ch;
+  }
+
+  /* **Und im Termin gibt das Datum nach, nie der Bestellschluss.** Dafuer
+     wird die Angabe zur Zeile: der Text schneidet mit Auslassungspunkten ab,
+     das Abzeichen behaelt seine Groesse. Ohne das kuerzt `text-overflow`
+     beides gemeinsam — und weil das Abzeichen hinten steht, verschwindet es
+     zuerst. */
+  .lotzwoo-contextbar__fact [data-lotzwoo-contextbar-appointment] {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    min-width: 0;
+  }
+
+  .lotzwoo-contextbar__fact [data-lotzwoo-contextbar-appointment-text] {
+    overflow: hidden;
+    min-width: 0;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .lotzwoo-contextbar__cutoff {
+    flex: none;
+  }
+
   /* **Der Schalter verliert sein Wort und behaelt seine Aufgabe.**
      Aus „Wechseln" (94 px gemessen) wird ein Winkel in einer Trefferflaeche
      von 40 x 40 — 54 px, die den Angaben zugutekommen. Das Wort verschwindet
@@ -3426,4 +3485,40 @@ header .wp-block-navigation__responsive-container.is-menu-open
   .lotzwoo-contextbar__weekday {
     display: none;
   }
+}
+
+/* -------------------------------------------------------------------
+   WooCommerce zwingt seinen Seiten eine eigene Inhaltsbreite auf —
+   und bricht damit die linke Kante (AP-58)
+
+   `woocommerce-blocktheme.css` setzt auf Konto, Warenkorb und Kasse:
+
+       .woocommerce-account .wp-block-post-title,
+       .woocommerce-account main .woocommerce, …   { max-width: 1000px }
+
+   Unser `contentSize` ist **960px** (`theme.json`). Der Seitentitel bekommt
+   damit 1000, der Inhalt darunter bleibt bei 960 — beide zentriert, und die
+   Differenz von 40px verteilt sich auf zwei Seiten. Gemessen am 2026-08-17 auf
+   `/konto/` bei 1440px: Überschrift links bei **220**, erster Reiter bei
+   **240**. Bei 390px stehen beide auf 16, weil dort nichts mehr zu zentrieren
+   ist — deshalb sieht man den Fehler nur breit.
+
+   **Warum es nur auf der Kontoseite auffällt und die Regel trotzdem global
+   ist:** Woos Liste trifft drei Seiten, aber nur das Konto stellt Titel und
+   eingerückte Navigation direkt untereinander. Warenkorb und Kasse tragen
+   denselben Versatz, ohne dass er dort eine Kante bricht. Eine Regel, die nur
+   `.woocommerce-account` heilte, ließe den Fehler an zwei Stellen stehen und
+   wartete darauf, dass ihn dort jemand findet.
+
+   **Wirkungslos überall sonst:** die drei Klassen setzt WooCommerce selbst auf
+   `<body>`, und ohne sie greift nichts hier. Eine gewöhnliche Inhaltsseite
+   bleibt unberührt — nachgemessen.
+   ------------------------------------------------------------------- */
+.woocommerce-account .wp-block-post-title,
+.woocommerce-account main .woocommerce,
+.woocommerce-cart .wp-block-post-title,
+.woocommerce-cart main .woocommerce,
+.woocommerce-checkout .wp-block-post-title,
+.woocommerce-checkout main .woocommerce {
+  max-width: var(--wp--style--global--content-size);
 }
