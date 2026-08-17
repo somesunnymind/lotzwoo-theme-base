@@ -2181,30 +2181,40 @@ main:has(> .lotzwoo-contextbar) {
   color: #ffb4ad;
 }
 
-/* Auf schmalen Schirmen bekommt jede Tatsache ihre Zeile, und die Aktionen
-   ruecken unter die Werte statt neben sie: bei 390 px teilen sich
-   „Wien 1100 — Hauptfiliale" und „Wechseln" sonst 22 Zeichen Platz. */
-@media (max-width: 600px) {
-  .lotzwoo-contextbar__inner {
-    gap: var(--wp--preset--spacing--20);
-    padding-block: var(--wp--preset--spacing--20);
-  }
+/* --- Die 600er-Stufe der Leiste ist am 2026-08-17 entfallen ----------
 
-  .lotzwoo-contextbar__facts {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--wp--preset--spacing--20);
-  }
+   Hier stapelte die Kontextleiste ihre Tatsachen: jede Tatsache ihre Zeile,
+   die Aktionen auf volle Breite darunter. Das war richtig, solange die Zeile
+   umbrechen durfte — und es ist am selben Tag um 10:03 falsch geworden, ohne
+   dass eine Regel sich geaendert haette.
 
-  .lotzwoo-contextbar__sep {
-    display: none;
-  }
+   **Was passiert ist.** Die 700er-Stufe (AP-48, weiter unten) setzt
+   `flex-wrap: nowrap` auf `__inner`; nachgeben sollen seither die Angaben, mit
+   Auslassungspunkten, nicht die Leiste. Die `width: 100%` der Aktionen aus
+   diesem Block blieb daneben stehen. Beide Bloecke kollidierten in **keiner**
+   einzelnen Eigenschaft, also entschied die Kaskade nichts und beide galten:
+   die Aktionen nahmen die ganze Zeile, umbrechen durfte nichts mehr, und fuer
+   Ort und Termin blieben **null Pixel**. Am Klon gemessen — bei 601 px waren
+   die Angaben 367 px breit, bei 600 px 0, und zwar bis 320 px hinunter.
 
-  .lotzwoo-contextbar__actions {
-    width: 100%;
-    margin-inline-start: 0;
-  }
-}
+   Das ist die teuerste Sorte Fehler: er stand in keiner der beiden Regeln, er
+   entstand zwischen ihnen. Kein waagrechter Ueberlauf, keine rote Zusicherung,
+   keine Meldung — die Leiste zeigte auf jedem Telefon einfach nichts mehr an.
+
+   **Entfallen ist er ersatzlos, nicht zusammengefuehrt.** Die 700er-Stufe
+   traegt den Fall vollstaendig: gemessen laufen die Angaben von 367 px bei
+   601 auf 130 px bei 320 durch, die Leiste bleibt ueber den ganzen Bereich
+   **62 px** hoch, und es gibt auf keiner Breite einen waagrechten Ueberlauf.
+   Der Rest dieses Blocks — engere Abstaende und ein weggeblendeter Trenner —
+   ist mitgegangen, weil er eine **zweite Schwelle** bei 600 baute, wo jetzt
+   eine Darstellung genuegt: mit ihm sprang die klebende Leiste dort von 62 auf
+   70 px, und Hoehe ist bei einer Leiste, die stehen bleibt, die teuerste
+   Groesse.
+
+   Die Zusicherung dazu steht in `eine-kontextleiste.mjs` (Plugin-Repo): sie
+   misst die Angaben ueber die Schwelle hinweg und wird rot, wenn ihre Breite
+   auf null faellt.
+   ------------------------------------------------------------------- */
 
 /* =====================================================================
    Die drei Kopfflaechen des Plugins — `lotzwoo/header-slot`
