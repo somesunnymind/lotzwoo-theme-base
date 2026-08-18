@@ -18,7 +18,7 @@ Tags: block-theme, full-site-editing, e-commerce
    Die Brücke zwischen theme.json und den B2B-Oberflächen.
 
    Das Plugin bringt sein eigenes Design-System mit (`b2b-tokens.css`,
-   54 Custom Properties, auf die sechs Wurzeln unten gescopet — bis zum
+   54 Custom Properties, auf die acht Wurzeln unten gescopet — bis zum
    2026-08-13 stand hier „`.lotzwoo-b2b-shop` und `.lotzwoo-reorder`", und
    genau diese verkürzte Liste war der Fehler). Das ist richtig so: das
    Plugin muss in jedem Theme funktionieren, auch in einem, das nichts von
@@ -49,7 +49,8 @@ Tags: block-theme, full-site-editing, e-commerce
    ================================================================== */
 
 /* ------------------------------------------------------------------
-   Die sechs Wurzeln sind ein Vertrag zwischen zwei Repos.
+   Die acht Wurzeln sind ein Vertrag zwischen zwei Repos.
+   (`.lotzwoo-standing-orders` kam mit AP-58, `.lotzwoo-contextcard` mit AP-60.)
 
    Dieselbe Liste steht in `lotzapp-for-woocommerce/assets/css/b2b-tokens.css`,
    und sie muss dort dieselbe sein. Wer hier eine Fläche hinzufügt und dort
@@ -77,6 +78,7 @@ Tags: block-theme, full-site-editing, e-commerce
 .lotzwoo-locations,
 .lotzwoo-standing-orders,
 .lotzwoo-ordercontext,
+.lotzwoo-contextcard,
 .lotzwoo-heldback {
   --lwb-brand-50:  var(--wp--preset--color--brand-50,  #eaf6f1);
   --lwb-brand-100: var(--wp--preset--color--brand-100, #cfe9de);
@@ -212,6 +214,7 @@ Tags: block-theme, full-site-editing, e-commerce
 .lotzwoo-locations,
 .lotzwoo-standing-orders,
 .lotzwoo-ordercontext,
+.lotzwoo-contextcard,
 .lotzwoo-heldback {
   font-family: var(--wp--preset--font-family--sans, "Inter", "Segoe UI", system-ui, sans-serif);
 }
@@ -228,6 +231,7 @@ Tags: block-theme, full-site-editing, e-commerce
 .lotzwoo-favorites :is(h2, h3, h4, h5, h6),
 .lotzwoo-locations :is(h2, h3, h4, h5, h6),
 .lotzwoo-ordercontext :is(h2, h3, h4, h5, h6),
+.lotzwoo-contextcard :is(h2, h3, h4, h5, h6),
 .lotzwoo-heldback :is(h2, h3, h4, h5, h6) {
   font-family: inherit;
 }
