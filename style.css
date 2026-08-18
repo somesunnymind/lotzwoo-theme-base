@@ -3254,7 +3254,19 @@ header .wp-block-navigation__responsive-container.is-menu-open
 }
 
 @media (max-width: 700px) {
-  .lotzwoo-contextbar__facts [data-lotzwoo-contextbar-location] {
+  /* **Nur zurücktreten, wenn eine Kurzform bereitsteht.**
+     `Location::short_label()` schneidet am Gedankenstrich ab — „Wien 1100 —
+     Hauptfiliale" wird „Wien 1100". Ein Ortsname **ohne** Trenner („Tour W4
+     Dienstag") hat keine kuerzere Fassung, und die Vorlage zeichnet dann auch
+     keine: sie setzt kein leeres Element fuer einen Fall, den es nicht gibt.
+
+     Unbedingt gesetzt, versteckte diese Regel dann die einzige vorhandene
+     Fassung — ab 700 px stand kein Ortsname mehr da. `eine-kontextleiste.mjs`
+     hat das an 26 Stellen gemeldet, und die Zusicherung hatte recht.
+     `:has()` fragt deshalb nach der Ersatzfassung, bevor es das Original
+     wegnimmt. */
+  .lotzwoo-contextbar__fact:has(.lotzwoo-contextbar__location-short)
+    [data-lotzwoo-contextbar-location] {
     position: absolute;
     width: 1px;
     height: 1px;
