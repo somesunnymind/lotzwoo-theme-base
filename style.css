@@ -1960,6 +1960,29 @@ main:has(> .lotzwoo-contextbar) {
   min-height: 44px;
 }
 
+/* **Die Auskunft fluchtet mit der Seite, die Flaeche laeuft durch.**
+
+   Die Leiste steht auf zwei verschiedenen Arten im Dokument: im Sortiment
+   zeichnet der Kurzcode sie **in** seinem eigenen Behaelter, auf Warenkorb,
+   Konto und Favoriten haengt sie als Block `lotzwoo/context-slot` direkt in
+   `.wp-site-blocks` — ausserhalb jeder Inhaltsspalte.
+
+   Gemessen am 2026-08-17 bei 1920 px: dort begann ihre Auskunft bei x = 16,
+   waehrend der Seiteninhalt darunter in einer zentrierten 960er-Spalte bei
+   x = 480 anfing. Die Leiste sah damit aus, als gehoere sie nicht zur Seite,
+   sondern liege darueber.
+
+   Die dunkle Flaeche laeuft weiterhin bis zum Fensterrand — das traegt der
+   Schlagschatten mit `100vmax`, und daran aendert sich nichts. Begrenzt wird
+   nur, **wo der Inhalt steht**: dieselbe Rasterbreite, die das Theme jedem
+   `constrained` Block gibt. Im Sortiment greift die Regel nicht: dort liegt
+   die Leiste im Kurzcode-Behaelter und fluchtet schon. */
+.wp-site-blocks > .lotzwoo-contextbar .lotzwoo-contextbar__inner {
+  box-sizing: border-box;
+  max-width: var(--wp--style--global--content-size);
+  margin-inline: auto;
+}
+
 .lotzwoo-contextbar__facts {
   flex: 1 1 auto;
   min-width: 0;
@@ -2135,91 +2158,22 @@ main:has(> .lotzwoo-contextbar) {
   color: var(--wp--preset--color--surface);
 }
 
-/* Die Klappe mit dem Waehler. Sichtbar wird sie durch das Entfernen von
-   `hidden`; das Skript setzt nichts an `style`. Das Sortiment rendert sie
-   gar nicht — es hat seinen eigenen, vollen Ort/Termin-Dialog. */
-.lotzwoo-contextbar__panel {
-  display: flex;
-  align-items: flex-end;
-  flex-wrap: wrap;
-  gap: var(--wp--preset--spacing--20) var(--wp--preset--spacing--40);
-  margin-bottom: var(--wp--preset--spacing--30);
-  padding-top: var(--wp--preset--spacing--30);
-  border-top: 1px solid rgba(255, 255, 255, 0.18);
-}
+/* --- Die Klappe mit dem Waehler ist am 2026-08-17 entfallen ---------
 
-.lotzwoo-contextbar__panel[hidden] {
-  display: none;
-}
+   Hier standen rund achtzig Zeilen fuer `.lotzwoo-contextbar__panel` und ihre
+   Teile: zwei Auswahlfelder, ein Knopf, eine Statuszeile. Sie waren die
+   **zweite** Antwort auf dieselbe Frage — im Sortiment oeffnete derselbe Knopf
+   einen vollen Waehler im Modal, mit Suche und mit den Abzeichen fuer
+   Mindestbestellwert und Bestellschluss. Auf Warenkorb und Konto, also dort,
+   wo der Korb schon gefuellt ist, stand die schlechtere.
 
-.lotzwoo-contextbar__field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35em;
-  min-width: 16rem;
-  flex: 1 1 16rem;
-}
-
-.lotzwoo-contextbar__field > span {
-  font-size: var(--wp--preset--font-size--xs);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--wp--preset--color--ink-300);
-}
-
-/* Das Auswahlfeld bekommt eine Linie statt eines Kastens — ein `<select>`
-   bringt seinen eigenen Rahmen mit, und `appearance: none` waere der
-   Punkt, an dem man den Pfeil selbst nachbauen muss. `color-scheme: dark`
-   sagt dem Browser, dass die Klappe des Feldes auf dunklem Grund steht;
-   ohne das zeichnet er schwarze Schrift auf schwarzem Feld. */
-.lotzwoo-contextbar__field select {
-  width: 100%;
-  padding: 0.4em 0;
-  border: 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.4);
-  border-radius: 0;
-  background: none;
-  font: inherit;
-  color: var(--wp--preset--color--surface);
-  color-scheme: dark;
-}
-
-.lotzwoo-contextbar__field select:disabled {
-  color: var(--wp--preset--color--ink-300);
-}
-
-.lotzwoo-contextbar__apply {
-  padding: 0.5em 1.2em;
-  border: 1px solid var(--wp--preset--color--surface);
-  border-radius: 6px;
-  background: var(--wp--preset--color--surface);
-  font: inherit;
-  font-weight: 600;
-  color: var(--wp--preset--color--ink-900);
-  cursor: pointer;
-}
-
-.lotzwoo-contextbar__apply[disabled] {
-  border-color: rgba(255, 255, 255, 0.3);
-  background: rgba(255, 255, 255, 0.3);
-  color: var(--wp--preset--color--ink-700);
-  cursor: default;
-}
-
-/* Die Statuszeile der Klappe steht **in** der Klappe. Der Grund steht im
-   Browser-Durchgang zu Posten 9: auf 390 px stand dieselbe Meldung einmal
-   944 Pixel ueber dem Knopf, der sie ausgeloest hatte, also ausserhalb des
-   Bildes. `flex-basis: 100%` gibt ihr eine eigene Zeile direkt darunter. */
-.lotzwoo-contextbar__say {
-  flex: 1 0 100%;
-  margin: 0;
-  font-size: var(--wp--preset--font-size--sm);
-  color: rgba(255, 255, 255, 0.82);
-}
-
-.lotzwoo-contextbar__say--err {
-  color: #ffb4ad;
-}
+   Der Waehler ist ausgezogen und gehoert jetzt dem Plugin
+   (`assets/js/b2b-context-picker.js` samt eigenem Stylesheet). Das ist die
+   Ausnahme von AD-1 und sie ist begruendet: ein Modal steht ueber der Seite,
+   gehoert keinem Seitenbereich, und ohne Gestaltung ist es nicht schlicht,
+   sondern unbenutzbar. Wer dieses Theme nicht einsetzt, bekommt trotzdem
+   einen Waehler, der funktioniert.
+   ------------------------------------------------------------------- */
 
 /* --- Die 600er-Stufe der Leiste ist am 2026-08-17 entfallen ----------
 
