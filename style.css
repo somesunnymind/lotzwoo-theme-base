@@ -3480,3 +3480,403 @@ header .wp-block-navigation__responsive-container.is-menu-open
 .woocommerce-checkout main .woocommerce {
   max-width: var(--wp--style--global--content-size);
 }
+
+/* --- Ausser dem Titel, der sich selbst als `alignwide` ausweist ------
+
+   Die Regel darueber ist fuer die Kontoseite gebaut und trifft drei Seiten.
+   Auf dem Warenkorb bricht sie genau die Kante, von der der Kommentar oben
+   sagt, sie bleibe dort heil: `templates/page-cart.html` gibt dem Titel
+   `{"align":"wide"}` und dem Warenkorbblock `alignwide`, beide sollen also
+   auf derselben Linie stehen. Gemessen am 2026-08-18 bei 1440px stand der
+   Titel bei x=240 mit 960px Breite, der Block darunter bei x=16 mit 1408 —
+   **224px Versatz zwischen einer Ueberschrift und ihrem eigenen Inhalt.**
+
+   Kein Zurueckdrehen der Regel darueber: sie nimmt Woos Versatz weiter weg,
+   wo niemand `alignwide` gesagt hat. Ausgenommen ist nur, was die Vorlage
+   ausdruecklich breit stellt — dort gilt wieder `wideSize`, dieselbe Zahl,
+   die der Kern jedem anderen `alignwide` gibt. */
+.woocommerce-cart .wp-block-post-title.alignwide,
+.woocommerce-checkout .wp-block-post-title.alignwide {
+  max-width: var(--wp--style--global--wide-size);
+}
+
+/* =====================================================================
+   Der Kaufweg — Warenkorb, Kasse, Bestellbestaetigung und Seitenkorb
+   (AP-61)
+
+   Vier Flaechen, die WooCommerce selbst zeichnet, und bis zum 2026-08-18
+   die einzigen im ganzen Portal ohne eine einzige Zeile dieses Themes.
+   Was dort stand, war Woos Werkseinstellung — und die ist nicht neutral,
+   sondern ein eigenes, fremdes Design-System: kalte Linien aus
+   `currentColor`, 4px-Radien, acht festverdrahtete Hinweisfarben, Schwarz
+   als Auswahlfarbe.
+
+   **Der Befund in einem Satz:** derselbe Kunde sieht im Sortiment die
+   Marke des Shops und drei Klicks spaeter WooCommerce. Gemessen am
+   2026-08-18 an `/warenkorb/`, `/kasse/`,
+   `/kasse/bestellung-erhalten/581/` und am Seitenkorb, bei 1440px, gegen
+   die Werte, die `.lwb-input`, `.lwb-panel` und `.lwb-alert` im Sortiment
+   auf derselben Installation tatsaechlich zeichnen.
+
+   **Warum hier und nicht im Plugin** — dieselbe Antwort wie bei
+   `.lotzwoo-contextbar`, `.lotzwoo-heldback` und den Kopfflaechen: das
+   Plugin entscheidet, *was* im Kaufweg steht (Artikelnummer,
+   zurueckgehaltene Positionen, Bestellkontext), dieses Theme *wie* es
+   aussieht. Und es steht in `--wp--preset--*` statt in `--lwb-*`, weil
+   diese Flaechen nicht unter den acht Wurzeln liegen: ein `var(--lwb-…)`
+   loest hier auf nichts auf, und zwar lautlos.
+
+   **Die Reihenfolge traegt hier mit.** Woos Blockstile stehen im Dokument
+   als Handles 11 bis 22, diese Datei als 31 (abgelesen 2026-08-18 auf
+   `/warenkorb/`). Regeln gleicher Spezifitaet gewinnen deshalb hier. Wer
+   das Enqueue umbaut, bricht diesen Abschnitt, ohne dass etwas rot wird.
+   ===================================================================== */
+
+/* --- 1. Eine Linie, und es ist die der Marke -------------------------
+
+   ADR 004 verlangt „feine Linien statt Kaesten", und die Linie ist
+   `ink-200` — dieselbe Zahl, die weiter oben schon die Trennlinie, die
+   Kopfunterkante und die Fusskante traegt.
+
+   Woo zieht stattdessen jede Linie als
+   `color-mix(in srgb, currentColor 20%, transparent)`. Auf `ink-900`
+   ergibt das ein kaltes Grauschwarz — gemessen
+   `color(srgb 0.105882 0.0980392 0.0862745 / 0.2)` an der Warenkorbtabelle,
+   an den Adresskaesten der Bestaetigung und am Trennstrich ueber den AGB,
+   und mit 30% am Mengenwaehler und an der Fusskante des Seitenkorbs.
+   Neben `#e4daca` steht das wie ein Ausdruck neben einem Druck.
+
+   **Aufgezaehlt statt pauschal.** Ein `border-color` auf alle Nachkommen
+   traefe auch Fokusringe, Abzeichen und Knopfkanten. Was hier steht, ist
+   die Liste der Linien, die auf den vier Flaechen tatsaechlich sichtbar
+   waren; eine, die Woo nur im Ladezustand oder in der Expresskasse zieht,
+   steht bewusst nicht dabei. */
+.wp-block-woocommerce-cart .wc-block-cart__main .wc-block-cart-items,
+.wp-block-woocommerce-cart .wc-block-cart__main .wc-block-cart-items td,
+.wp-block-woocommerce-cart table.wc-block-cart-items .wc-block-cart-items__row,
+.wp-block-woocommerce-cart .wp-block-woocommerce-cart-order-summary-block,
+.wp-block-woocommerce-cart .wp-block-woocommerce-cart-order-summary-totals-block,
+.wp-block-woocommerce-checkout .wp-block-woocommerce-checkout-order-summary-block,
+.wp-block-woocommerce-checkout .wc-block-components-checkout-order-summary__title,
+.wp-block-woocommerce-checkout .wc-block-components-checkout-order-summary__content.is-open,
+.wp-block-woocommerce-checkout .wp-block-woocommerce-checkout-order-summary-totals-block,
+.wp-block-woocommerce-checkout .wc-block-components-address-card,
+.wp-block-woocommerce-checkout .wc-block-checkout__terms--with-separator,
+.wp-block-woocommerce-checkout .wc-block-components-shipping-rates-control__package--multiple,
+.wp-block-woocommerce-checkout .wc-block-components-local-pickup-select--multiple,
+.wp-block-woocommerce-checkout .wc-block-components-panel.has-border,
+.wp-block-woocommerce-checkout .wc-block-components-radio-control--highlight-checked::after,
+.wc-block-mini-cart__drawer .wc-block-mini-cart__footer,
+.wc-block-order-confirmation-totals__table,
+.wc-block-order-confirmation-totals__table td,
+.wc-block-order-confirmation-totals__table th,
+.wc-block-order-confirmation-shipping-address,
+.wc-block-order-confirmation-billing-address,
+.wc-block-order-confirmation-additional-fields,
+.wc-block-cart-item__quantity .wc-block-components-quantity-selector {
+  border-color: var(--wp--preset--color--ink-200);
+}
+
+/* Zwei Linien zeichnet Woo nicht als Rahmen, sondern als 1px hohes
+   `::after` mit Hintergrundfarbe — die Trenner zwischen den Versand- und
+   Zahlungsoptionen. Dieselbe Farbe, andere Eigenschaft. */
+.wp-block-woocommerce-checkout .wc-block-components-radio-control--highlight-checked .wc-block-components-radio-control__option::after,
+.wp-block-woocommerce-checkout .wc-block-components-radio-control--highlight-checked div.wc-block-components-radio-control-accordion-option::after {
+  background: var(--wp--preset--color--ink-200);
+}
+
+/* --- 2. Die Radien der Skala ----------------------------------------
+
+   Woo setzt ueberall 4px. Die Skala kennt 5 / 8 / 12, und der Kaufweg ist
+   die einzige Stelle im Portal, an der 4 vorkam. Angewandt wie im
+   Sortiment: 8 fuer alles, was man bedient (Feld, Mengenwaehler, Option,
+   Hinweis), 12 fuer die Kaesten, die Inhalt tragen (`.lwb-panel` = 12). */
+.wp-block-woocommerce-checkout .wc-block-components-text-input input,
+.wp-block-woocommerce-checkout .wc-block-components-address-card,
+.wp-block-woocommerce-checkout .wc-block-components-radio-control--highlight-checked::after,
+.wp-block-woocommerce-checkout .wc-block-components-radio-control--highlight-checked .wc-block-components-radio-control-accordion-option--checked-option-highlighted,
+.wp-block-woocommerce-checkout .wc-block-components-shipping-rates-control__package--multiple,
+.wp-block-woocommerce-checkout .wc-block-components-local-pickup-select--multiple,
+.wc-block-cart-item__quantity .wc-block-components-quantity-selector,
+.wc-block-components-notice-banner {
+  border-radius: 8px;
+}
+
+.wp-block-woocommerce-checkout .wp-block-woocommerce-checkout-order-summary-block,
+.wc-block-order-confirmation-totals__table,
+.wc-block-order-confirmation-shipping-address,
+.wc-block-order-confirmation-billing-address,
+.wc-block-order-confirmation-additional-fields {
+  border-radius: 12px;
+}
+
+/* --- 3. Die Hinweise tragen die Palette -----------------------------
+
+   Acht festverdrahtete Hexwerte stehen in `wc-blocks.css`: `#fff0f0`,
+   `#cc1818`, `#fffbf4`, `#f0b849`, `#f4fff7`, `#4ab866`, `#f4f8ff`,
+   `#007cba` — dazu `#2f2f2f` fuer Text und Symbol. Keiner davon steht in
+   einer der beiden `theme.json`.
+
+   Gemessen hat das am 2026-08-18 den Mindestbestellwert-Hinweis auf
+   `/warenkorb/` und im Seitenkorb in Woo-Rot statt in `err-500` gezeigt —
+   zwei Rottoene in einem Bild, und der falsche war der lautere.
+
+   Die drei Randfarben sind die des Plugins (`.lwb-alert--warn|err|info`,
+   `b2b-shop.css`), Zeichen fuer Zeichen. Damit sehen der Hinweis im
+   Sortiment und der im Warenkorb gleich aus — das ist der Zweck. Fuer
+   `is-success` hat das Plugin keine Vorlage; dort steht die einzige
+   errechnete Farbe dieses Abschnitts. */
+.wc-block-components-notice-banner {
+  border-color: var(--wp--preset--color--ink-200);
+  background-color: var(--wp--preset--color--ink-50);
+  color: var(--wp--preset--color--ink-700);
+  font-size: var(--wp--preset--font-size--sm);
+}
+
+.wc-block-components-notice-banner > svg {
+  background-color: var(--wp--preset--color--ink-500);
+}
+
+.wc-block-components-notice-banner.is-error {
+  border-color: #f4b9b9;
+  background-color: var(--wp--preset--color--err-50);
+  color: var(--wp--preset--color--err-700);
+}
+
+.wc-block-components-notice-banner.is-error > svg {
+  background-color: var(--wp--preset--color--err-500);
+}
+
+.wc-block-components-notice-banner.is-warning {
+  border-color: #f4d9a4;
+  background-color: var(--wp--preset--color--warn-50);
+  color: var(--wp--preset--color--warn-500);
+}
+
+.wc-block-components-notice-banner.is-warning > svg {
+  background-color: var(--wp--preset--color--warn-500);
+}
+
+.wc-block-components-notice-banner.is-info {
+  border-color: #b9cff2;
+  background-color: var(--wp--preset--color--info-50);
+  color: var(--wp--preset--color--info-500);
+}
+
+.wc-block-components-notice-banner.is-info > svg {
+  background-color: var(--wp--preset--color--info-500);
+}
+
+.wc-block-components-notice-banner.is-success {
+  border-color: color-mix(in srgb, var(--wp--preset--color--ok-500) 35%, transparent);
+  background-color: var(--wp--preset--color--ok-50);
+  color: var(--wp--preset--color--ok-500);
+}
+
+.wc-block-components-notice-banner.is-success > svg {
+  background-color: var(--wp--preset--color--ok-500);
+}
+
+/* --- 4. Die Auswahl traegt die Marke, nicht Schwarz ------------------
+
+   `wc-blocks.css` zeichnet den Punkt der gewaehlten Versand- oder
+   Zahlungsart als `background:#000` und ihren Rahmen als
+   `inset 0 0 0 1.5px currentColor`. Gemessen ergab das auf der Kasse eine
+   schwarze Auswahlmarke in einem Shop, dessen Akzent `#b33a2b` ist — die
+   einzige Stelle im ganzen Kaufweg, an der eine Zustandsfarbe vorkommt,
+   und sie sagt nichts ueber die Marke.
+
+   Der ungewaehlte Rahmen kommt von `currentColor 48%` und wird `ink-350`,
+   dieselbe Rolle („Rahmen Bedienelement"), die `.lwb-input` im Sortiment
+   traegt. */
+.wp-block-woocommerce-checkout .wc-block-components-radio-control__input {
+  border-color: var(--wp--preset--color--ink-350);
+  background: var(--wp--preset--color--white);
+}
+
+.wp-block-woocommerce-checkout .wc-block-components-radio-control__input:checked {
+  border-color: var(--wp--preset--color--brand-500);
+}
+
+.wp-block-woocommerce-checkout .wc-block-components-radio-control__input:checked::before {
+  background: var(--wp--preset--color--brand-500);
+}
+
+.wp-block-woocommerce-checkout .wc-block-components-radio-control--highlight-checked .wc-block-components-radio-control-accordion-option--checked-option-highlighted,
+.wp-block-woocommerce-checkout .wc-block-components-radio-control--highlight-checked .wc-block-components-radio-control__option--checked-option-highlighted {
+  box-shadow: inset 0 0 0 1.5px var(--wp--preset--color--brand-500);
+}
+
+/* --- 5. Felder und Kaesten wie im Sortiment -------------------------
+
+   `.lwb-input` zeichnet am 2026-08-18 gemessen: `1px solid #8c8073`,
+   Radius 8, Flaeche `#fbf7f0`. Woos Feld auf der Kasse zeichnete
+   `1px solid color(srgb 0.168 0.176 0.184 / 0.8)`, Radius 4, Flaeche
+   `#ffffff` — auf einer cremefarbenen Seite ein weisser Kasten mit
+   grauem Rand.
+
+   **Die Schriftgroesse bleibt bei 16px**, obwohl `.lwb-input` 15 traegt.
+   Das ist keine Nachlaessigkeit: unter 16px zoomt iOS Safari beim
+   Hineintippen in das Feld hinein, und diese 16 sind Woos Antwort darauf.
+   Ein Pixel Abweichung gegen einen Sprung der ganzen Seite auf dem Telefon
+   ist kein Tausch, den dieser Abschnitt machen sollte. */
+.wp-block-woocommerce-checkout .wc-block-components-text-input input,
+.wp-block-woocommerce-checkout .wc-block-components-textarea {
+  border-color: var(--wp--preset--color--ink-350);
+  background-color: var(--wp--preset--color--surface);
+}
+
+/* Der Mengenwaehler steht im Warenkorb **und** im Seitenkorb, und sein
+   Eingabefeld erbte keine Schrift: gemessen `Arial 13px` mitten in einer
+   Seite, die durchgehend Inter traegt. `font: inherit` waere zu viel — es
+   naehme dem Feld auch seine Groesse; geerbt wird nur die Familie. */
+.wc-block-components-quantity-selector .wc-block-components-quantity-selector__input {
+  font-family: inherit;
+}
+
+/* --- 6. Die Bestellbestaetigung kommt auf die Skala zurueck ----------
+
+   Zwei Werte fielen dort heraus, und beide haben dieselbe Ursache: Woo
+   haengt an `woocommerce/order-confirmation-status` die Kernklasse
+   `has-large-font-size`. `large` ist ein Preset des **Kerns**, keines
+   dieser `theme.json` — es loest auf 36px auf. Der Absatz „Vielen Dank…"
+   stand damit bei 36px, und die blanke `<h1>` darin bei ihren
+   Browservorgabe-`2em` davon, also **72px**. Der groesste Schritt der
+   Skala ist `3xl` = 30px, und genau den traegt der Seitentitel des
+   Warenkorbs nebenan. Zwei Seiten desselben Kaufwegs, zwei Titelgroessen
+   im Verhaeltnis 1:2,4.
+
+   Die `<h1>` bekommt deshalb die Groesse jedes anderen Seitentitels, der
+   Absatz die Vorspann-Stufe `lg`. */
+.wc-block-order-confirmation-status.has-large-font-size {
+  font-size: var(--wp--preset--font-size--lg);
+}
+
+.wc-block-order-confirmation-status h1 {
+  font-size: var(--wp--preset--font-size--3xl);
+}
+
+/* Woos eigene Ueberschrift der Positionstabelle traegt `style="font-size:24px"`
+   inline — ein Attributwert, den keine Regel schlaegt. Er liegt zufaellig auf
+   `2xl` und bleibt deshalb stehen; hier steht nur, dass er geprueft wurde. */
+
+/* --- 7. Der Seitenkorb ----------------------------------------------
+
+   Drei Aenderungen kommen aus dem Auftrag vom 2026-08-18 und nicht aus
+   einer Messung: der Titel heisst „Warenkorb", die Artikelnummer entfaellt,
+   und die Variante zieht zum Preis in eine Zeile.
+
+   **Der Titel liegt nicht hier**, sondern in `parts/mini-cart.html` — er
+   ist ein Blockattribut, keine Farbe. Was hier steht, ist seine Groesse:
+   gemessen 32px, damit **groesser als der Seitentitel des Warenkorbs
+   (30px)**, den die Schublade nur zusammenfasst. Er bekommt `xl`, dieselbe
+   Stufe wie die Schritt-Ueberschriften der Kasse.
+
+   **Artikelnummer und Variante kommen beide aus einem Filter des Plugins
+   bzw. aus der Store-API**, und beide Flaechen — Warenkorbseite und
+   Schublade — lesen dieselbe Nutzlast. Eine Aenderung in PHP traefe
+   deshalb zwangslaeufig beide. Der Auftrag will sie nur in der Schublade,
+   also steht sie hier und nur hier.
+
+   Ausgewaehlt wird ueber `data-wp-context`, nicht ueber die Klasse
+   `…__artikelnummer`: die Klasse baut Woo aus dem **Label**, sie hiesse
+   nach jeder Umbenennung anders. `dataProperty` ist der Vertrag. */
+.wc-block-mini-cart__drawer .wc-block-mini-cart__title {
+  font-size: var(--wp--preset--font-size--xl);
+}
+
+.wc-block-mini-cart__drawer .wc-block-components-product-details[data-wp-context*="item_data"] {
+  display: none;
+}
+
+/* Preis und Variante in eine Zeile. Sie sind **keine** Geschwister — der
+   Preis haengt direkt im `__wrap`, die Variante zwei Ebenen tiefer in der
+   `product-metadata`. Deshalb nicht `flex`, sondern Inline-Fluss: die
+   Spalte wird zum Block, Preis und Metadaten werden inline, und der
+   Zeilenumbruch entsteht von selbst, wenn es eng wird — „umbrechen
+   erlaubt" ist damit nicht erlaubt, sondern eingebaut.
+
+   Die leere Kurzbeschreibung faellt weg, weil ein leerer Block-Kasten
+   mitten in einem Inline-Fluss die Zeile trotzdem aufbricht. Nur die
+   leere: hat ein Artikel eine Kurzbeschreibung, behaelt sie ihre eigene
+   Zeile ueber dem Preis. */
+.wc-block-mini-cart__drawer .wc-block-cart-item__wrap {
+  display: block;
+}
+
+.wc-block-mini-cart__drawer .wc-block-cart-item__wrap .wc-block-components-product-name {
+  display: block;
+}
+
+.wc-block-mini-cart__drawer .wc-block-cart-item__prices,
+.wc-block-mini-cart__drawer .wc-block-components-product-metadata,
+.wc-block-mini-cart__drawer .wc-block-components-product-metadata > div {
+  display: inline;
+}
+
+.wc-block-mini-cart__drawer .wc-block-components-product-metadata > div:has(> .wc-block-components-product-metadata__description:empty) {
+  display: none;
+}
+
+/* Der Trenner. `•` statt `/`, weil `/` in der Zeile bereits vergeben ist:
+   Woo setzt es zwischen zwei Attributachsen desselben Artikels
+   („Sorte: Vanille / Gebinde: 1x"). Zwei Bedeutungen fuer ein Zeichen in
+   einer Zeile waere genau der Fehler, den die Zusammenlegung vermeiden
+   soll. */
+.wc-block-mini-cart__drawer .wc-block-components-product-details[data-wp-context*="variation"]::before {
+  content: "•";
+  margin: 0 0.45em;
+  color: var(--wp--preset--color--ink-300);
+}
+
+/* Preis und Variante lesen sich als eine Zeile, also tragen sie eine
+   Groesse. Die Variante stand bei 11.375px — das ist Woos `0.875em` auf
+   13px und kein Schritt der Skala; die naechste echte Stufe unter `sm`
+   waere `xs` = 12px, und die braucht es hier nicht mehr, weil die Zeile
+   ohnehin nur noch halb so lang ist. Das Label bleibt leiser als der
+   Preis. */
+.wc-block-mini-cart__drawer .wc-block-components-product-details {
+  font-size: var(--wp--preset--font-size--sm);
+}
+
+.wc-block-mini-cart__drawer .wc-block-components-product-details__name {
+  color: var(--wp--preset--color--ink-500);
+}
+
+/* Derselbe Artikelname, zwei Farben: in der Schublade `brand-600` mit
+   Unterstreichung, auf der Warenkorbseite `ink-900` ohne. Der Unterschied
+   ist keiner der Absicht — er entsteht daraus, dass die Schublade
+   ausserhalb von `main` haengt und die Ausnahmeliste der Linkregel weiter
+   oben sie deshalb nicht erreicht. Die Schublade folgt der Seite. */
+.wc-block-mini-cart__drawer .wc-block-cart-item__wrap a.wc-block-components-product-name {
+  color: var(--wp--preset--color--ink-900);
+  text-decoration: none;
+}
+
+.wc-block-mini-cart__drawer .wc-block-cart-item__wrap a.wc-block-components-product-name:hover,
+.wc-block-mini-cart__drawer .wc-block-cart-item__wrap a.wc-block-components-product-name:focus-visible {
+  text-decoration: underline;
+}
+
+/* Die Schale der Schublade steht auf `#ffffff`, ihr Inhalt auf `surface`.
+   Sichtbar wird das heute nur unter der Adminleiste, die den Inhalt um
+   32px nach unten schiebt — ein Streifen, den ein Kunde nie sieht. Die
+   Regel steht trotzdem hier: zwei Flaechen, die dasselbe sein sollen und
+   es nicht sind, sind ein Fehler, der auf seinen Anlass wartet. */
+.wc-block-mini-cart__drawer {
+  background-color: var(--wp--preset--color--surface);
+}
+
+/* --- 8. Die Ueberschrift der Warenkorbsumme -------------------------
+
+   `.wc-block-cart__totals-title` ist eine `<h2>`, und Woo setzt sie mit
+   `font-size:inherit` und `background:transparent` auf Fliesstext zurueck —
+   gemessen Inter 13px. Jede andere Ueberschrift des Portals steht in
+   Bitter; `theme.json` sagt das fuer `elements.heading`, und Woos Regel
+   liegt darueber. Sie bekommt die Familie zurueck und die Stufe `md`,
+   weil sie eine Spaltenueberschrift ist und keine Seitenueberschrift. */
+.wp-block-woocommerce-cart .wc-block-cart__totals-title {
+  font-family: var(--wp--preset--font-family--serif);
+  font-size: var(--wp--preset--font-size--md);
+  color: var(--wp--preset--color--ink-900);
+}
