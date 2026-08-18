@@ -1960,27 +1960,31 @@ main:has(> .lotzwoo-contextbar) {
   min-height: 44px;
 }
 
-/* **Die Auskunft fluchtet mit der Seite, die Flaeche laeuft durch.**
+/* **Die Auskunft fluchtet mit der Kopfzeile, die Flaeche laeuft durch.**
 
    Die Leiste steht auf zwei verschiedenen Arten im Dokument: im Sortiment
    zeichnet der Kurzcode sie **in** seinem eigenen Behaelter, auf Warenkorb,
    Konto und Favoriten haengt sie als Block `lotzwoo/context-slot` direkt in
-   `.wp-site-blocks` — ausserhalb jeder Inhaltsspalte.
+   `.wp-site-blocks` — ausserhalb jeder Inhaltsspalte. Dort begann ihre
+   Auskunft bei x = 16, waehrend der Seitenrahmen darum ganz woanders sass.
 
-   Gemessen am 2026-08-17 bei 1920 px: dort begann ihre Auskunft bei x = 16,
-   waehrend der Seiteninhalt darunter in einer zentrierten 960er-Spalte bei
-   x = 480 anfing. Die Leiste sah damit aus, als gehoere sie nicht zur Seite,
-   sondern liege darueber.
+   **Ausgerichtet wird an der Kopfzeile, nicht am Seiteninhalt.** Die Leiste
+   gehoert zum Kopf: sie klebt unter ihm, traegt seine Farbe und beantwortet
+   dieselbe Frage wie er — *fuer wen und fuer wann gilt, was hier steht*. Ein
+   erster Anlauf nahm die Inhaltsbreite (960 px) und liess sie auf 480 px
+   beginnen; der Auftraggeber hat das am 2026-08-17 als „schmal" gemeldet und
+   die Kopfzeile als Mass genannt. Gemessen ist die jetzt **x = 16, w = 1888**
+   auf 1920 px, und die Leiste steht genau so.
 
    Die dunkle Flaeche laeuft weiterhin bis zum Fensterrand — das traegt der
    Schlagschatten mit `100vmax`, und daran aendert sich nichts. Begrenzt wird
-   nur, **wo der Inhalt steht**: dieselbe Rasterbreite, die das Theme jedem
-   `constrained` Block gibt. Im Sortiment greift die Regel nicht: dort liegt
+   nur, wo der Inhalt steht. Im Sortiment greift die Regel nicht: dort liegt
    die Leiste im Kurzcode-Behaelter und fluchtet schon. */
 .wp-site-blocks > .lotzwoo-contextbar .lotzwoo-contextbar__inner {
   box-sizing: border-box;
-  max-width: var(--wp--style--global--content-size);
+  max-width: var(--wp--style--global--wide-size);
   margin-inline: auto;
+  padding-inline: var(--wp--preset--spacing--40);
 }
 
 .lotzwoo-contextbar__facts {
@@ -3284,7 +3288,11 @@ header .wp-block-navigation__responsive-container.is-menu-open
 
   /* Der Zwischenraum wird schmaler. 8 px statt 16 — bei einer Leiste, die
      ihre Angaben abschneiden muss, ist jede Rinne ein Zeichen weniger. */
-  .lotzwoo-contextbar__inner {
+  /* Die laengere Kette steht dabei, weil die Ausrichtungsregel weiter oben
+     `.wp-site-blocks > …` traegt und sonst gewinnt: die Rinnen blieben auf
+     den Block-Flaechen bei 16 px, waehrend das Sortiment auf 10 ginge. */
+  .lotzwoo-contextbar__inner,
+  .wp-site-blocks > .lotzwoo-contextbar .lotzwoo-contextbar__inner {
     gap: 8px;
     padding-inline: 10px;
   }
@@ -3420,7 +3428,8 @@ header .wp-block-navigation__responsive-container.is-menu-open
      sind genau die, die zwischen ‚Wien 11…' und ‚Wien 1100' liegen" — auf
      390 px gemessen. Eine Stufe, die nur etwas wegnimmt, verschenkt den
      Platz, den das Wegnehmen frei macht. */
-  .lotzwoo-contextbar__inner {
+  .lotzwoo-contextbar__inner,
+  .wp-site-blocks > .lotzwoo-contextbar .lotzwoo-contextbar__inner {
     gap: 6px;
     padding-inline: 8px;
   }
@@ -3591,7 +3600,7 @@ header .wp-block-navigation__responsive-container.is-menu-open
    die einzige Stelle im Portal, an der 4 vorkam. Angewandt wie im
    Sortiment: 8 fuer alles, was man bedient (Feld, Mengenwaehler, Option,
    Hinweis), 12 fuer die Kaesten, die Inhalt tragen (`.lwb-panel` = 12). */
-.wp-block-woocommerce-checkout .wc-block-components-text-input input,
+.wp-block-woocommerce-checkout .wc-block-components-form .wc-block-components-text-input input,
 .wp-block-woocommerce-checkout .wc-block-components-address-card,
 .wp-block-woocommerce-checkout .wc-block-components-radio-control--highlight-checked::after,
 .wp-block-woocommerce-checkout .wc-block-components-radio-control--highlight-checked .wc-block-components-radio-control-accordion-option--checked-option-highlighted,
@@ -3720,10 +3729,25 @@ header .wp-block-navigation__responsive-container.is-menu-open
    Hineintippen in das Feld hinein, und diese 16 sind Woos Antwort darauf.
    Ein Pixel Abweichung gegen einen Sprung der ganzen Seite auf dem Telefon
    ist kein Tausch, den dieser Abschnitt machen sollte. */
-.wp-block-woocommerce-checkout .wc-block-components-text-input input,
-.wp-block-woocommerce-checkout .wc-block-components-textarea {
+.wp-block-woocommerce-checkout .wc-block-components-form .wc-block-components-text-input input,
+.wp-block-woocommerce-checkout .wc-block-components-form .wc-block-components-textarea {
   border-color: var(--wp--preset--color--ink-350);
   background-color: var(--wp--preset--color--surface);
+}
+
+/* Woos Fokuszustand setzt `border: 1.5px solid` **ohne Farbe** — der Rahmen
+   springt damit auf `currentColor`, also auf die Textfarbe, und der einzige
+   Unterschied zum Ruhezustand waere ein halbes Pixel Dicke. Das Sortiment
+   zeigt Fokus als Ring in der Marke (`--lwb-focus`); dieselbe Form hier,
+   ausgeschrieben, weil dieser Token unter den acht Wurzeln liegt und hier
+   auf nichts aufloesen wuerde. */
+.wp-block-woocommerce-checkout .wc-block-components-form .wc-block-components-text-input input:focus,
+.wp-block-woocommerce-checkout .wc-block-components-form .wc-block-components-textarea:focus {
+  border-color: var(--wp--preset--color--brand-500);
+  outline: none;
+  box-shadow:
+    0 0 0 2px var(--wp--preset--color--brand-500),
+    0 0 0 5px color-mix(in srgb, var(--wp--preset--color--brand-500) 25%, transparent);
 }
 
 /* Der Mengenwaehler steht im Warenkorb **und** im Seitenkorb, und sein
@@ -3811,6 +3835,17 @@ header .wp-block-navigation__responsive-container.is-menu-open
 .wc-block-mini-cart__drawer .wc-block-cart-item__prices,
 .wc-block-mini-cart__drawer .wc-block-components-product-metadata,
 .wc-block-mini-cart__drawer .wc-block-components-product-metadata > div {
+  display: inline;
+}
+
+/* Der Preis selbst traegt `display: block` aus `mini-cart-contents.css` und
+   haette die Zeile von innen wieder aufgebrochen. `:not([hidden])` ist kein
+   Zierrat: dieselbe Zelle traegt eine **zweite**, verborgene Preisfassung fuer
+   den Rabattfall, und die haelt allein das Attribut unten
+   (`.wc-block-components-product-price[hidden]`, Spezifitaet 0-1-1). Eine
+   Regel ohne die Ausnahme haette sie eingeblendet und jeden Preis doppelt
+   gezeigt. */
+.wc-block-mini-cart__drawer .wc-block-cart-item__prices > .wc-block-components-product-price:not([hidden]) {
   display: inline;
 }
 
