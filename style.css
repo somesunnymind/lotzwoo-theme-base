@@ -79,6 +79,7 @@ Tags: block-theme, full-site-editing, e-commerce
 .lotzwoo-standing-orders,
 .lotzwoo-ordercontext,
 .lotzwoo-contextcard,
+.lotzwoo-overview,
 .lotzwoo-heldback {
   --lwb-brand-50:  var(--wp--preset--color--brand-50,  #eaf6f1);
   --lwb-brand-100: var(--wp--preset--color--brand-100, #cfe9de);
@@ -215,6 +216,7 @@ Tags: block-theme, full-site-editing, e-commerce
 .lotzwoo-standing-orders,
 .lotzwoo-ordercontext,
 .lotzwoo-contextcard,
+.lotzwoo-overview,
 .lotzwoo-heldback {
   font-family: var(--wp--preset--font-family--sans, "Inter", "Segoe UI", system-ui, sans-serif);
 }
@@ -232,6 +234,7 @@ Tags: block-theme, full-site-editing, e-commerce
 .lotzwoo-locations :is(h2, h3, h4, h5, h6),
 .lotzwoo-ordercontext :is(h2, h3, h4, h5, h6),
 .lotzwoo-contextcard :is(h2, h3, h4, h5, h6),
+.lotzwoo-overview :is(h2, h3, h4, h5, h6),
 .lotzwoo-heldback :is(h2, h3, h4, h5, h6) {
   font-family: inherit;
 }
