@@ -79,8 +79,15 @@ Tags: block-theme, full-site-editing, e-commerce
 .lotzwoo-standing-orders,
 .lotzwoo-ordercontext,
 .lotzwoo-contextcard,
+/* AP-70 (C1/C5): die zwei fremden Wurzeln. `b2b-tokens.css` traegt sie
+   ebenfalls — beide Seiten definieren dieselben Token auf derselben
+   Spezifitaet, und es gewinnt, was spaeter steht. Fehlt eine Zeile hier,
+   traegt die Flaeche die Vorgabefarben des Plugins statt der Marke, und
+   nichts wird davon rot. */
 .lotzwoo-overview,
-.lotzwoo-heldback {
+.lotzwoo-heldback,
+.woocommerce-MyAccount-content,
+.woocommerce-MyAccount-navigation {
   --lwb-brand-50:  var(--wp--preset--color--brand-50,  #eaf6f1);
   --lwb-brand-100: var(--wp--preset--color--brand-100, #cfe9de);
   --lwb-brand-200: var(--wp--preset--color--brand-200, #a3d5c2);
@@ -217,7 +224,9 @@ Tags: block-theme, full-site-editing, e-commerce
 .lotzwoo-ordercontext,
 .lotzwoo-contextcard,
 .lotzwoo-overview,
-.lotzwoo-heldback {
+.lotzwoo-heldback,
+.woocommerce-MyAccount-content,
+.woocommerce-MyAccount-navigation {
   font-family: var(--wp--preset--font-family--sans, "Inter", "Segoe UI", system-ui, sans-serif);
 }
 
