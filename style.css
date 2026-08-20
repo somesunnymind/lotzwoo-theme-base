@@ -2577,9 +2577,137 @@ main:has(> .lotzwoo-contextbar) {
   color: inherit;
 }
 
+/* =====================================================================
+   AP-70 · B1 + B2 — zwei Schaltflaechen, eine Regel
+
+   **Vier Unterschiede waren am 2026-08-20 gemessen**, und alle vier kamen
+   aus derselben Wurzel: der Stern ist unser Markup (`header-areas.php`),
+   der Warenkorb ist WooCommerces Mini-Cart-Block, und beide brachten ihre
+   Kopfzeilen-Regeln mit — die eine ohne Flaechenpraefix, die andere mit.
+
+     Flaeche   36 x 36 gegen min 40 x 40
+     Kreis     Marke mit weissem Rand gegen **ungestylt** — die Regel dafuer
+               steht unter `.lotzwoo-header-actions` und greift hier nicht
+     Hover     greift gegen **greift nicht** (dasselbe Praefix-Problem)
+     Grund     derselbe, `ink-900`
+
+   **Der auffaelligste war der Hover:** auf dem dunklen Grund leuchtete der
+   Stern als heller Kasten auf (`background: ink-100`), der Warenkorb daneben
+   tat gar nichts. Zwei Schaltflaechen in einer Reihe, von denen eine auf den
+   Zeiger reagiert.
+
+   **Der Hover ist fuer den dunklen Grund gebaut, nicht vom Kopf geerbt.**
+   Die Leiste hat fuer ihre eigenen Knoepfe bereits eine Sprache — 
+   `rgba(255,255,255,.16)` im Ruhezustand, `.26` beim Ueberfahren, siehe
+   `.lotzwoo-contextbar__switch` weiter oben. Sie wird hier genommen und
+   nicht neu erfunden.
+
+   **Eine Regel, zwei Flaechen** — doppelte Pflege ist der falsche Weg
+   zurueck. Und sie steht unter `.lotzwoo-contextbar__actions`, also genau
+   dort, wo sie greift; das war der ganze Befund der Kreis-Zeile. */
+.lotzwoo-contextbar__actions .lotzwoo-headerareas__favorites,
 .lotzwoo-contextbar__actions .wc-block-mini-cart__button {
+  position: relative;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
   min-width: 40px;
   min-height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.16);
+  color: inherit;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.lotzwoo-contextbar__actions .lotzwoo-headerareas__favorites:hover,
+.lotzwoo-contextbar__actions .lotzwoo-headerareas__favorites:focus-visible,
+.lotzwoo-contextbar__actions .wc-block-mini-cart__button:hover,
+.lotzwoo-contextbar__actions .wc-block-mini-cart__button:focus-visible {
+  background: rgba(255, 255, 255, 0.26);
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Der Fokusring in Weiss und nicht in der Markenfarbe: auf `ink-900` traegt
+   Brand-500 den Kontrast nicht, den WCAG 1.4.11 mit 3:1 verlangt. Im Kopf
+   ist es umgekehrt, deshalb steht dort eine andere Zeile. */
+.lotzwoo-contextbar__actions .lotzwoo-headerareas__favorites:focus-visible,
+.lotzwoo-contextbar__actions .wc-block-mini-cart__button:focus-visible {
+  outline: 2px solid var(--wp--preset--color--white);
+  outline-offset: 2px;
+}
+
+/* **Die Kreise verdecken das Symbol nicht mehr.** Sie sitzen auf der Ecke
+   der 40er-Flaeche statt ueber dem 20er-Symbol darin; der Rand ist die
+   Leistenfarbe und nicht Weiss, weil ein weisser Ring auf `ink-900` als
+   zweiter Kreis liest. Wie viel Symbolflaeche sichtbar bleibt, steht als
+   Zahl im Bericht — die Zahl entscheidet, nicht die Regel. */
+/* **Die laengere Kette ist Absicht.** Woos eigene Regel fuer sein Abzeichen
+   gewinnt sonst beim Grund: gemessen am 2026-08-20 stand dort `rgb(255,255,255)`
+   statt der Markenfarbe, waehrend jede andere Eigenschaft schon von hier kam —
+   ein Kreis, der die halbe Regel dieses Blocks trug und die andere Haelfte von
+   woanders. Mit `.lotzwoo-contextbar` davor tragen beide Flaechen dieselbe. */
+.lotzwoo-contextbar .lotzwoo-contextbar__actions .lotzwoo-headerareas__badge,
+.lotzwoo-contextbar .lotzwoo-contextbar__actions .wc-block-mini-cart__badge {
+  position: absolute;
+  top: -6px;
+  inset-inline-end: -6px;
+  box-sizing: border-box;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border: 2px solid var(--wp--preset--color--ink-900);
+  border-radius: 9px;
+  font-size: 11px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 14px;
+  text-align: center;
+}
+
+/* **`!important` ist hier kein Faustpfand, sondern die einzige Moeglichkeit —
+   und der Befund dahinter ist derselbe wie beim Fokusring aus AP-45.**
+
+   Woos Mini-Cart-Block faerbt sein Abzeichen ueber die Interactivity API:
+   `data-wp-style--background-color="state.badgeBackgroundColor"` schreibt ein
+   **inline** `style`-Attribut, und ein inline gesetzter Wert schlaegt jede
+   Regel aus einem Stylesheet, gleich wie lang deren Kette ist. Am 2026-08-20
+   im Dokument nachgesehen: `style="background-color: rgb(255,255,255); color:
+   rgb(179,58,43)"`. Drei Anlaeufe mit steigender Spezifitaet blieben ohne
+   Wirkung — jede andere Eigenschaft dieses Blocks kam schon von hier, nur die
+   zwei Farben nicht.
+
+   **Dasselbe gilt fuer die Kopffassung** (`.lotzwoo-header-actions
+   .wc-block-mini-cart__badge` weiter oben): ihr `background` hat nie gewirkt,
+   und niemand hat es gemessen. Sie bleibt unberuehrt — das ist ein
+   Nebenbefund und gehoert in den Bericht, nicht in diesen Commit. */
+.lotzwoo-contextbar .lotzwoo-contextbar__actions .wc-block-mini-cart__badge {
+  background-color: var(--wp--preset--color--brand-500) !important;
+  color: var(--wp--preset--color--white) !important;
+}
+
+.lotzwoo-contextbar .lotzwoo-contextbar__actions .lotzwoo-headerareas__badge {
+  background-color: var(--wp--preset--color--brand-500);
+  color: var(--wp--preset--color--white);
+}
+
+/* Woos Abzeichen liegt in einem eigenen Behaelter, der sonst selbst der
+   Bezugsrahmen waere — dann sitzt der Kreis am Symbol statt an der Flaeche. */
+.lotzwoo-contextbar__actions .wc-block-mini-cart__quantity-badge {
+  position: static;
+}
+
+/* Ist die Aktionsgruppe leer (keine Kopfflaechen auf dieser Seite), soll sie
+   auch keinen Zwischenraum kosten. Seit AP-70 kann sie leer sein: der
+   Ausloeser steht daneben, nicht mehr darin. */
+.lotzwoo-contextbar__actions:empty {
+  display: none;
 }
 
 /* =====================================================================
@@ -3376,10 +3504,9 @@ header .wp-block-navigation__responsive-container.is-menu-open
   }
 
   /* **Der Schalter verliert sein Wort und behaelt seine Aufgabe.**
-     Aus „Wechseln" (94 px gemessen) wird ein Winkel in einer Trefferflaeche
-     von 40 x 40 — 54 px, die den Angaben zugutekommen. Das Wort verschwindet
-     nur optisch und wird weiter vorgelesen; `aria-expanded` am selben Knopf
-     sagt unveraendert, was er tut.
+     Aus „Wechseln" (94 px gemessen) wird ein Winkel — die Breite kommt den
+     Angaben zugute. Das Wort verschwindet nur optisch und wird weiter
+     vorgelesen; `aria-haspopup` am selben Knopf sagt unveraendert, was er tut.
 
      Der Entwurf zeichnet hier zwei Elemente und blendet je eines aus. Gebaut
      ist **einer** mit zwei Fassungen darin — die Begruendung steht in
@@ -3395,18 +3522,78 @@ header .wp-block-navigation__responsive-container.is-menu-open
     white-space: nowrap;
   }
 
+  /* =================================================================
+     AP-70 · B3 — der Knopf „Wechseln" verschwindet, die Angaben uebernehmen
+
+     Bis zum 2026-08-20 wurde er hier zur 40er-Flaeche mit Winkel und stand
+     als eigenes Bedienelement neben den Angaben. Der Auftraggeber hat das
+     umgestellt: **der Knopf verschwindet als Kasten, der Winkel steht rechts
+     neben „Ort · Datum · Bestellschluss", und ein Klick irgendwo auf diese
+     Gruppe oeffnet den Waehler.**
+
+     **Gebaut ist es als Ueberlagerung, nicht als zweiter Ausloeser.** Die
+     Zeile wird zum Raster mit zwei Spalten; Angabengruppe und Knopf liegen
+     in **derselben** Zelle, der Knopf darueber und durchsichtig. Damit ist
+     die ganze Gruppe seine Flaeche, ohne dass etwas verschachtelt wird —
+     und das ist keine Feinheit: die Angaben sind eine `<dl>`, und ein
+     `<button>` nimmt nur Phrasing Content. Wer die Faktengruppe in den Knopf
+     legt, baut Markup, das jeder Browser anders repariert und jeder
+     Screenreader anders vorliest.
+
+     **Es bleibt bei genau einem Ausloeser.** Derselbe `<button>`, derselbe
+     Fokusstopp, dasselbe `aria-haspopup`, dieselbe Beschriftung — fuenf
+     Stellen in den Nachweisen lesen oder klicken ihn, und keine bricht.
+     Die Tastatur verliert nichts: er ist unveraendert erreichbar und
+     beschriftet, nur seine Flaeche ist groesser geworden.
+
+     Die Aktionsgruppe (Stern, Warenkorb) liegt in der **zweiten** Spalte und
+     bleibt anklickbar — sie liegt nicht unter dem Knopf. */
+  .lotzwoo-contextbar__inner,
+  .wp-site-blocks > .lotzwoo-contextbar .lotzwoo-contextbar__inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+  }
+
+  .lotzwoo-contextbar__facts,
+  .lotzwoo-contextbar__unset,
+  .lotzwoo-contextbar__switch {
+    grid-area: 1 / 1;
+  }
+
+  .lotzwoo-contextbar__actions {
+    grid-area: 1 / 2;
+  }
+
   .lotzwoo-contextbar__switch {
     display: inline-flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-end;
+    align-self: stretch;
     box-sizing: border-box;
-    min-width: 40px;
-    min-height: 40px;
-    padding: 0;
+    min-width: 0;
+    margin-inline-start: 0;
+    padding: 0 2px;
+    border: 0;
+    border-radius: 0;
+    background: none;
+    /* Ueber der Gruppe, damit der Klick ihn trifft und nicht den Text
+       darunter. Die Angaben bleiben lesbar — der Knopf ist durchsichtig. */
+    z-index: 1;
   }
 
+  .lotzwoo-contextbar__switch:hover,
+  .lotzwoo-contextbar__switch:focus-visible {
+    background: none;
+  }
+
+  /* Der Winkel bekommt eine eigene Trefferflaeche von 40 x 40, damit die
+     Zusicherung aus WCAG 2.5.8 auch dann steht, wenn jemand nur ihn sieht. */
   .lotzwoo-contextbar__switch-winkel {
     display: block;
+    flex: none;
+    box-sizing: content-box;
+    padding: 11px;
   }
 
   /* Die Langformen treten zurueck: das Zeitfenster hinter dem Datum und das
