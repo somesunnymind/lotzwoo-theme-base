@@ -1912,6 +1912,17 @@ p.is-style-kennzahl {
    mehr. */
 .lotzwoo-contextbar {
   --kontextleiste-grund: var(--wp--preset--color--ink-900);
+  /* **Die Hoehe der drei Bedienelemente der Leiste, an einer Stelle.**
+     Bis hierher war sie zweimal gerechnet und einmal geerbt: Stern und
+     Warenkorb standen auf gesetzten 40 px, der Wechsler auf 33,5 px aus
+     Polster plus Zeilenhoehe — am 2026-08-25 gemessen. Drei Knoepfe in
+     einer Reihe, zwei davon einen Kopf groesser.
+
+     Sie steht auf der Leiste und nicht auf `__actions`, weil der Wechsler
+     seit AP-70 (B3) **neben** der Aktionsgruppe steht und nicht darin:
+     unter 700 px muss er ein Rasterelement von `__inner` sein. Eine
+     Eigenschaft auf `__actions` erreichte ihn nicht. */
+  --lotzwoo-contextbar-control-h: 34px;
   position: sticky;
   top: 0;
   z-index: 20;
@@ -2155,9 +2166,11 @@ main:has(> .lotzwoo-contextbar) {
    vorgibt, traegt hier nicht. Stattdessen dieselbe helle Umrandung, die
    die Sortimentsfassung seit AD-3 benutzt. */
 .lotzwoo-contextbar__switch {
+  box-sizing: border-box;
   display: inline-flex;
   align-items: center;
-  padding: 6px 11px;
+  height: var(--lotzwoo-contextbar-control-h, 34px);
+  padding: 0 11px;
   border: 1px solid rgba(255, 255, 255, 0.32);
   border-radius: 6px;
   background: rgba(255, 255, 255, 0.16);
@@ -2461,17 +2474,34 @@ main:has(> .lotzwoo-contextbar) {
    Trefferflaeche mindestens 40 x 40 px, wie beim Menue-Oeffner. Ein Wort
    statt eines Symbols, weil „Anmelden" die Auskunft ist, die ein Besucher
    ohne Konto zuerst braucht — dasselbe Wort wie in `login_notice()`. */
+/* **Warum die Zeile die Trefferhoehe *ist* und nicht darin zentriert wird.**
+   Hier stand `display: flex; align-items: center` — und es wirkte nicht: die
+   Regel weiter unten setzt fuer den Ueberlaufschutz `display: block`, und ein
+   Blockcontainer kennt `align-items` nicht. Die 15-px-Zeile stand damit oben
+   im 40-px-Kasten, um rund 12 px ueber der Mitte. Am 2026-08-25 gemessen:
+   Kasten 48 px hoch, Textmitte bei 11,5 statt 24.
+
+   `display: flex` konnte hier nicht bleiben: `text-overflow: ellipsis` gilt
+   fuer Blockcontainer, ein Flex-Container gaebe den Ueberlauf hart
+   abgeschnitten zurueck — und genau dieser Ueberlauf (32 px bei 320 px
+   Fensterbreite) ist der Grund fuer die Regel weiter unten.
+
+   Beides zugleich geht ohne zusaetzliches Markup so: die Zeilenhoehe **ist**
+   die Trefferhoehe, das vertikale Polster entfaellt. Eine einzelne Zeile in
+   einem Zeilenkasten dieser Hoehe steht mittig, der Container bleibt ein
+   Blockcontainer, und `text-overflow` arbeitet weiter. Ein Wert, zweimal
+   gelesen — Hoehe und Zeile koennen nicht mehr auseinanderlaufen. */
 .lotzwoo-headerareas__login {
-  display: flex;
-  align-items: center;
-  min-width: 40px;
-  min-height: 40px;
-  padding: 4px 8px;
+  --lotzwoo-kopf-treffer: 40px;
+  box-sizing: border-box;
+  min-width: var(--lotzwoo-kopf-treffer);
+  min-height: var(--lotzwoo-kopf-treffer);
+  padding: 0 8px;
   border-radius: 8px;
   color: var(--wp--preset--color--ink-900);
   font-size: var(--wp--preset--font-size--sm);
   font-weight: 600;
-  line-height: 1.15;
+  line-height: var(--lotzwoo-kopf-treffer);
   text-decoration: none;
   white-space: nowrap;
 }
@@ -2637,10 +2667,15 @@ main:has(> .lotzwoo-contextbar) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
-  min-width: 40px;
-  min-height: 40px;
+  /* Quadratisch, und die Kantenlaenge ist die Hoehe des Wechslers
+     nebenan — ein Wert fuer drei Knoepfe, deklariert auf der Leiste.
+     Vier gleiche Zeilen und nicht `aspect-ratio`: `min-width`/`min-height`
+     muessen mitgehen, sonst zieht der Zaehler mit zweistelliger Zahl die
+     Breite auf und aus dem Quadrat wird ein Rechteck. */
+  width: var(--lotzwoo-contextbar-control-h, 34px);
+  height: var(--lotzwoo-contextbar-control-h, 34px);
+  min-width: var(--lotzwoo-contextbar-control-h, 34px);
+  min-height: var(--lotzwoo-contextbar-control-h, 34px);
   padding: 0;
   border: 0;
   border-radius: 6px;
