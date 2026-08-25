@@ -906,10 +906,26 @@ hr.wp-block-separator:not(.is-style-wide):not(.is-style-dots) {
   max-width: none;
 }
 
+/* Der Nulldurchgang gegen den Blockabstand — seit AP-83 gemessen und
+   angefordert. Setzt der Betreiber `[lotzwoo_b2b_login]` in sein Muster,
+   ist die Plugin-Wurzel dort ein Geschwisterblock unter anderen, und
+   WordPress' eigene Layout-Regel
+
+       :where(.is-layout-constrained) > :where(:not(.alignleft)…)
+       { margin-block-start: 24px }
+
+   gibt ihr denselben Abstand wie jedem Absatz. An der Bank gemessen
+   (2026-08-25, 1440 px): `margin-block-start: 24px`. Die Regel steht in
+   `:where()` und hat damit Spezifitaet 0 — dieser Selektor (0,2,0)
+   ueberschreibt sie, ohne dass irgendwo ein `!important` noetig waere.
+
+   Der Abstand ueber der Flaeche kommt damit aus dem Muster des Betreibers
+   und nicht aus einer Layout-Vorgabe, die ihn nicht kennt. */
 .lotzwoo-page-full-width .lotzwoo-b2b-shop,
 .lotzwoo-page-full-width .lotzwoo-reorder {
   max-width: var(--wp--style--global--wide-size);
-  margin-inline: auto;
+  margin-block-start: 0;
+  margin-inline: 0;
 }
 
 /* Die Kontextleiste des Shops klebt oben, und die WordPress-Admin-Bar
