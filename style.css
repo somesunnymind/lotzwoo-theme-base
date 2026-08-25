@@ -2704,10 +2704,35 @@ main:has(> .lotzwoo-contextbar) {
 }
 
 /* **Die Kreise verdecken das Symbol nicht mehr.** Sie sitzen auf der Ecke
-   der 40er-Flaeche statt ueber dem 20er-Symbol darin; der Rand ist die
+   der Flaeche statt ueber dem 20er-Symbol darin; der Rand ist die
    Leistenfarbe und nicht Weiss, weil ein weisser Ring auf `ink-900` als
    zweiter Kreis liest. Wie viel Symbolflaeche sichtbar bleibt, steht als
-   Zahl im Bericht — die Zahl entscheidet, nicht die Regel. */
+   Zahl im Bericht — die Zahl entscheidet, nicht die Regel.
+
+   **Der Kreis haengt an der Kantenlaenge des Knopfes, und das war bis
+   2026-08-25 unausgesprochen.** Die 18 px hier waren fuer die 40er-Flaeche
+   gerechnet: zwischen Symbolrand und Knopfecke lagen 10 px, der Kreis
+   brauchte davon 6. Als die Flaeche auf 34 px ging — gleiche Hoehe wie der
+   Wechsler nebenan —, blieben 7 px, und `ap70-leiste` meldete prompt 8,3 %
+   verdeckte Symbolflaeche gegen 5 % erlaubte. **Die Suite hat den Fehler
+   gefunden, nicht das Auge.**
+
+   Gemessen wurde die ganze Reihe, nicht nur der Ausweg:
+
+     Flaeche   Kreis    1 Ziffer   2 Ziffern   3 Ziffern
+     40 px     18 px       1,8 %       5,7 %       9,5 %
+     34 px     18 px       8,3 %      17,9 %          —
+     34 px     15 px       2,3 %       7,4 %          —
+
+   Daraus zwei Dinge. Erstens: 15 px ist der Wert, der zur 34er-Flaeche
+   gehoert. Zweitens, und das ist der Nebenbefund: **die 5 % galten noch nie
+   fuer zweistellige Zahlen** — auch die 40er-Flaeche lag dort bei 5,7 %. Die
+   Suite misst mit dem echten Zaehlerstand, und der war einstellig. Wer die
+   Zahl zweistellig braucht, misst sie zuerst; hier wird sie nicht stillgelegt.
+
+   `top`/`inset-inline-end` gehen von 6 auf 5 px: der Kreis stand damit 1 px
+   ueber der Leistenoberkante und wurde von deren `clip-path` angeschnitten.
+   Jetzt schliesst er buendig damit ab. */
 /* **Die laengere Kette ist Absicht.** Woos eigene Regel fuer sein Abzeichen
    gewinnt sonst beim Grund: gemessen am 2026-08-20 stand dort `rgb(255,255,255)`
    statt der Markenfarbe, waehrend jede andere Eigenschaft schon von hier kam —
@@ -2716,18 +2741,18 @@ main:has(> .lotzwoo-contextbar) {
 .lotzwoo-contextbar .lotzwoo-contextbar__actions .lotzwoo-headerareas__badge,
 .lotzwoo-contextbar .lotzwoo-contextbar__actions .wc-block-mini-cart__badge {
   position: absolute;
-  top: -6px;
-  inset-inline-end: -6px;
+  top: -5px;
+  inset-inline-end: -5px;
   box-sizing: border-box;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 4px;
-  border: 2px solid var(--wp--preset--color--ink-900);
-  border-radius: 9px;
-  font-size: 11px;
+  min-width: 15px;
+  height: 15px;
+  padding: 0 3px;
+  border: 1.5px solid var(--wp--preset--color--ink-900);
+  border-radius: 8px;
+  font-size: 10px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
-  line-height: 14px;
+  line-height: 12px;
   text-align: center;
 }
 
