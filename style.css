@@ -2026,7 +2026,17 @@ main:has(> .lotzwoo-contextbar) {
   align-items: center;
   flex-wrap: nowrap;
   gap: var(--wp--preset--spacing--40);
-  min-height: 44px;
+  /* 50 statt 44 — vom Auftraggeber am 2026-08-26 angefordert.
+     Es ist die einzige Stelle: die drei Medienstufen weiter unten regeln
+     nur Rinne und Polster, keine Hoehe.
+
+     **Was daran haengt, haengt gemessen daran.** Der Klebestapel des
+     Sortiments rechnet mit `--lwb-ctx-h`, und die Zahl kommt aus einem
+     ResizeObserver auf dieser Leiste (`b2b-ctxheight.js`) — Werkzeugleiste,
+     Filterspalte und Matrix-Spaltenkopf ruecken von selbst 6 px nach. Der
+     Vorgabewert `52px` in `b2b-shop.css` ist der Ausfallwert fuer den Fall,
+     dass das Skript nicht laeuft, und bleibt, wie er ist. */
+  min-height: 50px;
 }
 
 /* **Die Auskunft fluchtet mit der Kopfzeile, die Flaeche laeuft durch.**
@@ -2784,6 +2794,28 @@ main:has(> .lotzwoo-contextbar) {
   font-variant-numeric: tabular-nums;
   line-height: 12px;
   text-align: center;
+  /* **Woos zwei letzte eigene Zeilen, und damit sitzen beide Kreise gleich**
+     (2026-08-26, vom Auftraggeber gemeldet: „die Zahl am Warenkorb sitzt
+     hoeher"). Am Klon nachgemessen, 1440 px, beide Knoepfe bei y = 99,7:
+
+       Stern        Abzeichen y = 94,7   transform: none            margin: 0
+       Warenkorb    Abzeichen y = 87,2   translateY(-50%) = -7,5px  margin-left: -44%
+
+     Die 7,5 px sind die halbe Kreishoehe. Beides kommt aus Woos
+     `mini-cart.css` (`.wc-block-mini-cart__badge`), die den Kreis an seinem
+     eigenen Bezugsrahmen zentriert; `min-width` und `height` von dort hatte
+     dieser Block laengst uebernommen, `transform` und `margin` nicht — und
+     genau die zwei blieben uebrig.
+
+     Kein `!important` noetig: diese Kette ist (0,3,0) gegen Woos (0,1,0).
+     `margin` und nicht `margin-inline-start`, weil Woo physisch setzt und
+     eine Null auf allen vier Seiten hier ohnehin das Gemeinte ist.
+
+     Der Breitenunterschied, den dieselbe Messung zeigt, ist **keiner**:
+     der Stern trug eine Ziffer, der Warenkorb zwei. `min-width` ist der
+     Boden, oben waechst der Kreis mit dem Zaehler — an beiden gleich. */
+  transform: none;
+  margin: 0;
 }
 
 /* **`!important` ist hier kein Faustpfand, sondern die einzige Moeglichkeit —
