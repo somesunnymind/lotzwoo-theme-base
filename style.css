@@ -244,7 +244,21 @@ Tags: block-theme, full-site-editing, e-commerce
 .lotzwoo-ordercontext :is(h2, h3, h4, h5, h6),
 .lotzwoo-contextcard :is(h2, h3, h4, h5, h6),
 .lotzwoo-overview :is(h2, h3, h4, h5, h6),
-.lotzwoo-heldback :is(h2, h3, h4, h5, h6) {
+.lotzwoo-heldback :is(h2, h3, h4, h5, h6),
+/* **Zwei Wurzeln fehlten, und der Absatz darueber sagt schon warum**
+   (2026-08-26). Gemeldet als „diese h2 sind nicht Inter wie die anderen":
+   „Rechnungsadresse", „Lieferadresse", „Darstellung" und „Daueraufträge"
+   standen in Bitter, „Nachbestellen" daneben in Inter. Gemessen — an allen
+   vier gewinnt `h1, h2, h3, h4, h5, h6 { font-family: serif }` aus
+   `theme.json`, weil keine Wurzel darueber diese Regel zurueckholt.
+
+   Die Liste eine Ebene hoeher (Zeile 226 ff.) fuehrt
+   `.woocommerce-MyAccount-content` laengst; nur hier fehlte sie. Das ist
+   dieselbe Luecke, die der Absatz darueber fuer `.lotzwoo-heldback`
+   beschreibt — eine Wurzel, die in einer der zwei Listen steht und in der
+   anderen nicht, faellt erst an einer Ueberschrift auf. */
+.lotzwoo-standing-orders :is(h2, h3, h4, h5, h6),
+.woocommerce-MyAccount-content :is(h2, h3, h4, h5, h6) {
   font-family: inherit;
 }
 
