@@ -4263,23 +4263,39 @@ header .wp-block-navigation__responsive-container.is-menu-open
   display: none;
 }
 
-/* Der Trenner. `•` statt `/`, weil `/` in der Zeile bereits vergeben ist:
-   Woo setzt es zwischen zwei Attributachsen desselben Artikels
-   („Sorte: Vanille / Gebinde: 1x"). Zwei Bedeutungen fuer ein Zeichen in
-   einer Zeile waere genau der Fehler, den die Zusammenlegung vermeiden
-   soll. */
-.wc-block-mini-cart__drawer .wc-block-components-product-details[data-wp-context*="variation"]::before {
-  content: "•";
-  margin: 0 0.45em;
-  color: var(--wp--preset--color--ink-300);
-}
+/* **Hier stand ein Trenner, und er ist mit Absicht weg** — auf Ansage des
+   Auftraggebers am 2026-08-27.
 
-/* Preis und Variante lesen sich als eine Zeile, also tragen sie eine
-   Groesse. Die Variante stand bei 11.375px — das ist Woos `0.875em` auf
-   13px und kein Schritt der Skala; die naechste echte Stufe unter `sm`
-   waere `xs` = 12px, und die braucht es hier nicht mehr, weil die Zeile
-   ohnehin nur noch halb so lang ist. Das Label bleibt leiser als der
-   Preis. */
+   Er setzte ein `•` vor die Variantenzeile, `•` statt `/`, weil `/` in der
+   Zeile schon vergeben ist: Woo trennt damit zwei Attributachsen desselben
+   Artikels („Sorte: Vanille / Gebinde: 1x").
+
+   Die Ueberlegung war richtig, ihre **Voraussetzung** nicht. Ein Trenner
+   trennt nur, solange die beiden Seiten nebeneinanderstehen. In der
+   Schublade tun sie das nie: bei 1440 px ist die Warenkorbspalte rund
+   340 px breit, der Inline-Fluss bricht hinter dem Preis um, und das
+   Zeichen landet am **Zeilenanfang**. Dort trennt es nichts, es liest sich
+   als Aufzaehlungspunkt.
+
+   Gemessen am 2026-08-26/27 an vier Positionen: **auf allen vieren** stand
+   das Zeichen am Zeilenanfang, und auf einer stand es voellig allein —
+   ein einfaches Produkt hat keine Variante, aber Woo rendert den Kasten
+   `[data-wp-context*="variation"]` trotzdem. Er war dann 19 px breit und
+   enthielt genau den Punkt.
+
+   **Wer ihn zurueckholen will**, braucht zuerst die Zeile, in der er
+   stehen kann — die Voraussetzung, nicht das Zeichen, war das Problem.
+
+   Der Auftraggeber hat `display: none` auf dem `::before` geschickt. Das
+   waere eine zweite Regel gewesen, die die erste zuruecknimmt; ein `•`,
+   das gesetzt und im selben Stylesheet wieder versteckt wird, ist eine
+   Falle fuer den naechsten, der es sucht. Deshalb ist die Quelle weg. */
+
+/* Preis und Variante tragen dieselbe Groesse. Die Variante stand bei
+   11.375px — das ist Woos `0.875em` auf 13px und kein Schritt der Skala;
+   die naechste echte Stufe unter `sm` waere `xs` = 12px, und die braucht
+   es hier nicht: die Zeile ist ohnehin nur noch halb so lang. Das Label
+   bleibt leiser als der Preis. */
 .wc-block-mini-cart__drawer .wc-block-components-product-details {
   font-size: var(--wp--preset--font-size--sm);
 }
