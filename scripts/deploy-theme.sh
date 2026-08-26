@@ -28,8 +28,36 @@ SLUG="lotzwoo-theme-base"
 THEMES_DIR="${1:-/var/www/b2b/wp-content/themes}"
 TARGET="$THEMES_DIR/$SLUG"
 
-REPO_ROOT="$(git rev-parse --show-toplevel)"
+# Das Repo kommt aus dem **Skriptpfad**, nicht aus dem Arbeitsverzeichnis.
+#
+# Bis zum 2026-08-26 stand hier `git rev-parse --show-toplevel`. Damit kam
+# `SLUG` aus dem Skript und das Repo aus dem `cwd` — zwei Quellen, die
+# auseinanderlaufen koennen. Aus dem Plugin-Verzeichnis heraus mit absolutem
+# Pfad aufgerufen hat das Skript dann `git archive HEAD` des **Plugins** in den
+# **Theme**-Ordner entpackt, 325 fremde Dateien, und danach wahrheitsgemaess
+# "Deploy verifiziert" gemeldet: geprueft hatte es, dass die falschen Dateien
+# heil angekommen sind. Kommen beide aus dem Skript, ist der Fall zu.
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
+REPO_ROOT="$(cd -- "$SCRIPT_DIR/.." && pwd -P)"
 cd "$REPO_ROOT"
+
+# Zwei Riegel dahinter, denn der Skriptpfad allein ist nur so gut wie seine
+# Lage: eine Kopie oder ein Symlink an anderer Stelle traegt ihn falsch.
+#
+#   1. Das Skript muss in `<repo>/scripts/` liegen — sonst zeigt `..` nicht auf
+#      die Repo-Wurzel und `git archive` liefert einen fremden Baum.
+#   2. Ein Theme-Repo traegt eine `style.css` in der Wurzel, ein Plugin-Repo
+#      nicht. Genau daran waere der Unfall oben auch ohne 1. gescheitert.
+if [ "$(git rev-parse --show-toplevel 2>/dev/null || true)" != "$REPO_ROOT" ]; then
+  echo "$REPO_ROOT ist keine Repo-Wurzel — liegt dieses Skript in <repo>/scripts/?" >&2
+  exit 1
+fi
+
+if [ ! -f "$REPO_ROOT/style.css" ]; then
+  echo "$REPO_ROOT traegt keine style.css und ist damit kein Theme-Repo." >&2
+  echo "Abbruch, bevor ein fremder Baum nach $TARGET ausgeliefert wird." >&2
+  exit 1
+fi
 
 if [ -n "$(git status --porcelain)" ]; then
   echo "Arbeitskopie ist nicht sauber — ausgeliefert wird HEAD, nicht was hier liegt." >&2
