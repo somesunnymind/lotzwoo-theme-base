@@ -943,24 +943,39 @@ hr.wp-block-separator:not(.is-style-wide):not(.is-style-dots) {
    `position: absolute` wird und mitscrollt. Ein Versatz für eine Leiste,
    die nicht mehr steht, wäre ein Loch über der Tabelle.
 
-   Auch hier zwei Wurzeln statt sechs, mit Begründung: `--lwb-sticky-top`
-   liest genau eine Sache, die klebende Kontextleiste des Shops. Die drei
-   Konto-Flächen haben nichts Klebendes; der Token stünde dort ohne Leser. */
+   **Die Leiste steht in der Liste, seit dem 2026-08-26.** Hier standen zwei
+   Wurzeln, mit der Begründung, `--lwb-sticky-top` lese „genau eine Sache,
+   die klebende Kontextleiste des Shops" — und die drei Konto-Flächen hätten
+   nichts Klebendes. Der zweite Halbsatz stimmt nicht: seit AP-32 steht
+   dieselbe klebende Leiste auf allen vier Flächen, und auf Warenkorb und
+   Konto liegt sie **außerhalb** jeder Plugin-Wurzel. Dort war der Token gar
+   nicht deklariert, und die Leiste parkte hinter der Admin-Bar.
+
+   `.lotzwoo-contextbar` steht deshalb selbst in der Liste. Innerhalb des
+   Sortiments ist das keine zweite Quelle, sondern dieselbe Zahl eine Ebene
+   tiefer: die Leiste erbte sie ohnehin von `.lotzwoo-b2b-shop`. Nötig ist
+   die eigene Zeile für die drei Flächen, die keine Plugin-Wurzel haben —
+   und der Plugin-Token `--lwb-sticky-top: 0px` auf `.lotzwoo-b2b-shop`
+   (Spezifität 0,1,0) schlägt einen geerbten Wert von `body.admin-bar`
+   sonst zurück, bevor die Leiste ihn sieht. */
 body.admin-bar .lotzwoo-b2b-shop,
-body.admin-bar .lotzwoo-reorder {
+body.admin-bar .lotzwoo-reorder,
+body.admin-bar .lotzwoo-contextbar {
   --lwb-sticky-top: 32px;
 }
 
 @media screen and (max-width: 782px) {
   body.admin-bar .lotzwoo-b2b-shop,
-  body.admin-bar .lotzwoo-reorder {
+  body.admin-bar .lotzwoo-reorder,
+  body.admin-bar .lotzwoo-contextbar {
     --lwb-sticky-top: 46px;
   }
 }
 
 @media screen and (max-width: 600px) {
   body.admin-bar .lotzwoo-b2b-shop,
-  body.admin-bar .lotzwoo-reorder {
+  body.admin-bar .lotzwoo-reorder,
+  body.admin-bar .lotzwoo-contextbar {
     --lwb-sticky-top: 0px;
   }
 }
@@ -1924,7 +1939,22 @@ p.is-style-kennzahl {
      Eigenschaft auf `__actions` erreichte ihn nicht. */
   --lotzwoo-contextbar-control-h: 34px;
   position: sticky;
-  top: 0;
+  /* **Der Versatz ist ein Token, keine Null** (2026-08-26). Hier stand
+     `top: 0`, und damit parkte die Leiste hinter der WordPress-Admin-Bar:
+     von ihren 44 px verschwanden 32 unter ihr, und weil die Werkzeugleiste
+     des Sortiments mit `calc(var(--lwb-sticky-top) + var(--lwb-ctx-h))` =
+     76 px rechnet, lief die Artikelliste durch einen 32-px-Schlitz
+     dazwischen. Am 2026-08-26 am Klon gemessen, 1440 px, angemeldet.
+
+     Die Null ist beim Umzug der Gestaltung aus dem Plugin hierher
+     entstanden (`f030c61`, AP-32): die abgelöste Regel
+     `.lotzwoo-b2b-shop .lwb-contextbar` las `top: var(--lwb-sticky-top)`,
+     die Portierung hat die Hälfte verloren. Der Kommentar zum Token weiter
+     oben beschreibt genau diesen Fehler — er hatte nur keinen Leser.
+
+     Der Rückfall auf `0px` ist der Normalfall: ohne Admin-Bar deklariert
+     niemand den Token, und dann klebt die Leiste am Fensterrand. */
+  top: var(--lwb-sticky-top, 0px);
   z-index: 20;
   background: var(--kontextleiste-grund);
   box-shadow: 0 0 0 100vmax var(--kontextleiste-grund);
