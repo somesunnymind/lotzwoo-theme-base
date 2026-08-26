@@ -920,12 +920,40 @@ hr.wp-block-separator:not(.is-style-wide):not(.is-style-dots) {
    ueberschreibt sie, ohne dass irgendwo ein `!important` noetig waere.
 
    Der Abstand ueber der Flaeche kommt damit aus dem Muster des Betreibers
-   und nicht aus einer Layout-Vorgabe, die ihn nicht kennt. */
+   und nicht aus einer Layout-Vorgabe, die ihn nicht kennt.
+
+   **`margin-inline` ist wieder `auto`** (2026-08-26, angefordert). AP-83 hat
+   es am 2026-08-25 zusammen mit dem Blockabstand auf `0` gesetzt — die zwei
+   gehoerten aber nie zusammen. `margin-block-start: 0` behebt einen Abstand,
+   den WordPress oben anlegt; `margin-inline` entscheidet, wo die gedeckelte
+   Flaeche im Elternteil steht, und der ist `alignfull`, also so breit wie das
+   Fenster.
+
+   Am 2026-08-26 am Klon gemessen, Rest links/rechts neben der Flaeche:
+
+     Fenster   mit `0`            mit `auto`
+     2560      16 / **624**       320 / 320
+     2100      16 / **164**       90 / 90
+     1952      16 / 16            16 / 16
+     1440      16 / 16            16 / 16
+
+   Unterhalb von rund 1952 px aendert `auto` **nichts**: dort greift der Deckel
+   (`wide-size`, 1920) gar nicht, die Flaeche fuellt ihren Elternteil und die
+   16 px links wie rechts sind dessen Polster. Erst darueber steht sie mit `0`
+   am linken Rand und laesst rechts ein wachsendes Loch.
+
+   Angefragt war `.lotzwoo-b2b-shop { margin: auto !important }`. Beides steht
+   hier bewusst anders: **kein `!important`**, weil dieser Selektor (0,2,0) die
+   Kern-Regel in `:where()` (Spezifitaet 0) ohnehin schlaegt — es gibt nichts zu
+   ueberstimmen. Und **`margin-inline` statt `margin`**, damit `margin-block-end`
+   unberuehrt bleibt: die Kurzform setzte ihn auf `auto`, und das ist im Fluss
+   zwar auch Null, aber eine Null, die niemand entschieden hat. Beide Wurzeln,
+   weil es eine Regel ist und die Nachbestellseite dieselbe Vorlage traegt. */
 .lotzwoo-page-full-width .lotzwoo-b2b-shop,
 .lotzwoo-page-full-width .lotzwoo-reorder {
   max-width: var(--wp--style--global--wide-size);
   margin-block-start: 0;
-  margin-inline: 0;
+  margin-inline: auto;
 }
 
 /* Die Kontextleiste des Shops klebt oben, und die WordPress-Admin-Bar
