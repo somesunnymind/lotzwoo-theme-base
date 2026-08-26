@@ -2841,7 +2841,26 @@ main:has(> .lotzwoo-contextbar) {
 
      Der Breitenunterschied, den dieselbe Messung zeigt, ist **keiner**:
      der Stern trug eine Ziffer, der Warenkorb zwei. `min-width` ist der
-     Boden, oben waechst der Kreis mit dem Zaehler — an beiden gleich. */
+     Boden, oben waechst der Kreis mit dem Zaehler — an beiden gleich.
+
+     **Nachtrag vom selben Tag: `left` gehoert dazu, und das war ein halber
+     Fix.** Woos Regel lautet vollstaendig `left: 100%; margin-left: -44%` —
+     die zwei sind ein Paar: `left` schiebt den Kreis komplett neben den
+     Knopf, das negative Margin holt ihn wieder heran. Oben stand nur das
+     Margin, also fiel die Rueckholung weg und `left: 100%` blieb stehen.
+     Ergebnis, gemessen: der Kreis stand **15 px** rechts neben dem Knopf
+     statt 5 px darueber — „neben statt auf dem Eck", wie es gemeldet wurde.
+     Senkrecht stimmte es da schon, waagrecht war es schlechter als vorher.
+
+       Stern       left (verwendet) 24 px   Ueberstand rechts  5 px
+       Warenkorb   left  34 px = 100 %      Ueberstand rechts 15 px
+
+     `left: auto` gibt die Waagrechte an `inset-inline-end: -5px` zurueck,
+     und damit waechst der Kreis bei zweistelligen Zaehlern nach **links**
+     in den Knopf hinein statt nach rechts aus ihm heraus — genau wie der
+     Stern. Physisch `left` und nicht `inset-inline-start`, weil Woo physisch
+     setzt: neutralisiert wird die Zeile, die dasteht. */
+  left: auto;
   transform: none;
   margin: 0;
 }
