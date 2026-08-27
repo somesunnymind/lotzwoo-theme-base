@@ -2108,10 +2108,33 @@ main:has(> .lotzwoo-contextbar) {
   padding-inline: var(--wp--preset--spacing--40);
 }
 
+/* `overflow: hidden` haelt die Angaben in der Leiste — waagrecht, und dafuer
+   ist es da. Es klammert aber **in beiden Achsen**, und die untere Kante der
+   Klammer ist die Unterkante des Kastens: eine Unterlaenge, die darueber
+   hinausragt (das `g` in „Dienstag"), waere abgeschnitten.
+
+   Das Paar Polster/negatives Aussenmass schiebt **nur die Klammerkante** um
+   3 px nach unten. Der Kasten wird innen groesser, sein Aussenmass bleibt
+   gleich, also bewegt sich im Aufbau nichts — auch nicht die senkrechte
+   Zentrierung, die am Aussenmass haengt.
+
+   Nicht `overflow: clip` mit `overflow-clip-margin`: das lockert die Klammer
+   in **allen** Richtungen, also auch waagrecht, und genau waagrecht soll sie
+   halten. Nicht `overflow-y: visible`: eine Achse auf `hidden` rechnet die
+   andere zu `auto` um, und `auto` macht den Kasten zum Scroll-Container —
+   dieselbe Regel, an der `overflow-x: auto` weiter unten die Matrix-Kopfzeile
+   gekostet hat.
+
+   **Am 2026-08-27 gemessen und nicht reproduziert:** auf 14 Breiten von 1920
+   bis 360 px und auf Sortiment, Warenkorb und Konto ist das Bild mit und ohne
+   diese Klammer byteweise gleich — hier schneidet sie heute nichts ab. Die
+   drei Pixel sind die Zusicherung, dass sie es auch nicht kann. */
 .lotzwoo-contextbar__facts {
   flex: 1 1 auto;
   min-width: 0;
   overflow: hidden;
+  padding-bottom: 3px;
+  margin-bottom: -3px;
 }
 
 .lotzwoo-contextbar__fact {
