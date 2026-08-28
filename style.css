@@ -3668,6 +3668,24 @@ header .wp-block-navigation__responsive-container.is-menu-open
   .lotzwoo-contextbar__inner,
   .wp-site-blocks > .lotzwoo-contextbar .lotzwoo-contextbar__inner {
     gap: 8px;
+  }
+
+  /* **Das Polster gilt nur den Block-Flaechen, nicht dem Sortiment**
+     (2026-08-28, gemeldet).
+
+     Bis hierher trugen beide Selektoren dasselbe `padding-inline`, und das
+     war ein Versehen mit sichtbarer Folge: im Sortiment zeichnet der Kurzcode
+     die Leiste **in** seinem eigenen Behaelter, der seine Seitenraender schon
+     traegt. Oberhalb 700 px steht die Auskunft dort deshalb bei 0 und fluchtet
+     mit Ueberschrift, Werkzeugleiste und Liste darunter — unterhalb 700 px
+     ruckte sie um 10 px (unter 480 um 8) nach innen und stand als einzige
+     Flaeche der Seite aus der Flucht.
+
+     Auf Warenkorb, Konto und Favoriten haengt dieselbe Leiste als Block
+     direkt in `.wp-site-blocks`, ausserhalb jeder Inhaltsspalte. Dort ist das
+     Polster das einzige, was die Auskunft vom Fensterrand fernhaelt, und dort
+     bleibt es. */
+  .wp-site-blocks > .lotzwoo-contextbar .lotzwoo-contextbar__inner {
     padding-inline: 10px;
   }
 
@@ -3864,6 +3882,11 @@ header .wp-block-navigation__responsive-container.is-menu-open
   .lotzwoo-contextbar__inner,
   .wp-site-blocks > .lotzwoo-contextbar .lotzwoo-contextbar__inner {
     gap: 6px;
+  }
+
+  /* Wieder nur die Block-Flaechen — dieselbe Begruendung wie eine Stufe
+     hoeher. Im Sortiment bleibt die Auskunft bei 0 und in der Flucht. */
+  .wp-site-blocks > .lotzwoo-contextbar .lotzwoo-contextbar__inner {
     padding-inline: 8px;
   }
 
