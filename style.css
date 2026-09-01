@@ -2469,9 +2469,13 @@ main:has(> .lotzwoo-contextbar) {
    Der Chip sitzt auf 1920 px am rechten Rand und auf 320 px auch — eine
    Stelle, die sich mit der Breite verschiebt, ist eine Stelle, die man
    suchen muss. */
-/* Symbol und Beschriftung nebeneinander, Name und Ziel untereinander. Das
-   Symbol steht im Ruhezustand nicht da — es ist die Ersatzfassung fuer den
-   Fall, dass der Name keinen Platz mehr hat (weiter unten). */
+/* Symbol und Beschriftung nebeneinander, Name und Ziel untereinander.
+
+   **Seit AP-97 (2026-09-01) steht das Symbol im Ruhezustand da.** Bis dahin
+   war es allein die Ersatzfassung fuer den Fall, dass der Name keinen Platz
+   mehr hat. Der Auftraggeber wollte es auch daneben — und dann, wenn die Zeile
+   eng wird, als erstes wieder weg: Zierde geht vor Auskunft. Es hat damit zwei
+   Rollen und drei Stufen, und beide Regeln dafuer stehen weiter unten. */
 .lotzwoo-headerareas__customer {
   display: flex;
   align-items: center;
@@ -2534,6 +2538,18 @@ main:has(> .lotzwoo-contextbar) {
    2026-08-17 stand das Konto-Symbol auf **jeder** Breite da, neben dem Namen.
    Dritter Fall dieser Art in zwei Tagen; einer Regel sieht man das nicht an. */
 .lotzwoo-header-actions .lotzwoo-headerareas__customer-icon {
+  display: block;
+}
+
+/* **Stufe 2: die Zierde faellt zuerst.** Reicht die Zeile nicht mehr, nimmt
+   `kopfleiste.js` das Symbol weg, bevor irgendetwas anderes nachgibt — es ist
+   das einzige im Kopf, dessen Verlust keine Auskunft kostet.
+
+   `:not(.lotzwoo-kopf--kontoicon)` und nicht die Reihenfolge im Stylesheet:
+   in Stufe 3 tragen beide Klassen zugleich, und dann muss das Symbol wieder
+   da sein — dort ist es der ganze Knopf. Eine Regel, die nur deshalb gewinnt,
+   weil sie spaeter steht, ueberlebt das naechste Verschieben nicht. */
+.lotzwoo-kopf--ohne-symbole:not(.lotzwoo-kopf--kontoicon) .lotzwoo-header-actions .lotzwoo-headerareas__customer-icon {
   display: none;
 }
 
@@ -3062,14 +3078,42 @@ main:has(> .lotzwoo-contextbar) {
 /* Die Bestellannahme selbst. Sie gibt nach, statt die Zeile zu sprengen —
    und wenn sie ganz weichen muss, holt das Skript sie ins „mehr". */
 .lotzwoo-headerphone {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   min-width: 0;
   overflow: hidden;
   color: var(--wp--preset--color--ink-900);
   font-size: var(--wp--preset--font-size--sm);
   font-weight: 500;
   text-decoration: none;
-  text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* **Die Auslassungspunkte sitzen an der Nummer, nicht am Link** (AP-97). Seit
+   der Hoerer davorsteht, ist der Link ein Flex-Kasten mit zwei Kindern; ein
+   `text-overflow` auf ihm greift dann nicht mehr, und die Nummer waere hart
+   abgeschnitten statt mit Punkten. */
+.lotzwoo-headerphone__num {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Das Symbol schrumpft nicht mit: `min-width: 0` am Link laesst jedes Kind
+   nachgeben, und ein zusammengedrueckter Hoerer sieht aus wie ein Defekt. */
+.lotzwoo-headerphone__ico {
+  flex: none;
+}
+
+/* Derselbe Schritt wie beim Konto-Symbol, und derselbe Grund: die Nummer ist
+   die Auskunft, der Hoerer ist die Zierde.
+
+   **Nur in der mittleren Bahn.** Wandert die Nummer weiter unten ins „mehr"
+   oder ins Overlay, trifft dieser Selektor nicht mehr — dort steht sie in
+   einer eigenen Zeile, dort ist Platz, und dort fuehrt das Symbol wieder. */
+.lotzwoo-kopf--ohne-symbole .lotzwoo-header-mitte .lotzwoo-headerphone__ico {
+  display: none;
 }
 
 a.lotzwoo-headerphone:hover,

@@ -76,6 +76,23 @@
  * unter 600 px ohne Hamburger, über 600 px mit, wenn die Punkte es so ergeben.
  * Das Stylesheet dreht Kerns beide Medienregeln entsprechend um.
  *
+ * ## Die Symbole (AP-97, 2026-09-01)
+ *
+ * Vor allem anderen fallen die zwei Symbole im Kopf — der Hoerer vor der
+ * Bestellannahme und `circle-user` am Konto-Chip. Sie stehen dort seit dem
+ * 2026-09-01 auch im Ruhezustand, und die Bedingung des Auftraggebers war von
+ * Anfang an „nur, wenn genug Platz dafuer ist".
+ *
+ * Die ganze Leiter, von weit nach schmal:
+ *
+ *   1. alles: Hoerer + Nummer, Symbol + Name + „Mein Konto"
+ *   2. die **Symbole** fallen — Nummer und Name bleiben ausgeschrieben
+ *   3. Menuepunkte wandern ins „mehr"
+ *   4. die Nummer wandert hinterher
+ *   5. der Hamburger uebernimmt
+ *   6. der Chip wird zum Symbol — es kehrt zurueck, weil es dort kein
+ *      Beiwerk mehr ist, sondern der Knopf
+ *
  * ## Die Nummer
  *
  * Die Bestellannahme (`data-lotzwoo-headerphone`, gesetzt vom Plugin) ist der
@@ -128,6 +145,15 @@
 	var BURGER = 'lotzwoo-kopf--burger';
 	var MESSEN = 'lotzwoo-misst';
 	var KONTOICON = 'lotzwoo-kopf--kontoicon';
+
+	/*
+	 * AP-97: die Symbole am Konto-Chip und an der Bestellannahme fallen als
+	 * **erstes**, noch vor dem ersten Menuepunkt. Sie sind das einzige im
+	 * Kopf, dessen Verlust keine Auskunft kostet — das Wort daneben sagt
+	 * dasselbe. Welche Symbole das betrifft, steht im Stylesheet; hier steht
+	 * nur, wann.
+	 */
+	var SYMBOLE = 'lotzwoo-kopf--ohne-symbole';
 
 	// Der Konto-Chip (`data-lotzwoo-customer`, gesetzt vom Plugin). Findet
 	// dieses Skript ihn nicht, verteilt es eben nur Menuepunkte — dieselbe
@@ -185,6 +211,12 @@
 
 		telefonTraeger = null;
 		menue.textContent = '';
+
+		// Auch die Symbole gehoeren zum vollen Zustand — und aus demselben
+		// Grund wie der Chip darunter: gemessen wird die Zeile **mit** ihnen,
+		// sonst passt sie beim Vergroessern fuer immer und sie kaemen nie
+		// wieder.
+		zeile.classList.remove(SYMBOLE);
 
 		// Auch der Chip geht in den vollen Zustand zurueck — sonst gilt Falle 1
 		// fuer ihn: ein Chip, der schon Symbol ist, misst die Breite seines
@@ -275,6 +307,20 @@
 			return;
 		}
 
+		// --- Die Symbole fallen zuerst ---------------------------------
+		//
+		// Vor jedem Menuepunkt, und das ist die Rangordnung des Auftrags:
+		// ein Symbol, das neben seinem Wort steht, sagt nichts, was das Wort
+		// nicht sagt. Ein Menuepunkt, der ins „mehr" wandert, kostet einen
+		// Klick; ein Symbol, das geht, kostet nichts.
+		zeile.classList.add(SYMBOLE);
+
+		if (!laeuftUeber()) {
+			abschliessen(offen, false);
+
+			return;
+		}
+
 		// --- Erste Darstellung: „mehr" ---------------------------------
 		eintrag.hidden = false;
 
@@ -309,6 +355,12 @@
 		heim();
 		eintrag.hidden = true;
 		zeile.classList.add(BURGER);
+
+		// `heim()` hat die Symbole gerade zurueckgeholt — hier ist das falsch
+		// herum: der Hamburger steht auf jeder Breite unterhalb der Stufe, auf
+		// der sie schon nicht mehr passten. Ohne diese Zeile stuende der
+		// Hoerer auf 360 px wieder da, den er auf 900 px verloren hat.
+		zeile.classList.add(SYMBOLE);
 
 		// Der Öffner ist schmaler als die Leiste, die er ersetzt; die Nummer
 		// passt danach fast immer wieder. Wenn nicht, geht sie mit ins Overlay

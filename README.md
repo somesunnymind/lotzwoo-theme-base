@@ -193,6 +193,26 @@ Der Rückgabewert des Themes ist die leere Zeichenkette und **kein leeres `<div>
 Aktionsgruppe ist ein Flex-Container mit `blockGap`, und ein leerer Kasten darin schöbe die
 Nachbarn um eine Lücke.
 
+### Die zwei Symbole im Kopf — und die Klassennamen, an denen sie hängen (AP-97, 2026-09-01)
+
+Seit dem 2026-09-01 tragen die Bestellannahme und der Konto-Chip ein Lucide-Symbol, **und nur
+solange die Zeile Platz dafür hat**. Das Markup kommt vom Plugin, die Entscheidung „jetzt weg"
+trifft `assets/js/kopfleiste.js` — dieselbe Arbeitsteilung wie bei allem anderen im Kopf.
+
+Damit sind es drei Klassennamen mehr, die beide Repos kennen müssen:
+
+| Name | Wer setzt ihn | Wer liest ihn |
+|---|---|---|
+| `lotzwoo-headerphone__ico` | Plugin (`templates/header-areas.php`) | dieses Theme, `style.css` — blendet ihn in der mittleren Bahn weg |
+| `lotzwoo-headerphone__num` | Plugin | dieses Theme — die Auslassungspunkte sitzen an ihm, seit der Link ein Flex-Kasten ist |
+| `lotzwoo-kopf--ohne-symbole` | dieses Theme (`kopfleiste.js`) | dieses Theme (`style.css`) |
+
+Die Leiter, von weit nach schmal: **Symbole** → Menüpunkte ins „mehr" → die Nummer hinterher →
+Hamburger → der Chip wird selbst zum Symbol. Die Symbole gehen zuerst, weil sie das einzige im Kopf
+sind, dessen Verlust keine Auskunft kostet; in der letzten Stufe kehrt das Konto-Symbol zurück,
+weil es dort der Knopf ist und nicht mehr die Zierde. Die Begründung je Symbol steht im Plugin-Repo
+unter `docs/plans/2026-09-01-konto-symbole.md`.
+
 ### Der Warenkorb-Slot — derselbe Vertrag, anderer Mechanismus
 
 Ticket 15 hat den zweiten Slot geschnitten. Er sieht aus wie der erste und funktioniert anders:
