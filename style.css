@@ -2173,6 +2173,15 @@ main:has(> .lotzwoo-contextbar) {
   line-height: 1.25;
 }
 
+/* Der Hinweis ist ein `<p>`, und ein `<p>` bekommt in einer Block-Seite von
+   ausserhalb dieser Datei Abstaende. Die Gruppenregel darueber setzt sie schon
+   zurueck; diese Zeile sagt es fuer den einen Fall noch einmal, in dem die
+   Leiste nur den Hinweis traegt und nichts daneben steht, was den Umbruch
+   sichtbar machen wuerde. */
+.lotzwoo-contextbar__unset {
+  margin: 0;
+}
+
 /* Beschriftung ueber dem Wert, nicht daneben: so bleibt die Leiste eine
    Zeile hoch, auch wenn beide Werte lang sind. */
 .lotzwoo-contextbar__pair {
@@ -2326,6 +2335,19 @@ main:has(> .lotzwoo-contextbar) {
 .lotzwoo-contextbar__switch:hover,
 .lotzwoo-contextbar__switch:focus-visible {
   background: rgba(255, 255, 255, 0.26);
+}
+
+/* **Der Knopf nimmt die Hoehe der Zeile, nicht seine eigene.** Die feste
+   `height` darueber laesst ihn neben zweizeiligen Angaben mittig schweben; mit
+   `height: 100%` steht seine Umrandung so hoch wie das, wozu sie gehoert.
+   `min-height` haelt die 34 px als Untergrenze — sie ist die Trefferflaeche,
+   nicht die Optik, und in einer einzeiligen Leiste ist `100%` kleiner.
+
+   Der Elementname erhoeht die Spezifitaet gerade so weit, dass diese Regel die
+   `height` oben schlaegt; alles andere am Knopf bleibt, wie es dort steht. */
+button.lotzwoo-contextbar__switch {
+  height: 100%;
+  min-height: 34px;
 }
 
 /* Der Satz aus `Context_Notice`, wenn der Kontext das Bestellen sperrt.
