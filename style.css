@@ -2251,6 +2251,43 @@ main:has(> .lotzwoo-contextbar) {
   color: var(--wp--preset--color--err-500);
 }
 
+/* Der laufende Bestellschluss (2026-09-08, Plugin-Seite:
+   `assets/js/b2b-cutoff.js`).
+
+   Bis dahin kannte diese Leiste zwei Zustaende, offen und vorbei — ein Termin,
+   der in zwanzig Minuten schliesst, sah aus wie einer in fuenf Tagen. Genau
+   dieser Kunde ruft danach an und fragt, ob er noch bestellen darf.
+
+   Gefaerbt wird ueber `data-lwb-cutoff-stage`, das Attribut, das das Skript
+   fortschreibt. **Nicht ueber eine Klasse**: dasselbe Skript bedient die
+   Warenkorbflaeche des Plugins, und deren Stylesheet benennt seine Klassen
+   anders. Ein Attributselektor faerbt beide, ohne dass eines von beiden das
+   andere kennen muss.
+
+   Rot ab der letzten halben Stunde, und zwar dasselbe Rot wie „vorbei": was in
+   zwanzig Minuten schliesst, verlangt dieselbe Aufmerksamkeit wie das, was
+   gerade geschlossen hat. Eine dritte Farbe dafuer waere eine, die niemand
+   gelernt hat. */
+.lotzwoo-contextbar__cutoff[data-lwb-cutoff-stage="warn"] {
+  background: var(--wp--preset--color--warn-50, #fdf3e3);
+  color: var(--wp--preset--color--warn-500, #9a6107);
+}
+
+.lotzwoo-contextbar__cutoff[data-lwb-cutoff-stage="urgent"],
+.lotzwoo-contextbar__cutoff[data-lwb-cutoff-stage="late"] {
+  background: var(--wp--preset--color--err-50);
+  color: var(--wp--preset--color--err-500);
+}
+
+/* Die Restzeit steht hinter dem Zeitpunkt und traegt ihr Trennzeichen selbst
+   — als `::before`, damit es mit ihr verschwindet. Ausserhalb des
+   Warnfensters ist der Knoten leer (das Skript leert ihn), und ein
+   Mittepunkt, der dann allein stehenbliebe, waere die Sorte Rest, die man
+   erst auf einem Schirm sieht. */
+.lotzwoo-contextbar__cutoff-rest:not(:empty)::before {
+  content: " \00b7 ";
+}
+
 .lotzwoo-contextbar__cutoff .lotzwoo-contextbar__icon {
   color: currentColor;
 }
@@ -3905,6 +3942,26 @@ header .wp-block-navigation__responsive-container.is-menu-open
 
   .lotzwoo-contextbar__cutoff-short {
     display: inline;
+  }
+
+  /* **Im Warnfenster gewinnt die Restzeit den Platz.** Unter 700 px steht im
+     Abzeichen sonst die blosse Uhrzeit („13:11"), und die beantwortet die
+     Frage, die in der letzten Stunde zaehlt, schlechter als „noch 25 Min."
+     — sie verlangt die Rechnung, die der Kunde gerade nicht machen will.
+     Beides nebeneinander passt auf 390 px nicht; also tritt der Zeitpunkt
+     zurueck, solange es eilt, und kommt darueber wieder. */
+  .lotzwoo-contextbar__cutoff[data-lwb-cutoff-stage="warn"] .lotzwoo-contextbar__cutoff-short,
+  .lotzwoo-contextbar__cutoff[data-lwb-cutoff-stage="urgent"] .lotzwoo-contextbar__cutoff-short,
+  .lotzwoo-contextbar__cutoff[data-lwb-cutoff-stage="late"] .lotzwoo-contextbar__cutoff-short {
+    display: none;
+  }
+
+  /* Und ohne den Zeitpunkt daneben braucht die Restzeit ihr Trennzeichen
+     nicht mehr. */
+  .lotzwoo-contextbar__cutoff[data-lwb-cutoff-stage="warn"] .lotzwoo-contextbar__cutoff-rest::before,
+  .lotzwoo-contextbar__cutoff[data-lwb-cutoff-stage="urgent"] .lotzwoo-contextbar__cutoff-rest::before,
+  .lotzwoo-contextbar__cutoff[data-lwb-cutoff-stage="late"] .lotzwoo-contextbar__cutoff-rest::before {
+    content: none;
   }
 }
 
