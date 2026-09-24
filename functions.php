@@ -374,6 +374,98 @@ add_filter('render_block_core/navigation', static function (string $content): st
 }, 10, 1);
 
 /**
+ * „Shop" — der erste Menüpunkt, und er steht in jeder Navigation.
+ *
+ * Entscheidung des Auftraggebers vom 2026-09-24: der Weg ins Sortiment lief
+ * bis dahin allein über das Logo, und das ist nicht für jeden ein Weg — wer
+ * nicht weiß, dass das Logo ein Link ist, findet von „Über uns" aus nicht
+ * zurück in den Katalog. Ein Menüpunkt sagt es mit einem Wort.
+ *
+ * **Warum hier und nicht in `parts/navigation.html` des Kindthemes.** AD-11
+ * gibt die Seitenstruktur eines Kunden dem Kindtheme, und dort steht sie
+ * weiterhin. Das Sortiment ist aber keine Seite eines Kunden — jede
+ * Installation dieses Themes hat eins, und es liegt dort, wo das Plugin es
+ * findet. Stünde der Punkt im Kindtheme, müsste ihn jeder Kunde von Hand
+ * nachtragen, und genau der, der ihn vergisst, hat das Problem wieder.
+ *
+ * **Das Ziel ist das des Logos:** die Sortimentsseite, aufgelöst über dieselbe
+ * Naht `lotzwoo/sortiment-url` wie die „Zum Sortiment"-Knöpfe weiter unten.
+ * Ohne Plugin antwortet niemand, und es bleibt `/` — wie beim Logo.
+ *
+ * **Gerendert als echter `core/navigation-link`** mit dem Kontext der
+ * Navigation, nicht als abgeschriebenes `<li>`: Schriftgröße, Farben und
+ * Klassen kommen damit vom Kern und bleiben beim nächsten Update richtig, und
+ * `kopfleiste.js` behandelt den Punkt wie jeden anderen. Als erster Punkt
+ * wandert er als letzter ins „mehr".
+ *
+ * Priorität 9, damit er vor dem Eintrag „mehr" (Priorität 10) im Markup steht
+ * — der hängt am Ende an und fragt nicht, was davor liegt.
+ */
+add_filter('render_block_core/navigation', static function (string $content, array $block, $instance = null): string {
+    if (str_contains($content, 'lotzwoo-navi-shop')) {
+        return $content;
+    }
+
+    $url = apply_filters('lotzwoo/sortiment-url', '/');
+    $url = is_string($url) && $url !== '' ? $url : '/';
+
+    // Der Kontext, den `core/navigation` seinen Punkten gibt (Schriftgröße,
+    // Farben, …). Aus dem Blocktyp gelesen und nicht abgeschrieben.
+    $kontext = [];
+
+    if ($instance instanceof WP_Block && is_array($instance->block_type->provides_context ?? null)) {
+        foreach ($instance->block_type->provides_context as $name => $attribut) {
+            if (array_key_exists($attribut, $instance->attributes)) {
+                $kontext[$name] = $instance->attributes[$attribut];
+            }
+        }
+    }
+
+    $punkt = (new WP_Block([
+        'blockName' => 'core/navigation-link',
+        'attrs' => [
+            'label' => __('Shop', 'lotzwoo-theme-base'),
+            'url' => $url,
+            'kind' => 'custom',
+            'isTopLevelLink' => true,
+            'className' => 'lotzwoo-navi-shop',
+        ],
+        'innerBlocks' => [],
+        'innerHTML' => '',
+        'innerContent' => [],
+    ], $kontext))->render();
+
+    // Die Aktivmarkierung oben lässt einen Pfad `/` bewusst aus — für diesen
+    // Punkt ist die Startseite aber genau das Ziel, wenn das Sortiment dort
+    // liegt.
+    global $wp;
+    $ziel = trim((string) wp_parse_url($url, PHP_URL_PATH), '/');
+
+    if ($ziel === '' && trim((string) ($wp->request ?? ''), '/') === '' && is_front_page()) {
+        $tags = new WP_HTML_Tag_Processor($punkt);
+
+        if ($tags->next_tag('li')) {
+            $tags->add_class('current-menu-item');
+        }
+
+        if ($tags->next_tag('a')) {
+            $tags->set_attribute('aria-current', 'page');
+        }
+
+        $punkt = $tags->get_updated_html();
+    }
+
+    $ersetzt = preg_replace_callback(
+        '#<ul\b[^>]*\bwp-block-navigation__container\b[^>]*>#',
+        static fn (array $treffer): string => $treffer[0] . $punkt,
+        $content,
+        1
+    );
+
+    return is_string($ersetzt) ? $ersetzt : $content;
+}, 9, 3);
+
+/**
  * Die aktuelle Seite im Kopfbereich markieren.
  *
  * Die Navigation in `parts/header.html` steht **inline** — sechs
