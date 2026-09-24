@@ -2404,7 +2404,7 @@ button.lotzwoo-contextbar__switch {
 
 .lotzwoo-contextbar__facts,
 .lotzwoo-contextbar__unset {
-  padding-inline-end: var(--lotzwoo-contextbar-winkel, 40px);
+  padding-inline-end: var(--lotzwoo-contextbar-winkel, 34px);
 }
 
 .lotzwoo-contextbar__actions {
@@ -2448,14 +2448,27 @@ button.lotzwoo-contextbar__switch {
   white-space: nowrap;
 }
 
-/* Der Winkel bekommt eine eigene Trefferflaeche von 40 x 40, damit die
-   Zusicherung aus WCAG 2.5.8 auch dann steht, wenn jemand nur ihn sieht.
-   18 px Symbol + 2 x 11 px = die 40 px des Polsters oben. */
+/* **Der Winkel hat das Mass von Stern und Warenkorb** (2026-09-24, gemeldet:
+   „hoeher und breiter als die beiden daneben"). Bis dahin 40 x 40 aus
+   18 px Symbol + 2 x 11 px Polster; jetzt dieselbe Kantenlaenge
+   `--lotzwoo-contextbar-control-h` wie die zwei Aktionsknoepfe, das Symbol
+   mittig darin. 34 px liegen weiter ueber den 24 px aus WCAG 2.5.8 — und
+   die eigentliche Trefferflaeche ist ohnehin die ganze Angabengruppe.
+
+   `--lotzwoo-contextbar-winkel` ist dieselbe Zahl fuer das Polster hinter
+   den Angaben oben; beide muessen gleich sein, sonst laege der Winkel ueber
+   dem letzten Zeichen oder mit Luft dahinter. */
+.lotzwoo-contextbar {
+  --lotzwoo-contextbar-winkel: var(--lotzwoo-contextbar-control-h, 34px);
+}
+
 .lotzwoo-contextbar__switch-winkel {
   display: block;
   flex: none;
-  box-sizing: content-box;
-  padding: 11px;
+  box-sizing: border-box;
+  width: var(--lotzwoo-contextbar-winkel);
+  height: var(--lotzwoo-contextbar-winkel);
+  padding: calc((var(--lotzwoo-contextbar-winkel) - 18px) / 2);
 }
 
 /* Der Kasten ist fort, die Rueckmeldung nicht: beim Ueberfahren und im
