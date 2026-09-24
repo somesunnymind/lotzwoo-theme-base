@@ -2404,7 +2404,11 @@ button.lotzwoo-contextbar__switch {
 
 .lotzwoo-contextbar__facts,
 .lotzwoo-contextbar__unset {
-  padding-inline-end: var(--lotzwoo-contextbar-winkel, 34px);
+  /* Plus ein kleiner Abstand (2026-09-24, gewuenscht): ohne ihn stand der
+     Winkel buendig am letzten Zeichen bzw. am Bestellschluss-Abzeichen. Der
+     Knopf richtet den Winkel rechts in dieser Flaeche aus, das Polster ist
+     also der Abstand. */
+  padding-inline-end: calc(var(--lotzwoo-contextbar-winkel, 34px) + var(--lotzwoo-contextbar-winkel-abstand, 6px));
 }
 
 .lotzwoo-contextbar__actions {
