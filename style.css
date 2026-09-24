@@ -2362,6 +2362,114 @@ button.lotzwoo-contextbar__switch {
   min-height: 34px;
 }
 
+/* =================================================================
+   Der Wechsler ist ein Winkel direkt hinter den Angaben — auf jeder Breite
+
+   Entscheidung des Auftraggebers vom 2026-09-24. Bis dahin stand ueber
+   700 px ein Knopf „Wechseln" rechts aussen neben Stern und Warenkorb, und
+   nur darunter galt, was AP-70 (B3) gebaut hatte: kein Kasten, ein Winkel,
+   und ein Klick irgendwo auf Ort und Termin oeffnet den Waehler. Die schmale
+   Fassung war die verstaendlichere — der Winkel steht bei dem, was er
+   aendert, und nicht bei dem, was man sonst noch tun kann. Sie gilt jetzt
+   ueberall.
+
+   **Gebaut als Ueberlagerung, nicht als zweiter Ausloeser.** Die Zeile ist
+   ein Raster mit drei Spalten: Angaben, Leerraum, Aktionen. Angabengruppe und
+   Knopf liegen in **derselben** Zelle, der Knopf darueber und durchsichtig —
+   die ganze Gruppe ist seine Flaeche, ohne dass etwas verschachtelt wird. Die
+   Angaben sind eine `<dl>`, und ein `<button>` nimmt nur Phrasing Content.
+
+   **Die erste Spalte ist so breit wie ihr Inhalt** (`minmax(0, auto)`) und
+   nicht wie der Platz: damit steht der Winkel am Ende von Ort und Termin und
+   nicht am Ende der Zeile. Wird es eng, gibt zuerst die Leerspalte nach, dann
+   die Angaben — deren Auslassungspunkte bleiben, wie sie sind. Das Polster
+   hinter den Angaben ist die Breite des Winkels samt Trefferflaeche; ohne es
+   laege der Winkel ueber dem letzten Zeichen.
+
+   **Es bleibt bei genau einem Ausloeser** — derselbe `<button>`, derselbe
+   Fokusstopp, dasselbe `aria-haspopup`. Das Wort „Wechseln" bleibt im
+   Dokument und wird vorgelesen; weggeblendet wird es nur fuer die Augen. */
+.lotzwoo-contextbar__inner,
+.wp-site-blocks > .lotzwoo-contextbar .lotzwoo-contextbar__inner {
+  display: grid;
+  grid-template-columns: minmax(0, auto) 1fr auto;
+  align-items: center;
+}
+
+.lotzwoo-contextbar__facts,
+.lotzwoo-contextbar__unset,
+.lotzwoo-contextbar__switch {
+  grid-area: 1 / 1;
+}
+
+.lotzwoo-contextbar__facts,
+.lotzwoo-contextbar__unset {
+  padding-inline-end: var(--lotzwoo-contextbar-winkel, 40px);
+}
+
+.lotzwoo-contextbar__actions {
+  grid-area: 1 / 3;
+}
+
+/* Der Knopf des veralteten Kontexts („Erneut versuchen") hat keinen Winkel,
+   nur sein Wort — ueber die Angaben gelegt, stuende es auf ihnen. Er bleibt
+   ein Kasten und nimmt die Leerspalte. */
+.lotzwoo-contextbar__switch[data-lotzwoo-contextbar-retry] {
+  grid-area: 1 / 2;
+  justify-self: start;
+}
+
+.lotzwoo-contextbar__switch[data-lotzwoo-contextbar-open] {
+  justify-content: flex-end;
+  align-self: stretch;
+  min-width: 0;
+  margin-inline-start: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  /* Ueber der Gruppe, damit der Klick ihn trifft und nicht den Text
+     darunter. Die Angaben bleiben lesbar — der Knopf ist durchsichtig. */
+  z-index: 1;
+}
+
+.lotzwoo-contextbar__switch[data-lotzwoo-contextbar-open]:hover,
+.lotzwoo-contextbar__switch[data-lotzwoo-contextbar-open]:focus-visible {
+  background: none;
+}
+
+.lotzwoo-contextbar__switch-wort {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Der Winkel bekommt eine eigene Trefferflaeche von 40 x 40, damit die
+   Zusicherung aus WCAG 2.5.8 auch dann steht, wenn jemand nur ihn sieht.
+   18 px Symbol + 2 x 11 px = die 40 px des Polsters oben. */
+.lotzwoo-contextbar__switch-winkel {
+  display: block;
+  flex: none;
+  box-sizing: content-box;
+  padding: 11px;
+}
+
+/* Der Kasten ist fort, die Rueckmeldung nicht: beim Ueberfahren und im
+   Tastaturfokus bekommt der Winkel die Flaeche, die der Knopf „Wechseln"
+   vorher als Ganzes trug — dieselben Werte, siehe weiter oben. */
+.lotzwoo-contextbar__switch-winkel {
+  border-radius: 6px;
+}
+
+.lotzwoo-contextbar__switch[data-lotzwoo-contextbar-open]:hover .lotzwoo-contextbar__switch-winkel,
+.lotzwoo-contextbar__switch[data-lotzwoo-contextbar-open]:focus-visible .lotzwoo-contextbar__switch-winkel {
+  background: rgba(255, 255, 255, 0.26);
+}
+
 /* Der Satz aus `Context_Notice`, wenn der Kontext das Bestellen sperrt.
    Er steht unter der Zeile und nicht darin: er ist ein Satz und keine
    Angabe, und in der Zeile haette er jede Ausrichtung zerstoert. Das
@@ -3725,7 +3833,6 @@ header .wp-block-navigation__responsive-container.is-menu-open
    Schalters und der Bestellschluss ohne sein Wort stehen im Dokument und
    warten auf ihre Stufe. Was hier `display: none` traegt, ist die
    Ersatzfassung — nie die Angabe selbst. */
-.lotzwoo-contextbar__switch-winkel,
 .lotzwoo-contextbar__cutoff-short {
   display: none;
 }
@@ -3867,98 +3974,9 @@ header .wp-block-navigation__responsive-container.is-menu-open
     flex: none;
   }
 
-  /* **Der Schalter verliert sein Wort und behaelt seine Aufgabe.**
-     Aus „Wechseln" (94 px gemessen) wird ein Winkel — die Breite kommt den
-     Angaben zugute. Das Wort verschwindet nur optisch und wird weiter
-     vorgelesen; `aria-haspopup` am selben Knopf sagt unveraendert, was er tut.
-
-     Der Entwurf zeichnet hier zwei Elemente und blendet je eines aus. Gebaut
-     ist **einer** mit zwei Fassungen darin — die Begruendung steht in
-     `templates/context-bar.php`: zwei Ausloeser waeren zwei Zustaende, die
-     auseinanderlaufen koennen. */
-  .lotzwoo-contextbar__switch-wort {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    margin: -1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-    white-space: nowrap;
-  }
-
-  /* =================================================================
-     AP-70 · B3 — der Knopf „Wechseln" verschwindet, die Angaben uebernehmen
-
-     Bis zum 2026-08-20 wurde er hier zur 40er-Flaeche mit Winkel und stand
-     als eigenes Bedienelement neben den Angaben. Der Auftraggeber hat das
-     umgestellt: **der Knopf verschwindet als Kasten, der Winkel steht rechts
-     neben „Ort · Datum · Bestellschluss", und ein Klick irgendwo auf diese
-     Gruppe oeffnet den Waehler.**
-
-     **Gebaut ist es als Ueberlagerung, nicht als zweiter Ausloeser.** Die
-     Zeile wird zum Raster mit zwei Spalten; Angabengruppe und Knopf liegen
-     in **derselben** Zelle, der Knopf darueber und durchsichtig. Damit ist
-     die ganze Gruppe seine Flaeche, ohne dass etwas verschachtelt wird —
-     und das ist keine Feinheit: die Angaben sind eine `<dl>`, und ein
-     `<button>` nimmt nur Phrasing Content. Wer die Faktengruppe in den Knopf
-     legt, baut Markup, das jeder Browser anders repariert und jeder
-     Screenreader anders vorliest.
-
-     **Es bleibt bei genau einem Ausloeser.** Derselbe `<button>`, derselbe
-     Fokusstopp, dasselbe `aria-haspopup`, dieselbe Beschriftung — fuenf
-     Stellen in den Nachweisen lesen oder klicken ihn, und keine bricht.
-     Die Tastatur verliert nichts: er ist unveraendert erreichbar und
-     beschriftet, nur seine Flaeche ist groesser geworden.
-
-     Die Aktionsgruppe (Stern, Warenkorb) liegt in der **zweiten** Spalte und
-     bleibt anklickbar — sie liegt nicht unter dem Knopf. */
-  .lotzwoo-contextbar__inner,
-  .wp-site-blocks > .lotzwoo-contextbar .lotzwoo-contextbar__inner {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: center;
-  }
-
-  .lotzwoo-contextbar__facts,
-  .lotzwoo-contextbar__unset,
-  .lotzwoo-contextbar__switch {
-    grid-area: 1 / 1;
-  }
-
-  .lotzwoo-contextbar__actions {
-    grid-area: 1 / 2;
-  }
-
-  .lotzwoo-contextbar__switch {
-    display: inline-flex;
-    align-items: center;
-    justify-content: flex-end;
-    align-self: stretch;
-    box-sizing: border-box;
-    min-width: 0;
-    margin-inline-start: 0;
-    padding: 0 2px;
-    border: 0;
-    border-radius: 0;
-    background: none;
-    /* Ueber der Gruppe, damit der Klick ihn trifft und nicht den Text
-       darunter. Die Angaben bleiben lesbar — der Knopf ist durchsichtig. */
-    z-index: 1;
-  }
-
-  .lotzwoo-contextbar__switch:hover,
-  .lotzwoo-contextbar__switch:focus-visible {
-    background: none;
-  }
-
-  /* Der Winkel bekommt eine eigene Trefferflaeche von 40 x 40, damit die
-     Zusicherung aus WCAG 2.5.8 auch dann steht, wenn jemand nur ihn sieht. */
-  .lotzwoo-contextbar__switch-winkel {
-    display: block;
-    flex: none;
-    box-sizing: content-box;
-    padding: 11px;
-  }
+  /* Wechsler: seit dem 2026-09-24 auf jeder Breite ein Winkel direkt hinter
+     den Angaben — die Regeln stehen oben bei `.lotzwoo-contextbar__switch`
+     und gelten hier unveraendert. */
 
   /* Die Langformen treten zurueck: das Zeitfenster hinter dem Datum und das
      Wort „Bestellschluss" vor der Uhrzeit. Beides steht in der Klappe, die
