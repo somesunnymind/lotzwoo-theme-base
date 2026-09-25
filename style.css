@@ -4666,3 +4666,14 @@ header .wp-block-navigation__responsive-container.is-menu-open
   border-radius: 12px;
   box-shadow: 0 1px 3px rgba(13, 21, 32, .08), 0 1px 2px rgba(13, 21, 32, .04);
 }
+
+/* --- 13. Betraege brechen nicht um ------------------------------------
+
+   2026-09-25. In der Bestelluebersicht stand „ca. / € 43,34" in zwei
+   Zeilen, weil die Spalte seit der 960er-Kasse schmaler ist. Der Name links
+   darf umbrechen, der Betrag nicht. */
+.wp-block-woocommerce-checkout .wc-block-components-order-summary-item__total-price,
+.wp-block-woocommerce-checkout .wc-block-components-order-summary-item__individual-prices,
+.wp-block-woocommerce-checkout .wc-block-components-totals-item__value {
+  white-space: nowrap;
+}
