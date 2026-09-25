@@ -1129,6 +1129,59 @@ add_filter('get_block_template', static function ($block_template, $id, $templat
 }, 10, 3);
 
 /**
+ * Die Kontextleiste auch an der Kasse — in Woos eigener Vorlage.
+ *
+ * 2026-09-25, angefordert: Ort, Termin und Bestellschluss stehen an der Kasse,
+ * wo der Kunde sie bestätigt. Das Plugin zeigt die Leiste dort **nur lesend**
+ * (`Context_Bar::read_only()`); dieses Theme liefert den Ort dafür.
+ *
+ * **Kein eigenes `templates/page-checkout.html`.** AD-1 hält die Kassen-Vorlage
+ * bei WooCommerce, und `scripts/check-frontend.php` prüft genau das
+ * (`page-checkout` → `plugin`). Der Filter setzt deshalb nur den Slot hinter
+ * Woos Kopf-Part in die Vorlage, die Woo liefert — die Quelle bleibt `plugin`.
+ *
+ * Nicht in den Kopf-Part hinein: dort stünde der Slot im `<header>`, und die
+ * Leiste könnte nicht kleben (AP-32). Sie ist eine eigene Bahn darunter, wie in
+ * `templates/page.html`.
+ *
+ * Eine im Website-Editor angepasste Kasse (`source` = `custom`) bleibt
+ * unberührt. Trifft das Muster nicht mehr, weil Woo den Part umbenennt,
+ * tut der Filter nichts — die Kasse steht dann ohne Leiste, nicht kaputt.
+ */
+add_filter('get_block_templates', static function ($templates, $query, $template_type) {
+    if ($template_type !== 'wp_template' || !is_array($templates)) {
+        return $templates;
+    }
+
+    foreach ($templates as $i => $template) {
+        if (!$template instanceof WP_Block_Template
+            || $template->slug !== 'page-checkout'
+            || $template->source !== 'plugin'
+            || str_contains((string) $template->content, 'wp:lotzwoo/context-slot')) {
+            continue;
+        }
+
+        $content = preg_replace(
+            '#(<!-- wp:template-part \{[^}]*"slug":"checkout-header"[^}]*\} /-->)#',
+            "$1\n\n<!-- wp:lotzwoo/context-slot /-->",
+            (string) $template->content,
+            1
+        );
+
+        if (!is_string($content) || $content === $template->content) {
+            continue;
+        }
+
+        // Kopie, nicht Mutation — derselbe Grund wie beim Kassen-Kopf oben.
+        $kasse = clone $template;
+        $kasse->content = $content;
+        $templates[$i] = $kasse;
+    }
+
+    return $templates;
+}, 20, 3);
+
+/**
  * Updates über GitHub, ohne einen eigenen Updater mitzuschleppen.
  *
  * Seit WordPress 6.1 genügt der `Update URI`-Header plus ein Filter, dessen
