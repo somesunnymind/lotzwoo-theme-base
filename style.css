@@ -4639,3 +4639,16 @@ header .wp-block-navigation__responsive-container.is-menu-open
 .wp-block-woocommerce-checkout .wc-block-components-totals-footer-item .wc-block-components-formatted-money-amount {
   font-size: var(--wp--preset--font-size--md);
 }
+
+/* --- 11. Die Kasse so breit wie der Warenkorb -------------------------
+
+   2026-09-25, angefordert: „wirkt ueberbreit". Woo legt den Kassenblock mit
+   `alignwide` in den Seiteninhalt; unter `wideSize` (1920px) waren das auf
+   1440px 1408px. Der Warenkorb steht auf `contentSize` (960px) — die Kasse
+   bekommt dieselbe Breite, mittig. Die Klasse steht im gespeicherten Inhalt
+   der Seite, deshalb hier und nicht in einer Vorlage. */
+.wp-block-woocommerce-checkout.alignwide {
+  max-width: var(--wp--style--global--content-size, 960px);
+  margin-left: auto;
+  margin-right: auto;
+}
