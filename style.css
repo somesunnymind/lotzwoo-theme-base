@@ -87,6 +87,8 @@ Tags: block-theme, full-site-editing, e-commerce
 .lotzwoo-b2b-images,
 .lotzwoo-overview,
 .lotzwoo-heldback,
+/* Die Danke-Seite nach der Kasse (Plugin AP-121). */
+.lotzwoo-received,
 .woocommerce-MyAccount-content,
 .woocommerce-MyAccount-navigation {
   --lwb-brand-50:  var(--wp--preset--color--brand-50,  #eaf6f1);
@@ -227,6 +229,7 @@ Tags: block-theme, full-site-editing, e-commerce
 .lotzwoo-b2b-images,
 .lotzwoo-overview,
 .lotzwoo-heldback,
+.lotzwoo-received,
 .woocommerce-MyAccount-content,
 .woocommerce-MyAccount-navigation {
   font-family: var(--wp--preset--font-family--sans, "Inter", "Segoe UI", system-ui, sans-serif);
@@ -316,7 +319,8 @@ Tags: block-theme, full-site-editing, e-commerce
 .lotzwoo-reorder__pager .button,
 .lotzwoo-favorites :is(.lotzwoo-favorites__pill, .lotzwoo-favorites__qty, .lotzwoo-favorites__remove),
 .lotzwoo-favorites__more .button,
-.lotzwoo-locations .lotzwoo-locations__select {
+.lotzwoo-locations .lotzwoo-locations__select,
+.lotzwoo-received .lotzwoo-received__button:not(.lotzwoo-received__button--primary) {
   border-color: var(--wp--preset--color--ink-350, #808d9d);
 }
 
