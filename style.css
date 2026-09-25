@@ -247,6 +247,7 @@ Tags: block-theme, full-site-editing, e-commerce
 .lotzwoo-contextcard :is(h2, h3, h4, h5, h6),
 .lotzwoo-overview :is(h2, h3, h4, h5, h6),
 .lotzwoo-heldback :is(h2, h3, h4, h5, h6),
+.lotzwoo-b2b-images :is(h2, h3, h4, h5, h6),
 /* **Zwei Wurzeln fehlten, und der Absatz darueber sagt schon warum**
    (2026-08-26). Gemeldet als „diese h2 sind nicht Inter wie die anderen":
    „Rechnungsadresse", „Lieferadresse", „Darstellung" und „Daueraufträge"
