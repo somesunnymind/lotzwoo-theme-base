@@ -4614,3 +4614,21 @@ header .wp-block-navigation__responsive-container.is-menu-open
     margin-top: 0;
   }
 }
+
+/* --- 10. Bestellübersicht und Gesamtsumme wie die Schritt-Ueberschriften -
+
+   2026-09-25, angefordert. Die Schritte der Kasse („Lieferadresse" …) sind
+   `<h2>` und stehen in der Ueberschriftenfamilie, gemessen Bitter 20px/500.
+   „Bestellübersicht" ist bei Woo ein `<p>`, „Gesamtsumme" ein `<span>` —
+   beide gleich gross, aber in Inter, und Inter wirkt bei 20px deutlich
+   groesser als Bitter. Sie bekommen die Familie der Schritte; Groesse und
+   Gewicht sind schon dieselben und werden hier nur festgehalten.
+
+   Der Betrag daneben bleibt Inter: Zahlen stehen im ganzen Portal in der
+   Grundschrift. */
+.wp-block-woocommerce-checkout .wc-block-components-checkout-order-summary__title-text,
+.wp-block-woocommerce-checkout .wc-block-components-totals-footer-item .wc-block-components-totals-item__label {
+  font-family: var(--wp--preset--font-family--serif);
+  font-size: var(--wp--preset--font-size--xl);
+  font-weight: 500;
+}
