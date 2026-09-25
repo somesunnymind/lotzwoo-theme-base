@@ -4632,3 +4632,10 @@ header .wp-block-navigation__responsive-container.is-menu-open
   font-size: var(--wp--preset--font-size--xl);
   font-weight: 500;
 }
+
+/* Der Betrag daneben auf 14px (Stufe `md`, 70 % der 20px) — 2026-09-25,
+   angefordert: neben der Bitter-Beschriftung stand er zu gross. */
+.wp-block-woocommerce-checkout .wc-block-components-totals-footer-item .wc-block-components-totals-item__value,
+.wp-block-woocommerce-checkout .wc-block-components-totals-footer-item .wc-block-components-formatted-money-amount {
+  font-size: var(--wp--preset--font-size--md);
+}
