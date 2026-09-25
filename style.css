@@ -4661,10 +4661,26 @@ header .wp-block-navigation__responsive-container.is-menu-open
    Plugin auf seinen eigenen Flaechen, auf der Kasse loesen sie leer auf
    (gemessen). Der Wert ist der von `--lwb-sh-sm` in `b2b-tokens.css`. */
 .wp-block-woocommerce-checkout .wp-block-woocommerce-checkout-order-summary-block,
-.wp-block-woocommerce-checkout .wc-block-components-address-card {
+.wp-block-woocommerce-checkout .wc-block-components-address-card,
+.wp-block-woocommerce-checkout .checkout-order-summary-block-fill {
   background-color: var(--wp--preset--color--white, #fff);
   border-radius: 12px;
   box-shadow: 0 1px 3px rgba(13, 21, 32, .08), 0 1px 2px rgba(13, 21, 32, .04);
+}
+
+/* Unter der Desktop-Stufe steht die Uebersicht ein zweites Mal am Ende des
+   Formulars, in einer Huelle (`…-fill-wrapper`) mit eigener Ueberschrift.
+   Die Flaeche gehoert dort auf die Karte darin, nicht auf die Huelle — sonst
+   stand rechts neben „Bestellübersicht" ein weisser Streifen (gemessen auf
+   390px). Die Karte bekommt dazu die Linie der Palette statt Woos
+   `currentColor`-Rand. */
+.wp-block-woocommerce-checkout .wp-block-woocommerce-checkout-order-summary-block.checkout-order-summary-block-fill-wrapper {
+  background-color: transparent;
+  box-shadow: none;
+}
+
+.wp-block-woocommerce-checkout .checkout-order-summary-block-fill {
+  border-color: var(--wp--preset--color--ink-200);
 }
 
 /* --- 13. Betraege brechen nicht um ------------------------------------
