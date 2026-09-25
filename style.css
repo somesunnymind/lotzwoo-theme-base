@@ -4560,3 +4560,57 @@ header .wp-block-navigation__responsive-container.is-menu-open
   font-size: var(--wp--preset--font-size--md);
   color: var(--wp--preset--color--ink-900);
 }
+
+/* --- 9. Die Kasse auf dem Desktop: paarweise statt gestapelt ----------
+
+   2026-09-25, angefordert. Auf 1440 px standen Liefer- und Rechnungsadresse
+   untereinander, jede als Karte über 851 px mit einer einzigen Zeile darin,
+   ebenso die beiden Bestellfelder. Zwei Dinge derselben Art gehören
+   nebeneinander.
+
+   **Das Formular wird ein Raster, nicht die Abschnitte schmaler.** Jeder
+   Abschnitt behält die volle Breite, nur die beiden Adressen teilen sich eine
+   Zeile. Fehlt eine davon — Rechnung gleich Lieferung, oder Abholung ohne
+   Lieferadresse —, nimmt die andere wieder die ganze Zeile, statt neben einer
+   leeren Spalte zu stehen.
+
+   **Die Bestellfelder gehen zu zweit**, generisch: jedes Textfeld unter
+   „Zusätzliche Informationen" ist eine halbe Zeile. Das Theme nennt dafür keine
+   Feld-ID des Plugins; ein drittes Feld bricht von selbst in die nächste
+   Zeile um. */
+@media (min-width: 1024px) {
+  .wp-block-woocommerce-checkout .wc-block-checkout__form {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    column-gap: var(--wp--preset--spacing--50);
+    align-items: start;
+  }
+
+  .wp-block-woocommerce-checkout .wc-block-checkout__form > * {
+    grid-column: 1 / -1;
+  }
+
+  .wp-block-woocommerce-checkout .wc-block-checkout__form:has(> .wc-block-checkout__billing-fields) > .wc-block-checkout__shipping-fields {
+    grid-column: 1;
+  }
+
+  .wp-block-woocommerce-checkout .wc-block-checkout__form:has(> .wc-block-checkout__shipping-fields) > .wc-block-checkout__billing-fields {
+    grid-column: 2;
+  }
+}
+
+/* Die Felder erst ab 1200: bei 1024 ist eine Hälfte 288 px breit, und
+   „Bestellnummer / PO-Nummer (optional)" endete dort in „(op…". Gemessen. */
+@media (min-width: 1200px) {
+  .wp-block-woocommerce-checkout .wc-block-checkout__order-fields .wc-block-components-address-form {
+    display: flex;
+    flex-wrap: wrap;
+    /* Derselbe Abstand wie zwischen den Adressen, damit die Kanten fluchten. */
+    column-gap: var(--wp--preset--spacing--50);
+  }
+
+  .wp-block-woocommerce-checkout .wc-block-checkout__order-fields .wc-block-components-address-form > .wc-block-components-text-input {
+    flex: 1 1 calc(50% - var(--wp--preset--spacing--50) / 2);
+    margin-top: 0;
+  }
+}
