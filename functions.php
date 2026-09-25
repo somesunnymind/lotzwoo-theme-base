@@ -1129,7 +1129,8 @@ add_filter('get_block_template', static function ($block_template, $id, $templat
 }, 10, 3);
 
 /**
- * Die Kontextleiste auch an der Kasse — in Woos eigener Vorlage.
+ * Die Kontextleiste und die Seitenüberschrift auch an der Kasse — in Woos
+ * eigener Vorlage.
  *
  * 2026-09-25, angefordert: Ort, Termin und Bestellschluss stehen an der Kasse,
  * wo der Kunde sie bestätigt. Das Plugin zeigt die Leiste dort **nur lesend**
@@ -1167,6 +1168,18 @@ add_filter('get_block_templates', static function ($templates, $query, $template
             (string) $template->content,
             1
         );
+
+        // Die Seitenüberschrift („Kasse"), wie „Warenkorb-Übersicht" über dem
+        // Warenkorb (2026-09-25, Block 5). Woos Vorlage hat keine; sie kommt
+        // vor den Inhalt, in dieselbe Hauptgruppe.
+        if (is_string($content) && !str_contains($content, 'wp:post-title')) {
+            $content = preg_replace(
+                '#(<!-- wp:post-content)#',
+                "<!-- wp:post-title {\"level\":1} /-->\n\n$1",
+                $content,
+                1
+            );
+        }
 
         if (!is_string($content) || $content === $template->content) {
             continue;
