@@ -78,6 +78,20 @@ Zwei Dinge, die dabei leicht falsch verstanden werden:
 `lotzwoo-theme-bersta` hat bewusst keinen Update-Kanal und wird per Deploy-Skript ausgeliefert — so liegt
 in keiner Kundeninstallation ein Token.
 
+## Die Hausschrift — Inter, selbst ausgeliefert
+
+`assets/fonts/inter-var.woff2` ist Inter als variable Schrift (Gewicht 100–900, Achse `slnt`), die
+Datei, die WooCommerce 11.0.1 unter `assets/fonts/Inter-VariableFont_slnt,wght.woff2` mitbringt.
+Lizenz: SIL Open Font License 1.1 (rsms/inter). Eingebunden über `fontFace` in `theme.json`, ohne
+externe Quelle.
+
+Bis zum 2026-09-25 stand `Inter` nur als Name im Stapel und wurde nie geladen: jede Maschine zeigte
+ihre Ersatzschrift, und in Segoe UI war der Warenkorb-Knopf 18 px schmaler als in der Messung.
+
+**Ein Kindtheme, das `sans` neu definiert, muss das `fontFace` mitbringen** — gleichnamige
+Preset-Listen ersetzen die des Elterntheme ganz. `file:./assets/fonts/inter-var.woff2` darf dort
+stehen bleiben: WordPress sucht die Datei zuerst im Kind, dann im Eltern.
+
 ## Die Schriftskala — eine Leiter, zwei Hälften
 
 `theme.json` kann keine Kommentare tragen, und die elf Größen dort sind ohne Begründung nicht zu

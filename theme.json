@@ -64,7 +64,16 @@
         {
           "slug": "sans",
           "name": "Sans",
-          "fontFamily": "Inter, \"Segoe UI\", system-ui, -apple-system, \"Helvetica Neue\", Arial, sans-serif"
+          "fontFamily": "Inter, \"Segoe UI\", system-ui, -apple-system, \"Helvetica Neue\", Arial, sans-serif",
+          "fontFace": [
+            {
+              "fontFamily": "Inter",
+              "fontStyle": "normal",
+              "fontWeight": "100 900",
+              "fontDisplay": "swap",
+              "src": ["file:./assets/fonts/inter-var.woff2"]
+            }
+          ]
         },
         {
           "slug": "mono",
