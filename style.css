@@ -4597,11 +4597,7 @@ header .wp-block-navigation__responsive-container.is-menu-open
   .wp-block-woocommerce-checkout .wc-block-checkout__form:has(> .wc-block-checkout__shipping-fields) > .wc-block-checkout__billing-fields {
     grid-column: 2;
   }
-}
 
-/* Die Felder erst ab 1200: bei 1024 ist eine Hälfte 288 px breit, und
-   „Bestellnummer / PO-Nummer (optional)" endete dort in „(op…". Gemessen. */
-@media (min-width: 1200px) {
   .wp-block-woocommerce-checkout .wc-block-checkout__order-fields .wc-block-components-address-form {
     display: flex;
     flex-wrap: wrap;
