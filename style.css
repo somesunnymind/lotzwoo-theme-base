@@ -4771,9 +4771,10 @@ body.woocommerce-checkout main.wp-block-group:has(> .wp-block-post-title) {
   border-radius: 8px;
 }
 
-.wc-block-mini-cart__drawer .wc-block-mini-cart__footer-actions .wc-block-components-button:not(.is-link).outlined {
-  border: 1px solid var(--wp--preset--color--ink-350);
+/* Woo zeichnet den Rand des Zweitknopfs als `inset`-Schatten in
+   `currentColor` (…`.is-style-outline:not(:focus)`, 0,4,0). */
+.wc-block-mini-cart__drawer .wc-block-mini-cart__footer-actions .wc-block-components-button:not(.is-link).is-style-outline {
   background-color: var(--wp--preset--color--surface);
   color: var(--wp--preset--color--ink-900);
-  box-shadow: none;
+  box-shadow: inset 0 0 0 1px var(--wp--preset--color--ink-350);
 }
