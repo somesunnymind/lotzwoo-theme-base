@@ -4419,9 +4419,9 @@ header .wp-block-navigation__responsive-container.is-menu-open
 
 /* --- 7. Der Seitenkorb ----------------------------------------------
 
-   Drei Aenderungen kommen aus dem Auftrag vom 2026-08-18 und nicht aus
-   einer Messung: der Titel heisst „Warenkorb", die Artikelnummer entfaellt,
-   und die Variante zieht zum Preis in eine Zeile.
+   Aus dem Auftrag vom 2026-08-18 bleibt der Titel „Warenkorb". Die zwei
+   anderen Punkte (Artikelnummer weg, Variante zum Preis) sind seit dem
+   2026-09-25 zurueckgenommen, siehe Abschnitt 15.
 
    **Der Titel liegt nicht hier**, sondern in `parts/mini-cart.html` — er
    ist ein Blockattribut, keine Farbe. Was hier steht, ist seine Groesse:
@@ -4429,103 +4429,16 @@ header .wp-block-navigation__responsive-container.is-menu-open
    (30px)**, den die Schublade nur zusammenfasst. Er bekommt `xl`, dieselbe
    Stufe wie die Schritt-Ueberschriften der Kasse.
 
-   **Artikelnummer und Variante kommen beide aus einem Filter des Plugins
-   bzw. aus der Store-API**, und beide Flaechen — Warenkorbseite und
-   Schublade — lesen dieselbe Nutzlast. Eine Aenderung in PHP traefe
-   deshalb zwangslaeufig beide. Der Auftrag will sie nur in der Schublade,
-   also steht sie hier und nur hier.
-
-   Ausgewaehlt wird ueber `data-wp-context`, nicht ueber die Klasse
-   `…__artikelnummer`: die Klasse baut Woo aus dem **Label**, sie hiesse
-   nach jeder Umbenennung anders. `dataProperty` ist der Vertrag. */
+*/
 .wc-block-mini-cart__drawer .wc-block-mini-cart__title {
   font-size: var(--wp--preset--font-size--xl);
 }
 
-.wc-block-mini-cart__drawer .wc-block-components-product-details[data-wp-context*="item_data"] {
-  display: none;
-}
-
-/* Preis und Variante in eine Zeile. Sie sind **keine** Geschwister — der
-   Preis haengt direkt im `__wrap`, die Variante zwei Ebenen tiefer in der
-   `product-metadata`. Deshalb nicht `flex`, sondern Inline-Fluss: die
-   Spalte wird zum Block, Preis und Metadaten werden inline, und der
-   Zeilenumbruch entsteht von selbst, wenn es eng wird — „umbrechen
-   erlaubt" ist damit nicht erlaubt, sondern eingebaut.
-
-   Die leere Kurzbeschreibung faellt weg, weil ein leerer Block-Kasten
-   mitten in einem Inline-Fluss die Zeile trotzdem aufbricht. Nur die
-   leere: hat ein Artikel eine Kurzbeschreibung, behaelt sie ihre eigene
-   Zeile ueber dem Preis. */
-.wc-block-mini-cart__drawer .wc-block-cart-item__wrap {
-  display: block;
-}
-
-.wc-block-mini-cart__drawer .wc-block-cart-item__wrap .wc-block-components-product-name {
-  display: block;
-}
-
-.wc-block-mini-cart__drawer .wc-block-cart-item__prices,
-.wc-block-mini-cart__drawer .wc-block-components-product-metadata,
-.wc-block-mini-cart__drawer .wc-block-components-product-metadata > div {
-  display: inline;
-}
-
-/* Der Preis selbst traegt `display: block` aus `mini-cart-contents.css` und
-   haette die Zeile von innen wieder aufgebrochen. `:not([hidden])` ist kein
-   Zierrat: dieselbe Zelle traegt eine **zweite**, verborgene Preisfassung fuer
-   den Rabattfall, und die haelt allein das Attribut unten
-   (`.wc-block-components-product-price[hidden]`, Spezifitaet 0-1-1). Eine
-   Regel ohne die Ausnahme haette sie eingeblendet und jeden Preis doppelt
-   gezeigt. */
-.wc-block-mini-cart__drawer .wc-block-cart-item__prices > .wc-block-components-product-price:not([hidden]) {
-  display: inline;
-}
-
-.wc-block-mini-cart__drawer .wc-block-components-product-metadata > div:has(> .wc-block-components-product-metadata__description:empty) {
-  display: none;
-}
-
-/* **Hier stand ein Trenner, und er ist mit Absicht weg** — auf Ansage des
-   Auftraggebers am 2026-08-27.
-
-   Er setzte ein `•` vor die Variantenzeile, `•` statt `/`, weil `/` in der
-   Zeile schon vergeben ist: Woo trennt damit zwei Attributachsen desselben
-   Artikels („Sorte: Vanille / Gebinde: 1x").
-
-   Die Ueberlegung war richtig, ihre **Voraussetzung** nicht. Ein Trenner
-   trennt nur, solange die beiden Seiten nebeneinanderstehen. In der
-   Schublade tun sie das nie: bei 1440 px ist die Warenkorbspalte rund
-   340 px breit, der Inline-Fluss bricht hinter dem Preis um, und das
-   Zeichen landet am **Zeilenanfang**. Dort trennt es nichts, es liest sich
-   als Aufzaehlungspunkt.
-
-   Gemessen am 2026-08-26/27 an vier Positionen: **auf allen vieren** stand
-   das Zeichen am Zeilenanfang, und auf einer stand es voellig allein —
-   ein einfaches Produkt hat keine Variante, aber Woo rendert den Kasten
-   `[data-wp-context*="variation"]` trotzdem. Er war dann 19 px breit und
-   enthielt genau den Punkt.
-
-   **Wer ihn zurueckholen will**, braucht zuerst die Zeile, in der er
-   stehen kann — die Voraussetzung, nicht das Zeichen, war das Problem.
-
-   Der Auftraggeber hat `display: none` auf dem `::before` geschickt. Das
-   waere eine zweite Regel gewesen, die die erste zuruecknimmt; ein `•`,
-   das gesetzt und im selben Stylesheet wieder versteckt wird, ist eine
-   Falle fuer den naechsten, der es sucht. Deshalb ist die Quelle weg. */
-
-/* Preis und Variante tragen dieselbe Groesse. Die Variante stand bei
-   11.375px — das ist Woos `0.875em` auf 13px und kein Schritt der Skala;
-   die naechste echte Stufe unter `sm` waere `xs` = 12px, und die braucht
-   es hier nicht: die Zeile ist ohnehin nur noch halb so lang. Das Label
-   bleibt leiser als der Preis. */
-.wc-block-mini-cart__drawer .wc-block-components-product-details {
-  font-size: var(--wp--preset--font-size--sm);
-}
-
-.wc-block-mini-cart__drawer .wc-block-components-product-details__name {
-  color: var(--wp--preset--color--ink-500);
-}
+/* Artikelnummer, Preis und VE standen hier bis 2026-09-25 anders: die
+   Nummer ausgeblendet, Preis und VE in einer Zeile (Auftrag 2026-08-18).
+   Seit 2026-09-25 folgt die Schublade der Kasse — Name, „pro VE", „Art. N",
+   „VE: …" untereinander (Entscheid des Inhabers). Die Regeln dafuer stehen
+   in Abschnitt 15. */
 
 /* Derselbe Artikelname, zwei Farben: in der Schublade `brand-600` mit
    Unterstreichung, auf der Warenkorbseite `ink-900` ohne. Der Unterschied
@@ -4787,4 +4700,80 @@ body.woocommerce-checkout main.wp-block-group:has(> .wp-block-post-title) {
    (0,3,0) — eine Stufe darueber, nur die Seiten. */
 .wp-block-woocommerce-checkout .wp-block-woocommerce-checkout-order-summary-block .wc-block-components-checkout-order-summary__title .wc-block-components-checkout-order-summary__title-text {
   margin-inline: 0;
+}
+
+/* --- 15. Der Seitenkorb wie die Kasse --------------------------------
+
+   2026-09-25, angefordert: die Schublade an Warenkorb und Kasse angleichen.
+   Gemessen an beiden Seiten, Unterschiede der Schublade vorher:
+
+   * Titel Bitter 20/**600** — die Abschnitte der Kasse tragen 500.
+   * Zeile: „Art. N" ausgeblendet, Preis und VE in einer Zeile (Abschnitt 7).
+     Jetzt wie die Kasse untereinander; Woos eigene Groessen (Name 13/500,
+     „pro VE" 13, Nummer und VE 0.875em) gelten wieder.
+   * Bild ohne Kachel, gestreckt (`fill`). Jetzt wie die Uebersicht der
+     Kasse (Abschnitt 14): weiss, eingepasst, Rand, Radius 8.
+   * Mengenwahl 28 px hoch, Rand `ink-200`. Jetzt wie der Stepper des
+     Warenkorbs: 40 hoch, Rand `ink-350`, Knoepfe 32 breit auf `ink-50`.
+   * Summe in Inter. Jetzt wie die Gesamtsumme der Kasse (Abschnitt 10):
+     Wort Bitter 20/500, Betrag 14.
+   * Zweitknopf mit Rand in Textfarbe. Jetzt `ink-350` auf `surface`, beide
+     Knoepfe 40 hoch.
+
+   Woos Regeln hier sind bis (0,3,x); jede Regel steht eine Stufe darueber. */
+.wc-block-mini-cart__drawer h2.wc-block-mini-cart__title {
+  font-weight: 500;
+}
+
+.wc-block-mini-cart__drawer table.wc-block-cart-items .wc-block-cart-items__row .wc-block-cart-item__image img {
+  box-sizing: border-box;
+  aspect-ratio: 1;
+  padding: 2px;
+  border: 1px solid var(--wp--preset--color--ink-200);
+  border-radius: 8px;
+  background-color: var(--wp--preset--color--white, #fff);
+  object-fit: contain;
+}
+
+.wc-block-mini-cart__drawer .wc-block-cart-item__quantity .wc-block-components-quantity-selector {
+  height: 40px;
+  border-color: var(--wp--preset--color--ink-350);
+  background-color: var(--wp--preset--color--surface);
+  overflow: hidden;
+}
+
+.wc-block-mini-cart__drawer .wc-block-components-quantity-selector .wc-block-components-quantity-selector__button {
+  min-width: 32px;
+  background-color: var(--wp--preset--color--ink-50);
+  color: var(--wp--preset--color--ink-700);
+  font-size: var(--wp--preset--font-size--base, 15px);
+  opacity: 1;
+}
+
+.wc-block-mini-cart__drawer .wc-block-components-quantity-selector .wc-block-components-quantity-selector__button:hover,
+.wc-block-mini-cart__drawer .wc-block-components-quantity-selector .wc-block-components-quantity-selector__button:focus-visible {
+  background-color: var(--wp--preset--color--ink-100);
+}
+
+.wc-block-mini-cart__drawer .wc-block-mini-cart__footer .wc-block-components-totals-item__label {
+  font-family: var(--wp--preset--font-family--serif);
+  font-size: var(--wp--preset--font-size--xl);
+  font-weight: 500;
+}
+
+.wc-block-mini-cart__drawer .wc-block-mini-cart__footer .wc-block-components-totals-item__value {
+  font-size: var(--wp--preset--font-size--md);
+}
+
+.wc-block-mini-cart__drawer .wc-block-mini-cart__footer-actions .wc-block-components-button:not(.is-link) {
+  height: 40px;
+  padding-block: 0;
+  border-radius: 8px;
+}
+
+.wc-block-mini-cart__drawer .wc-block-mini-cart__footer-actions .wc-block-components-button:not(.is-link).outlined {
+  border: 1px solid var(--wp--preset--color--ink-350);
+  background-color: var(--wp--preset--color--surface);
+  color: var(--wp--preset--color--ink-900);
+  box-shadow: none;
 }
