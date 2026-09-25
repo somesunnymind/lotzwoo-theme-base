@@ -4648,3 +4648,21 @@ header .wp-block-navigation__responsive-container.is-menu-open
   margin-left: auto;
   margin-right: auto;
 }
+
+/* --- 12. Die Flaechen der Kasse wie die Zusammenfassung des Warenkorbs -
+
+   2026-09-25, angefordert. Die Zusammenfassung des Warenkorbs
+   (`.lwc-summary`) ist gemessen: Weiss, 1px `#e4daca`, Radius 12,
+   Schatten `--lwb-sh-sm`. Die Bestelluebersicht der Kasse hatte Rahmen und
+   Radius, aber keine Flaeche und keinen Schatten; die Adresskarten dazu
+   Radius 8. Beide bekommen dieselbe Gestalt.
+
+   Der Schatten steht ausgeschrieben: die `--lwb-*`-Token laedt nur das
+   Plugin auf seinen eigenen Flaechen, auf der Kasse loesen sie leer auf
+   (gemessen). Der Wert ist der von `--lwb-sh-sm` in `b2b-tokens.css`. */
+.wp-block-woocommerce-checkout .wp-block-woocommerce-checkout-order-summary-block,
+.wp-block-woocommerce-checkout .wc-block-components-address-card {
+  background-color: var(--wp--preset--color--white, #fff);
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(13, 21, 32, .08), 0 1px 2px rgba(13, 21, 32, .04);
+}
