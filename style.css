@@ -4534,29 +4534,43 @@ header .wp-block-navigation__responsive-container.is-menu-open
   }
 }
 
-/* --- 10. Bestellübersicht und Gesamtsumme wie die Schritt-Ueberschriften -
+/* --- 10. Bestellübersicht wie die Schritt-Ueberschriften, Gesamtsumme wie die Titel -
 
    2026-09-25, angefordert. Die Schritte der Kasse („Lieferadresse" …) sind
    `<h2>` und stehen in der Ueberschriftenfamilie, gemessen Bitter 20px/500.
-   „Bestellübersicht" ist bei Woo ein `<p>`, „Gesamtsumme" ein `<span>` —
-   beide gleich gross, aber in Inter, und Inter wirkt bei 20px deutlich
-   groesser als Bitter. Sie bekommen die Familie der Schritte; Groesse und
-   Gewicht sind schon dieselben und werden hier nur festgehalten.
-
-   Der Betrag daneben bleibt Inter: Zahlen stehen im ganzen Portal in der
-   Grundschrift. */
-.wp-block-woocommerce-checkout .wc-block-components-checkout-order-summary__title-text,
-.wp-block-woocommerce-checkout .wc-block-components-totals-footer-item .wc-block-components-totals-item__label {
+   „Bestellübersicht" ist bei Woo ein `<p>` in Inter und bekommt die Familie der
+   Schritte; Groesse und Gewicht sind schon dieselben und werden hier nur
+   festgehalten. */
+.wp-block-woocommerce-checkout .wc-block-components-checkout-order-summary__title-text {
   font-family: var(--wp--preset--font-family--serif);
   font-size: var(--wp--preset--font-size--xl);
   font-weight: 500;
 }
 
-/* Der Betrag daneben auf 14px (Stufe `md`, 70 % der 20px) — 2026-09-25,
-   angefordert: neben der Bitter-Beschriftung stand er zu gross. */
+/* Woo setzt den Produkttitel nur in der Seitenleiste auf die Grundschrift. Die
+   Uebersicht des Telefons steht ausserhalb, dort griff die Ueberschriftenfamilie
+   der `h3`: gemessen Bitter statt Inter, 2026-11-01. */
+.wp-block-woocommerce-checkout .wc-block-components-product-name {
+  font-family: inherit;
+}
+
+/* 2026-11-01, angefordert: „Gesamtsumme" im Stil der Produkttitel (Inter 500,
+   13px), etwas groesser; der Betrag daneben gleich gross. „inkl. USt" wie die
+   Zwischensumme (Inter 400, 13px). Den Knoten dafuer setzt das Plugin. */
+.wp-block-woocommerce-checkout .wc-block-components-totals-footer-item .wc-block-components-totals-item__label {
+  font-family: var(--wp--preset--font-family--sans);
+  font-size: var(--wp--preset--font-size--base);
+  font-weight: 500;
+}
+
+.wp-block-woocommerce-checkout .wc-block-components-totals-footer-item .lotzwoo-total-tax-note {
+  font-size: var(--wp--preset--font-size--sm);
+  font-weight: 400;
+}
+
 .wp-block-woocommerce-checkout .wc-block-components-totals-footer-item .wc-block-components-totals-item__value,
 .wp-block-woocommerce-checkout .wc-block-components-totals-footer-item .wc-block-components-formatted-money-amount {
-  font-size: var(--wp--preset--font-size--md);
+  font-size: var(--wp--preset--font-size--base);
 }
 
 /* --- 11. Die Kasse so breit wie der Warenkorb -------------------------
