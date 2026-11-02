@@ -12,6 +12,8 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+require_once __DIR__ . '/inc/mail-angaben.php';
+
 add_action('after_setup_theme', static function (): void {
     add_theme_support('wp-block-styles');
     add_theme_support('responsive-embeds');

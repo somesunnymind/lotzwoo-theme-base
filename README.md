@@ -312,6 +312,50 @@ Zugestellt wird über `enqueue_block_assets` und nicht über `add_editor_style()
 `get_theme_file_path()` auf und **bevorzugt das Kindtheme**, hätte im Editor also die vier Kilobyte
 des Kindes geliefert und die des Elternteils nie.
 
+## Die Mail-Angaben des Kindthemes
+
+Ein Kindtheme liefert Logo, Fußzeile und Schrift der WooCommerce-Mails als Daten, ohne PHP. Die
+Datei `mail-angaben.json` liegt neben seiner `theme.json`:
+
+```json
+{
+  "header_image": "assets/email/logo.png",
+  "footer_text": "Firma<br />Adresse",
+  "font_family": "Helvetica"
+}
+```
+
+| Schlüssel | Woo-Feld | Regel |
+|---|---|---|
+| `header_image` | `woocommerce_email_header_image` | PNG im Kindtheme, Pfad relativ dazu. Bis 400 px breit: Outlook ignoriert die CSS-Breite |
+| `footer_text` | `woocommerce_email_footer_text` | Woos Platzhalter gelten (`{site_title}`, `{site_url}`, `{store_address}`, `{store_email}`) |
+| `font_family` | `woocommerce_email_font_family` | Ein Eintrag aus Woos Schriftauswahl |
+
+**Was im Woo-Feld steht, gewinnt.** Das Kindtheme füllt nur ein leeres Feld. Ein neu installiertes
+WooCommerce legt Fußzeile und Schrift aber mit eigenen Standardwerten an; dort greift das Kindtheme
+erst, wenn die Felder geleert sind:
+
+```bash
+wp option update woocommerce_email_footer_text ''
+```
+
+Leeren heißt `update`, nicht `delete`: eine leere Zeile übersteht ein Woo-Update, eine fehlende kann
+Woo dabei mit seinem Standard neu anlegen.
+
+Das Formular zeigt den Wert des Kindthemes. Unverändert gespeichert wird daraus keine Eingabe, die
+Zeile bleibt leer. Zwei Folgen: Ein geleertes Feld, auch „Logo entfernen", bringt den Wert des
+Kindthemes zurück; „keine Fußzeile" gibt es damit nicht. Und wer genau den Wert des Kindthemes
+eingibt, bindet sich nicht daran: die Zeile wird leer und folgt künftigen Änderungen der Datei.
+
+Die Gründe stehen in `inc/mail-angaben.php`, die Messung liefert:
+
+```bash
+wp eval-file scripts/check-mail-angaben.php [KINDTHEME-VERZEICHNIS]
+```
+
+`wp option get` zeigt nach dem Deploy den gefüllten Wert. Die gespeicherte Zeile zeigt
+`wp option list --search=woocommerce_email_footer_text`.
+
 ## Flächen, die dieses Theme abschaltet
 
 Ein B2B-Portal ist kein Blog. Das Theme schaltet drei Flächen ab, die WordPress sonst bedient:

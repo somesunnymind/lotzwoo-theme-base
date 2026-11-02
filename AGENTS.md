@@ -45,8 +45,13 @@ Was hier gilt und dort nicht steht:
    Wer hier einen Menüpunkt einträgt, den ein bestimmter Kunde braucht, hat den Fehler gemacht, den
    Ticket 16 gefunden hat.
 
+5. **`mail-angaben.json` im Kindtheme** — Logo, Fußzeile und Schrift der Mails. `inc/mail-angaben.php`
+   liest sie und füllt nur leere Woo-Felder. Die Basis selbst liefert keine: hier stehen keine
+   Firmendaten. Prüfung: `scripts/check-mail-angaben.php`.
+
 `scripts/check-frontend.php` deckt 1 mit zwei, 2 mit drei und 4 mit zwei Prüfungen ab. Es braucht
-eine laufende Installation und läuft nicht in der CI.
+eine laufende Installation und läuft nicht in der CI. Dasselbe gilt für
+`scripts/check-mail-angaben.php`.
 
 ## Was hier nicht hingehört
 
