@@ -58,7 +58,7 @@ Tags: block-theme, full-site-editing, e-commerce
    führte fünf Wurzeln, dieses Theme drei, die Schnittmenge war zwei — und auf
    `.lotzwoo-favorites`, `.lotzwoo-locations` und `.lotzwoo-ordercontext` galt
    deshalb **kein einziges** Token dieser Datei. Die drei Konto-Flächen trugen
-   die Marke des Kunden nicht: die Grundfläche stand dort auch auf Bersta bei
+   die Marke des Kunden nicht: die Grundfläche stand dort auch im Kundentheme bei
    #ffffff statt bei #fbf7f0, mitten in einem cremefarbenen Shop.
 
    Eine Fläche steht auch dann in beiden Listen, wenn eine der beiden Seiten
@@ -129,7 +129,7 @@ Tags: block-theme, full-site-editing, e-commerce
      Fläche, die sich vom Grund abheben *soll*. Sie ist wörtlich Weiß und
      hängt deshalb am Preset `white`, das beide theme.json führen — nicht an
      `surface`. Die zwei müssen auf einem Kundentheme verschieden aussehen,
-     sonst gibt es nichts, wovon sich der Vordergrund abhebt: auf Bersta
+     sonst gibt es nichts, wovon sich der Vordergrund abhebt: im Kundentheme
      #ffffff gegen #fbf7f0.
 
      Nur die Farbe steht hier. Kontur und Schatten der Rolle (`--lwb-front`,
@@ -192,14 +192,14 @@ Tags: block-theme, full-site-editing, e-commerce
    drei, und die Lücke war dieselbe wie eine Etage höher bei den Token, nur
    eine Ebene tiefer: `.lotzwoo-favorites`, `.lotzwoo-locations` und
    `.lotzwoo-ordercontext` bekamen die Token von AP-25, aber keine der Regeln,
-   die sie benutzen. Auf Bersta gemessen kamen die Überschriften der drei
+   die sie benutzen. Im Kundentheme gemessen kamen die Überschriften der drei
    Konto-Flächen in **Bitter** statt in **Inter** — die Serife des
    Kundenthemes mitten in der Bedienoberfläche. Auf dem Basistheme war nichts
    zu sehen, weil dort beide Rollen dieselbe Grotesk tragen; deshalb hat es
    niemand bemerkt, und deshalb wird auch hier nichts rot.
 
-   Die Regel gilt für die Wurzel und nicht nur für die Überschrift, obwohl auf
-   Bersta heute nur die Überschrift abweicht: `<body>` trägt dort zufällig
+   Die Regel gilt für die Wurzel und nicht nur für die Überschrift, obwohl im
+   Kundentheme heute nur die Überschrift abweicht: `<body>` trägt dort zufällig
    dieselbe Grotesk. Ein Kundentheme mit einer eigenen Fließtextschrift
    verschöbe sonst die ganze Fläche, und der Befund käme ein drittes Mal.
 
@@ -237,7 +237,7 @@ Tags: block-theme, full-site-editing, e-commerce
 
 /* `.lotzwoo-heldback` steht hier aus genau dem Grund, den der Absatz oben
    nennt, und er ist am 2026-08-12 im Browser sichtbar geworden: die
-   Überschrift der Sektion kam in der Serife des Kundenthemes: Bersta setzt
+   Überschrift der Sektion kam in der Serife des Kundenthemes: es setzt
    `styles.elements.heading`, und die Sektion ist keine Drucksache, sondern
    eine Bedienbeschriftung im Warenkorb. Genau derselbe Befund stand am
    2026-08-13 auf den drei Konto-Flächen — dort ist es die einzige Stelle, an
@@ -1082,7 +1082,7 @@ main#wp--skip-link--target:has(.lwb-contextbar) {
 }
 
 /* Das Logo muss sich der Zeile fügen, nicht umgekehrt. Der Block schreibt
-   Breite und Höhe als Attribute ans <img> — bersta.png ist fast quadratisch,
+   Breite und Höhe als Attribute ans <img> — ein fast quadratisches Logo ist,
    bei den 140px des Blocks also 126px hoch und damit doppelt so hoch wie der
    ganze Kopf. Begrenzt wird die Höhe, nicht die Breite: ein breiter
    Schriftzug als Logo bliebe so lesbar, während eine feste Breite ihn auf
@@ -1102,8 +1102,8 @@ header .wp-block-site-title a {
    Filter in functions.php. Maße sind die des Prototyps.
 
    Der Verlauf lief von `brand-400` nach `brand-700`; der Buchstabe stand am
-   hellen Ende bei 4.15:1 gegen Weiß und verfehlte die 4.5. Bersta hat ein
-   Logo hochgeladen, die Kachel greift dort nicht — beim nächsten Kunden ohne
+   hellen Ende bei 4.15:1 gegen Weiß und verfehlte die 4.5. Mit
+   hochgeladenem Logo greift die Kachel nicht — beim nächsten Kunden ohne
    Logo greift sie wieder. Eine Stufe tiefer angesetzt (`brand-500`) trägt
    denselben Verlauf und hält die Schwelle in jeder Palette, weil `500` die
    Stufe ist, auf der ohnehin der Primärknopf mit weißer Schrift steht. */
@@ -1271,7 +1271,7 @@ header .current-menu-item > .wp-block-navigation-item__content {
      brand-500 #157d5f   Fuellung ink-100 #f1f4f7               4.61:1
      brand-500 #157d5f   aktuelle Seite brand-50 #eaf6f1        4.59:1
 
-   Die ersten zwei Zeilen sind das aktive Kindtheme lotzwoo-theme-bersta, die
+   Die ersten zwei Zeilen sind ein aktives Kindtheme, die
    letzten zwei das Basistheme. Die Aussenkante des Rings grenzt weiterhin an
    die Flaeche daneben — #b33a2b auf Creme #fbf7f0 5.53:1 und auf dem weissen
    Overlay 5.90:1, #157d5f auf Weiss 5.08:1. Alle sieben Werte tragen die 3:1,
@@ -1312,7 +1312,7 @@ header .wp-block-navigation-item__content:focus-visible,
    Kopfflaeche. Beide Kanten des Rings grenzen damit an dieselbe Flaeche, und
    die Logo-Grafik beruehrt er ueberhaupt nicht:
 
-     brand-500 #b33a2b   auf Kopfflaeche #fbf7f0 (bersta)     5.53:1
+     brand-500 #b33a2b   auf Kopfflaeche #fbf7f0 (Kind)       5.53:1
      brand-500 #157d5f   auf Kopfflaeche #ffffff (Basis)      5.08:1 */
 header .wp-block-site-logo a:focus-visible,
 header .wp-block-site-title a:focus-visible {
@@ -1347,7 +1347,7 @@ header .wp-block-site-title a:focus-visible {
    wirklich liegt — die Fuellung im Ruhezustand und die `brand-600` des
    `:hover`, denn beide Zustaende koennen zusammenfallen:
 
-     Kante                                       bersta      Basis
+     Kante                                       Kind        Basis
      Kern white gegen Fuellung brand-500          5.90:1     5.08:1
      Kern white gegen Fuellung brand-600 (hover)  7.75:1     6.48:1
      Kern white gegen Saum brand-500              5.90:1     5.08:1
@@ -1360,11 +1360,11 @@ header .wp-block-site-title a:focus-visible {
    nicht geraten:
 
    * **Nur ein weisser Ring innen (invertiert).** Gegen die Fuellung 5.90/5.08,
-     das traegt. Seine Aussenkante grenzt aber an die Kopfflaeche: 1.07:1 in
-     bersta, 1.00:1 im Basistheme. Im Bild sieht der Knopf dann aus, als haette
+     das traegt. Seine Aussenkante grenzt aber an die Kopfflaeche: 1.07:1 im
+     Kindtheme, 1.00:1 im Basistheme. Im Bild sieht der Knopf dann aus, als haette
      er 2px seines Randes verloren — die Anzeige verschwindet nach aussen.
    * **`ink-900` als Ringfarbe.** Faellt an der Rechnung durch, und zwar zuerst
-     in der aktiven Palette: 2.97:1 auf `brand-500` in bersta, 3.61:1 im
+     in der aktiven Palette: 2.97:1 auf `brand-500` im Kindtheme, 3.61:1 im
      Basistheme — und auf dem `brand-600` des Hover-Zustands 2.26:1 bzw.
      2.83:1. Der Wert wird schlechter, je dunkler die Fuellung, also genau in
      die Richtung, in die die Marken-Rampe von 500 nach 900 laeuft. Als Regel
@@ -1542,7 +1542,7 @@ header .wp-block-navigation__responsive-container-close:focus-visible {
 
    Systemregeln, nicht Kundengestaltung: die Bausteine sind Rollen (ein Label,
    eine Karte, ein abgesetzter Abschnitt), ihre Farben kommen aus der Palette
-   des jeweiligen Kindthemes. Deshalb gehören sie hierher und nicht nach Bersta.
+   des jeweiligen Kindthemes. Deshalb gehören sie hierher und nicht ins Kindtheme.
 
    Die Klassennamen sind eine Kopplung zum Website-Repo. `import-pages.py`
    schreibt genau diese Zeichenketten; wer hier umbenennt, muss dort nachziehen.
@@ -1566,8 +1566,8 @@ p.is-style-label {
    Vertrag, den das Design-System mit sich selbst bricht, und zwar lautlos —
    der Rueckfall auf die Grundschrift sah aus wie eine Absicht.
 
-   Welche Serife es ist, bleibt Kundensache: Bersta ueberschreibt denselben
-   Slug mit Bitter (ADR 004), die Kaskade der theme.json erledigt das ueber den
+   Welche Serife es ist, bleibt Kundensache: ein Kindtheme ueberschreibt denselben
+   Slug, etwa mit Bitter (ADR 004), die Kaskade der theme.json erledigt das ueber den
    gleichen Slugnamen von selbst.
 
    Der Fallback auf `sans` bleibt stehen. Er greift jetzt nur noch, wenn ein
@@ -2715,7 +2715,7 @@ button.lotzwoo-contextbar__switch {
    die kleinste Schrift im Kopf hat:
 
      #3a4759 auf `surface` #ffffff (Basistheme)   9.44:1
-     #534d46 auf `surface` #fbf7f0 (Bersta)       7.81:1 */
+     #534d46 auf `surface` #fbf7f0 (Kindtheme)    7.81:1 */
 .lotzwoo-headerareas__customer-role {
   color: var(--wp--preset--color--ink-600);
   font-size: var(--wp--preset--font-size--xs);
@@ -2903,7 +2903,7 @@ button.lotzwoo-contextbar__switch {
 /* Auf schmalen Schirmen schrumpft der Kundenchip, er verschwindet
    nicht. Bei 390px teilen sich Logo, Menuetaste, Suchknopf, Zaehler,
    Konto und Warenkorb eine Zeile von 343px, und ein Firmenname wie
-   "Bersta Naturkost Grosshandel" braucht davon allein die Haelfte —
+   "Muster Naturkost Grosshandel" braucht davon allein die Haelfte —
    also faellt weg, was der Kunde ohnehin weiss (das Wort "Kunde") und
    was ihn eine Antippbewegung entfernt auf der Kontoseite erwartet
    (die Preisklasse). Was bleibt, ist die Antwort auf die Frage: fuer

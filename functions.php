@@ -997,7 +997,7 @@ add_action('init', static function (): void {
  * `enqueue_block_assets` und nicht `add_editor_style()`, aus einem Grund, der
  * sich erst mit Kindtheme zeigt: `add_editor_style('style.css')` löst über
  * `get_theme_file_path()` auf, und das **bevorzugt das Kindtheme**. Bei
- * aktivem `lotzwoo-theme-bersta` hätte der Editor also die 4 KB des Kindes
+ * aktivem Kindtheme hätte der Editor also die 4 KB des Kindes
  * bekommen und die 54 KB des Elternteils nie. Ein voller URI umginge das,
  * würde aber über `file_get_contents()` durchs Netz geladen.
  *

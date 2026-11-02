@@ -2,8 +2,7 @@
 
 Minimales Block-Theme für B2B-Großhandelsshops auf WooCommerce. Es trägt das Design-System in
 `theme.json` und sonst so wenig wie möglich: Kopfbereich, Fußbereich, zwei zuweisbare
-Seitenvorlagen. **Alles Kundenspezifische gehört in ein Kindtheme** — das erste ist
-[`lotzwoo-theme-bersta`](https://github.com/somesunnymind/lotzwoo-theme-bersta).
+Seitenvorlagen. **Alles Kundenspezifische gehört in ein Kindtheme** — je Kunde eines, in einem eigenen privaten Repo.
 
 ## Die Arbeitsteilung, in einem Absatz
 
@@ -75,7 +74,7 @@ Zwei Dinge, die dabei leicht falsch verstanden werden:
   geht, hängt am selben Filter; der Callback prüft deshalb zuerst Stylesheet und `UpdateURI`.
 
 **Das Kindtheme aktualisiert sich nicht mit.** Der Kern führt jedes Stylesheet einzeln.
-`lotzwoo-theme-bersta` hat bewusst keinen Update-Kanal und wird per Deploy-Skript ausgeliefert — so liegt
+Ein Kindtheme hat bewusst keinen Update-Kanal und wird per Deploy-Skript ausgeliefert — so liegt
 in keiner Kundeninstallation ein Token.
 
 ## Die Hausschrift — Inter, selbst ausgeliefert
@@ -110,7 +109,7 @@ deren Zeilenhöhe mit der Fensterbreite wandert, ist an jeder Breite anders zu t
 
 Die obere Hälfte ist die Skala der **Drucksache**: Seitentitel, Kennzahlen, Abschnittsüberschriften.
 Die drei Werte sind wörtlich die des Entwurfs
-([ADR 004](https://github.com/somesunnymind/bersta-website), `docs/mockups/richtung-entwurf/`) —
+(ADR 004 im Website-Repo des ersten Kunden, `docs/mockups/richtung-entwurf/`) —
 `3.9rem` ist dort die `h1`, `3.2rem` die Kennzahl, `2.6rem` die `h2`.
 
 ### Warum eigene `clamp()` und nicht `settings.typography.fluid`
@@ -279,7 +278,7 @@ dritte ruft den `render_callback` auf und sucht `id="lotzwoo-cart-slot"` in sein
 
 ## Die fünf Block-Styles — und der dritte Name, der aus dem Haus zeigt
 
-Ticket 17. `bersta-website/scripts/import-pages.py` baute fünf wiederkehrende Bausteine an **45
+Ticket 17. Das Import-Skript der ersten Kunden-Website baute fünf wiederkehrende Bausteine an **45
 Aufrufstellen** aus Block-Attributen zusammen; jede Palettenänderung hätte 45 Stellen gehabt, und
 keine davon im Theme. Seit `register_block_style()` schreibt das Skript nur noch die Klasse, das
 Aussehen gehört hierher.
