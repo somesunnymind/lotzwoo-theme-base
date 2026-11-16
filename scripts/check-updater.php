@@ -89,8 +89,8 @@ function pruefe(bool $ok, string $was): void
     $bestanden++;
 }
 
-const REPO = 'https://github.com/LotzApp/lotzwoo-theme-base';
-const ASSET_API = 'https://api.github.com/repos/LotzApp/lotzwoo-theme-base/releases/assets/123';
+const REPO = 'https://github.com/LotzApp/LotzWooThemeBase';
+const ASSET_API = 'https://api.github.com/repos/LotzApp/LotzWooThemeBase/releases/assets/123';
 const DOWNLOAD = REPO . '/releases/download/0.5.0/lotzwoo-theme-base.zip';
 
 function release(array $asset = []): array
@@ -116,9 +116,10 @@ pruefe(is_array($angebot) && $angebot['package'] === DOWNLOAD, 'ohne Token: brow
 pruefe($angebot['version'] === '0.5.0' && $angebot['new_version'] === '0.5.0', 'version und new_version gesetzt');
 pruefe($angebot['requires'] === '6.6' && $angebot['requires_php'] === '8.1', 'Anforderungen der installierten Fassung');
 pruefe(!isset(end($GLOBALS['abrufe'])[1]['headers']['Authorization']), 'ohne Token: kein Authorization-Kopf');
-pruefe(str_contains(end($GLOBALS['abrufe'])[0], '/repos/LotzApp/lotzwoo-theme-base/releases/latest'), 'fragt LotzApp');
+pruefe(str_contains(end($GLOBALS['abrufe'])[0], '/repos/LotzApp/LotzWooThemeBase/releases/latest'), 'fragt LotzApp');
 
 pruefe(frage(REPO . '-gabel') === false, 'Update URI mit Anhängsel wird nicht bedient');
+pruefe(frage('https://github.com/LotzApp/lotzwoo-theme-base') === false, 'alte Update URI mit Slug statt Repo-Name wird nicht bedient');
 pruefe(frage(REPO, 'anderes-theme') === false, 'fremder Slug wird nicht bedient');
 pruefe(frage(REPO, 'lotzwoo-theme-base', '0.5.0') === false, 'gleiche Version: kein Angebot');
 
@@ -156,8 +157,8 @@ pruefe($args['headers']['Authorization'] === 'token geheim', 'Download des Asset
 pruefe($args['headers']['Accept'] === 'application/octet-stream', 'Download des Assets verlangt die Datei');
 
 foreach ([
-    'https://api.github.com/repos/LotzApp/lotzwoo-theme-base/releases/assets/123/../../x',
-    'https://api.github.com/repos/LotzApp/lotzwoo-theme-base/releases/assets/123?x=1',
+    'https://api.github.com/repos/LotzApp/LotzWooThemeBase/releases/assets/123/../../x',
+    'https://api.github.com/repos/LotzApp/LotzWooThemeBase/releases/assets/123?x=1',
     'https://api.github.com/repos/Andere/repo/releases/assets/1',
     'https://example.com/?u=' . ASSET_API,
 ] as $fremd) {

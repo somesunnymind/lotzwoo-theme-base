@@ -27,9 +27,15 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-/** Besitzer und Name des Repos, aus dem die Releases kommen. */
+/** Besitzer und Name des Repos, aus dem die Releases kommen. Schreibweise wie bei GitHub. */
 const LOTZWOO_THEME_GITHUB_OWNER = 'LotzApp';
-const LOTZWOO_THEME_GITHUB_REPO = 'lotzwoo-theme-base';
+const LOTZWOO_THEME_GITHUB_REPO = 'LotzWooThemeBase';
+
+/**
+ * Der Slug des Themes, unabhängig vom Repo-Namen. Kindthemes hängen per
+ * `Template:` daran, er ändert sich nie.
+ */
+const LOTZWOO_THEME_SLUG = 'lotzwoo-theme-base';
 
 /** Der Name des Release-Assets. Er ist zugleich der Ordnername im ZIP. */
 const LOTZWOO_THEME_ASSET = 'lotzwoo-theme-base.zip';
@@ -122,7 +128,7 @@ function lotzwoo_theme_release_abrufen(?string $token): ?array
 {
     $kopf = [
         'Accept' => 'application/vnd.github+json',
-        'User-Agent' => 'lotzwoo-theme-base/' . wp_get_theme(LOTZWOO_THEME_GITHUB_REPO)->get('Version'),
+        'User-Agent' => 'lotzwoo-theme-base/' . wp_get_theme(LOTZWOO_THEME_SLUG)->get('Version'),
     ];
 
     if ($token !== null) {
@@ -208,7 +214,7 @@ function lotzwoo_theme_letztes_release(): ?array
  */
 function lotzwoo_theme_update_angebot($update, $theme_data, $theme_stylesheet)
 {
-    if ($theme_stylesheet !== LOTZWOO_THEME_GITHUB_REPO || !is_array($theme_data)) {
+    if ($theme_stylesheet !== LOTZWOO_THEME_SLUG || !is_array($theme_data)) {
         return $update;
     }
 
@@ -228,7 +234,7 @@ function lotzwoo_theme_update_angebot($update, $theme_data, $theme_stylesheet)
     $installiert = wp_get_theme($theme_stylesheet);
 
     return [
-        'theme' => LOTZWOO_THEME_GITHUB_REPO,
+        'theme' => LOTZWOO_THEME_SLUG,
         'version' => $release['version'],
         'new_version' => $release['version'],
         'url' => $release['url'],
@@ -311,7 +317,7 @@ add_action('requests-requests.before_redirect', 'lotzwoo_theme_token_bei_weiterl
 function lotzwoo_theme_release_cache_leeren($upgrader = null, $extra = []): void
 {
     if (is_array($extra) && ($extra['type'] ?? '') === 'theme'
-        && in_array(LOTZWOO_THEME_GITHUB_REPO, (array) ($extra['themes'] ?? []), true)) {
+        && in_array(LOTZWOO_THEME_SLUG, (array) ($extra['themes'] ?? []), true)) {
         delete_site_transient(LOTZWOO_THEME_RELEASE_CACHE);
     }
 }

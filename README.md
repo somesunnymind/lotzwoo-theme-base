@@ -9,7 +9,7 @@ Slug ändert sich deshalb nie.
 
 ## Die Arbeitsteilung
 
-Das Plugin [LotzApp for WooCommerce](https://github.com/LotzApp/lotzapp-for-woocommerce) besitzt
+Das Plugin [LotzApp for WooCommerce](https://github.com/LotzApp/LotzWoo) besitzt
 die B2B-Oberflächen — Sortiment, Warenkorb-Logik, Konto-Endpunkte — und bringt sein eigenes
 Design-System mit (`b2b-tokens.css`, Custom Properties `--lwb-*`). Dieses Theme liefert die Hülle
 und übersetzt in `style.css` die `--wp--preset--*` aus `theme.json` in die `--lwb-*` des Plugins.
@@ -22,7 +22,7 @@ trägt denselben Wert als Rückfall, den das Plugin ohnehin hat.
 ## Installation
 
 1. ZIP `lotzwoo-theme-base.zip` aus dem neuesten
-   [Release](https://github.com/LotzApp/lotzwoo-theme-base/releases/latest) unter *Design → Themes →
+   [Release](https://github.com/LotzApp/LotzWooThemeBase/releases/latest) unter *Design → Themes →
    Theme hinzufügen → Theme hochladen* installieren.
 2. Ein Kindtheme des Kunden installieren und aktivieren (siehe unten). Ohne Kindtheme läuft das
    Theme auch, aber Menü und Fußlinks bleiben leer.
@@ -104,19 +104,20 @@ Kontextleiste (nur lesend) und die Seitenüberschrift ein.
 
 Über den `Update URI`-Header (WordPress ≥ 6.1) und den Filter `update_themes_github.com` in
 `inc/updater.php`. Der Kern übernimmt Versionsvergleich, `no_update`-Pflege und
-Kollisionsschutz. Das Theme fragt `releases/latest` des Repos `LotzApp/lotzwoo-theme-base` und
+Kollisionsschutz. Das Theme fragt `releases/latest` des Repos `LotzApp/LotzWooThemeBase` und
 bietet das Asset `lotzwoo-theme-base.zip` an. Antworten werden sechs Stunden zwischengespeichert.
 
-- **Öffentliches Repo:** nichts einzustellen.
-- **Privates Repo:** in der `wp-config.php` einen GitHub-Token mit Leserecht auf das Repo setzen:
+Das Repo ist **privat**. Jede Installation braucht deshalb in der `wp-config.php` einen GitHub-Token
+mit Leserecht auf das Repo (fein granular: *Contents: Read-only*):
 
-  ```php
-  define('LOTZWOO_GITHUB_TOKEN', 'github_pat_…');
-  ```
+```php
+define('LOTZWOO_GITHUB_TOKEN', 'github_pat_…');
+```
 
-  Dieselbe Konstante liest das Plugin. Der Token geht nur an die API-Adressen dieses Repos und wird
-  bei der Weiterleitung zum Download-Speicher wieder abgenommen. Ohne Token gibt es bei einem
-  privaten Repo still kein Update.
+Dieselbe Konstante liest das Plugin; ein Token mit Leserecht auf beide Repos genügt. Der Token
+geht nur an die API-Adressen dieses Repos und wird bei der Weiterleitung zum Download-Speicher
+wieder abgenommen. Ohne Token gibt es still kein Update. Würde das Repo öffentlich, ginge es auch
+ohne Token.
 
 Zwei Dinge, die leicht falsch verstanden werden:
 
