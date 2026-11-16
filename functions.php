@@ -13,6 +13,7 @@ if (!defined('ABSPATH')) {
 }
 
 require_once __DIR__ . '/inc/mail-angaben.php';
+require_once __DIR__ . '/inc/updater.php';
 
 add_action('after_setup_theme', static function (): void {
     add_theme_support('wp-block-styles');
@@ -384,8 +385,11 @@ add_filter('render_block_core/navigation', static function (string $content, arr
         return $content;
     }
 
+    // `esc_url_raw()`, weil jeder an diesem Filter hängen kann und das Ergebnis
+    // ins `href` geht: ein `javascript:` wird so zur leeren Zeichenkette.
     $url = apply_filters('lotzwoo/sortiment-url', '/');
-    $url = is_string($url) && $url !== '' ? $url : '/';
+    $url = is_string($url) ? esc_url_raw($url) : '';
+    $url = $url !== '' ? $url : '/';
 
     // Der Kontext, den `core/navigation` seinen Punkten gibt (Schriftgröße,
     // Farben, …). Aus dem Blocktyp gelesen und nicht abgeschrieben.
@@ -511,11 +515,11 @@ add_filter('render_block_core/navigation-link', static function (string $content
 }, 10, 2);
 
 /**
- * Der Weg ins Sortiment — fünf Knöpfe, eine Auflösung.
+ * Der Weg ins Sortiment — mehrere Knöpfe, eine Auflösung.
  *
- * Fünf Stellen dieses Themes verlinken „Zum Sortiment". Ein festes `/` stimmt
+ * Mehrere Vorlagen dieses Themes verlinken „Zum Sortiment". Ein festes `/` stimmt
  * nur, solange `page_on_front` die Sortimentsseite ist — also **zufällig**.
- * Stellt jemand die Startseite um, zeigen alle fünf lautlos woanders hin.
+ * Stellt jemand die Startseite um, zeigen alle lautlos woanders hin.
  *
  * `wc_get_page_permalink('shop')` ist ebenfalls falsch: Woos Shop-Seite trägt
  * „Kein Katalog an dieser Stelle", der Weg ins Sortiment endete bei einer
@@ -524,7 +528,7 @@ add_filter('render_block_core/navigation-link', static function (string $content
  *
  * ## Warum ein Filter und kein Nachschlagen im Template
  *
- * Die fünf Templates bleiben statisches Blockmarkup. Sie können nichts
+ * Die Templates bleiben statisches Blockmarkup. Sie können nichts
  * nachschlagen, und sie sollen es auch nicht: eine Datei, die im
  * Website-Editor bearbeitbar ist, ist der falsche Ort für eine Abfrage. Was
  * dort steht, ist der **Rückfallwert** — und der wird hier als Eingabe in den
@@ -540,12 +544,12 @@ add_filter('render_block_core/navigation-link', static function (string $content
  *
  * Auch das Plugin hängt an diesem Filter und ruft ihn nicht anders auf: die
  * beiden Kontoseiten gehen über `Sortiment_Locator::url()`, und die reicht
- * ihren eigenen Rückfallwert durch dieselbe Naht. Sieben Verweise, eine
+ * ihren eigenen Rückfallwert durch dieselbe Naht. Viele Verweise, eine
  * Auflösung.
  *
- * ## Woran die fünf zu erkennen sind
+ * ## Woran die Knöpfe zu erkennen sind
  *
- * An der Klasse `lotzwoo-shop-link`, die alle fünf Knöpfe im Markup tragen.
+ * An der Klasse `lotzwoo-shop-link`, die alle diese Knöpfe im Markup tragen.
  *
  * Die Alternative wäre gewesen, jeden `core/button` mit `href="/"` und der
  * Beschriftung „Zum Sortiment" zu erwischen. Das erkennt einen Knopf an seinem
@@ -586,8 +590,9 @@ add_filter('render_block_core/button', static function (string $content, array $
      * @param string $fallback Das `href`, das im Template steht.
      */
     $url = apply_filters('lotzwoo/sortiment-url', $fallback);
+    $url = is_string($url) ? esc_url_raw($url) : '';
 
-    if (!is_string($url) || $url === '' || $url === $fallback) {
+    if ($url === '' || $url === $fallback) {
         return $content;
     }
 
@@ -1153,139 +1158,3 @@ add_filter('get_block_templates', static function ($templates, $query, $template
 
     return $templates;
 }, 20, 3);
-
-/**
- * Updates über GitHub, ohne einen eigenen Updater mitzuschleppen.
- *
- * Seit WordPress 6.1 genügt der `Update URI`-Header plus ein Filter, dessen
- * Name aus dem Hostnamen dieses Headers gebildet wird. Der Kern übernimmt
- * damit Versionsvergleich, `no_update`-Pflege und den Kollisionsschutz — gut
- * 500 der 545 Zeilen, die der `GitHub_Updater` des Plugins dafür selbst
- * mitbringt und die hier kein zweites Mal gepflegt werden.
- *
- * Der Kern ruft die URL im Header **nie** ab. Sie ist Kennung, nicht Endpunkt:
- * das Paket kommt aus `package` im Rückgabewert dieses Filters. Deshalb darf
- * dort etwas stehen, das ein Mensch aufmachen kann.
- *
- * `update_themes_github.com` ist ein **geteilter** Namensraum — jedes andere
- * Theme, das denselben Weg geht, hängt am selben Filter. Der Callback prüft
- * darum zuerst, ob er überhaupt gemeint ist, und gibt sonst unverändert
- * zurück, was er bekommen hat.
- *
- * Der Rückgabewert ist ein **Array**, kein Objekt: Themes laufen über
- * `update_themes` statt `update_plugins`, und dort erwartet der Kern ein
- * Array mit `theme`, `url` und `package`. Ein Objekt wird stillschweigend
- * verworfen.
- *
- * ## `version` **und** `new_version`, und warum das kein Gürtel-und-Hosenträger ist
- *
- * `wp_update_themes()` prüft die Antwort dieses Filters so:
- *
- * ```php
- * // Is it valid? We require at least a version.
- * if ( ! isset( $update->version ) ) { continue; }
- * // WordPress needs the version field specified as 'new_version'.
- * if ( ! isset( $update->new_version ) ) { $update->new_version = $update->version; }
- * ```
- *
- * Der Schlüssel, über den entschieden wird, heißt **`version`**. `new_version`
- * leitet der Kern daraus ab — es ist der *abgeleitete* Name, nicht der
- * geforderte. Eine Antwort mit nur `new_version` fällt durch das `continue`
- * und wird **stillschweigend** verworfen: kein Fehler, kein Eintrag im
- * Transienten, in der Themes-Übersicht schlicht kein Update.
- *
- * Genau das ist am 2026-08-11 passiert. Installiert `0.2.0`, veröffentlicht
- * `0.3.0`, der Filter feuerte und gab das richtige Paket zurück — und
- * `update_themes->response` blieb leer. Die Read-only-Probe aus Ticket 07 hat
- * geprüft, dass der Filter ein Array liefert, aber nicht, dass der Kern es
- * annimmt. Das ist der Unterschied zwischen „geprüft" und „gelaufen".
- *
- * `new_version` bleibt trotzdem stehen: der Kern setzt es sonst selbst, und
- * die Stelle liest sich besser, wenn dort steht, was ankommt.
- */
-add_filter('update_themes_github.com', static function ($update, array $theme_data, string $theme_stylesheet) {
-    if ($theme_stylesheet !== 'lotzwoo-theme-base') {
-        return $update;
-    }
-
-    $uri = $theme_data['UpdateURI'] ?? '';
-
-    if (!is_string($uri) || !str_starts_with($uri, 'https://github.com/somesunnymind/lotzwoo-theme-base')) {
-        return $update;
-    }
-
-    $installed = $theme_data['Version'] ?? '0';
-
-    $response = wp_remote_get(
-        'https://api.github.com/repos/somesunnymind/lotzwoo-theme-base/releases/latest',
-        [
-            'timeout' => 10,
-            'headers' => [
-                'Accept' => 'application/vnd.github+json',
-                'User-Agent' => 'lotzwoo-theme-base/' . $installed,
-            ],
-        ]
-    );
-
-    if (is_wp_error($response) || wp_remote_retrieve_response_code($response) !== 200) {
-        return $update;
-    }
-
-    $release = json_decode(wp_remote_retrieve_body($response), true);
-
-    if (!is_array($release) || empty($release['tag_name'])) {
-        return $update;
-    }
-
-    $latest = ltrim((string) $release['tag_name'], 'v');
-
-    // Der Kern vergleicht selbst noch einmal. Die Prüfung hier spart nur den
-    // Fall, in dem wir ein Paket anbieten, das gar keines ist.
-    if (version_compare($latest, (string) $installed, '<=')) {
-        return $update;
-    }
-
-    $package = '';
-
-    foreach ($release['assets'] ?? [] as $asset) {
-        if (($asset['name'] ?? '') === 'lotzwoo-theme-base.zip') {
-            $package = (string) ($asset['browser_download_url'] ?? '');
-            break;
-        }
-    }
-
-    // Ohne Paket kein Update. Die Quell-Archive, die GitHub automatisch
-    // beilegt, taugen nicht: ihr einziges Unterverzeichnis heisst
-    // `lotzwoo-theme-base-<tag>` und nicht `lotzwoo-theme-base`, und WordPress würde das
-    // Theme unter diesem Namen installieren — womit das Kindtheme sein
-    // Elterntheme verliert.
-    if ($package === '') {
-        return $update;
-    }
-
-    // `$theme_data` traegt nur acht Felder — Name, Title, Version, Author,
-    // Author URI, UpdateURI, Template, Stylesheet (`wp_update_themes()`).
-    // `RequiresWP` und `RequiresPHP` sind **nicht** darunter; die frueheren
-    // `$theme_data['RequiresWP'] ?? ''` lieferten deshalb immer die leere
-    // Zeichenkette, und `is_wp_version_compatible('')` gibt true zurueck: die
-    // Vertraeglichkeitspruefung in der Themes-Uebersicht lief leer. Gemessen am
-    // 2026-08-11 an der echten Aktualisierungszeile.
-    //
-    // Was hier steht, ist die Anforderung der **installierten** Fassung, nicht
-    // die der angebotenen — die stuende in der `style.css` des Tags und kostete
-    // einen zweiten Abruf bei jeder Update-Pruefung. Solange die Anforderung
-    // zwischen zwei Versionen steigt, ist das eine Naeherung; sie ist immer noch
-    // besser als der leere Wert, der gar nichts prueft. Steigt sie einmal
-    // wirklich, gehoert der zweite Abruf hierher.
-    $installed_theme = wp_get_theme($theme_stylesheet);
-
-    return [
-        'theme' => 'lotzwoo-theme-base',
-        'version' => $latest,
-        'new_version' => $latest,
-        'url' => (string) ($release['html_url'] ?? $uri),
-        'package' => $package,
-        'requires' => (string) $installed_theme->get('RequiresWP'),
-        'requires_php' => (string) $installed_theme->get('RequiresPHP'),
-    ];
-}, 10, 3);
