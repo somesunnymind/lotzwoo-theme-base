@@ -1,0 +1,37 @@
+# Was in diesem Repo und im ausgelieferten ZIP nicht stehen darf: Namen von
+# Kunden und Personen, Serverpfade, Verweise auf interne Arbeitsordner und
+# Arbeitsnotizen. Geprüft von scripts/check-sperrliste.mjs, ohne Groß/Klein.
+# Ein Begriff je Zeile. Reine Wörter gelten nur am Wortanfang.
+
+# Kunden
+simic
+bersta
+womensnature
+kleinrath
+
+# Personen und Betreiber
+michael-johannes
+somesunnymind
+mijoadmin
+martin
+emanuel
+clemens
+auftraggeber
+mastersession
+gmail.com
+
+# Server und Hosting
+/var/www/
+/home/
+lotzapp.dev
+raidboxes
+
+# Interne Arbeitsordner und Arbeitsnotizen
+.hermes/
+wayfinder
+ticket
+klon
+bank
+werkbank
+website-repo
+import-pages

@@ -6,7 +6,8 @@
     "check:theme-json": "node scripts/check-theme-json.mjs",
     "check:headers": "node scripts/check-headers.mjs",
     "check:blocks": "node scripts/check-block-markup.mjs",
-    "check": "npm run check:theme-json && npm run check:headers && npm run check:blocks"
+    "check:sperrliste": "node scripts/check-sperrliste.mjs",
+    "check": "npm run check:theme-json && npm run check:headers && npm run check:blocks && npm run check:sperrliste"
   },
   "devDependencies": {
     "@wordpress/block-serialization-default-parser": "^5.0.0",

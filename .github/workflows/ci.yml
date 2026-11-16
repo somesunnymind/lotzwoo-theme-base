@@ -59,3 +59,8 @@ jobs:
       # 5: Blockmarkup wohlgeformt.
       - name: Blockmarkup
         run: npm run check:blocks
+
+      # 6: keine Kunden- und Personennamen, Serverpfade, Ticket-Kürzel oder
+      #    Datumsangaben im Repo.
+      - name: Sperrliste
+        run: npm run check:sperrliste

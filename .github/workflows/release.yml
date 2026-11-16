@@ -91,6 +91,12 @@ jobs:
             | grep -qE '^[[:space:]]*Theme Name:[[:space:]]*\S' \
             || { echo "Leerer 'Theme Name' im ZIP" >&2; exit 1; }
 
+      # Torwaechter 3: was beim Kunden ankommt, gegen die Sperrliste. Die Liste
+      # und das Skript liegen unter `scripts/` und sind nicht im ZIP, deshalb
+      # aus dem Checkout.
+      - name: Gebautes ZIP gegen die Sperrliste pruefen
+        run: node scripts/check-sperrliste.mjs --zip build/lotzwoo-theme-base.zip
+
       # v3 ist genau der Sprung von node20 auf node24 -- die Release-Notiz
       # nennt keine andere Aenderung, `files` und `permissions` bleiben.
       - name: ZIP an das Release haengen
