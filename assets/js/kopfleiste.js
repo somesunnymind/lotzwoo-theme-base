@@ -1,12 +1,8 @@
 /**
- * Die Kopfzeile verteilt ihre Punkte, statt welche fallen zu lassen (AP-53).
+ * Die Kopfzeile verteilt ihre Punkte, statt welche fallen zu lassen.
  *
- * Bis zum 2026-08-17 standen im Stylesheet zwei Stufen: bei 1040 px
- * verschwanden „Über uns" und „Aktuelles" per `display:none`, bei 880 px wich
- * die ganze Leiste einer Menütaste. Die erste war das, was dieser Auftrag
- * abstellt — **zwei Punkte flogen raus**, und niemand kam mehr an sie heran.
- *
- * Was hier passiert, ist die Umkehrung: was nicht passt, wandert in ein
+ * Eine Ausblendung per `display:none` ab einer Breite nimmt Menüpunkte weg,
+ * und niemand kommt mehr an sie heran. Hier passiert die Umkehrung: was nicht passt, wandert in ein
  * Untermenü hinter dem Punkt „mehr". Die Vereinigung aus Leiste und „mehr" ist
  * auf **jeder** Breite vollständig — das ist die Zusicherung, um die es geht.
  *
@@ -45,19 +41,17 @@
  *
  * ## Die Rangordnung
  *
- * `.lotzwoo-navi--sekundaer` ist seit diesem Auftrag keine Ausblendung mehr,
- * sondern eine **Rangordnung**: was sie trägt, wandert zuerst. Die
- * redaktionelle Entscheidung dahinter — „Über uns" und „Aktuelles" sind
- * nachrangig — bleibt damit erhalten und bekommt eine bessere Wirkung als
- * vorher. Danach wird von hinten abgeräumt.
+ * `.lotzwoo-navi--sekundaer` ist keine Ausblendung, sondern eine
+ * **Rangordnung**: was sie trägt, wandert zuerst. Die redaktionelle
+ * Entscheidung, welche Punkte nachrangig sind, bleibt damit erhalten, ohne
+ * dass ein Punkt unerreichbar wird. Danach wird von hinten abgeräumt.
  *
  * Im Untermenü stehen die Punkte trotzdem in **Dokumentreihenfolge**: gewandert
  * wird nach Rang, gelesen wird nach Reihenfolge.
  *
  * ## Zwei Darstellungen, eine gemessene Grenze
  *
- * **„mehr" ist keine Leiter bis 320 px hinunter.** Klarstellung des
- * Auftraggebers vom 2026-08-17: unterhalb der Stelle, an der nur noch **zwei**
+ * **„mehr" ist keine Leiter bis 320 px hinunter.** Unterhalb der Stelle, an der nur noch **zwei**
  * Menüpunkte in der Leiste stünden, verschwinden **alle** im Hamburger. Eine
  * Leiste aus zwei Punkten und einem „mehr", hinter dem vier liegen, ist keine
  * Leiste mehr — sie ist ein Menü, das so tut, als wäre es keines.
@@ -76,12 +70,11 @@
  * unter 600 px ohne Hamburger, über 600 px mit, wenn die Punkte es so ergeben.
  * Das Stylesheet dreht Kerns beide Medienregeln entsprechend um.
  *
- * ## Die Symbole (AP-97, 2026-09-01)
+ * ## Die Symbole
  *
  * Vor allem anderen fallen die zwei Symbole im Kopf — der Hoerer vor der
- * Bestellannahme und `circle-user` am Konto-Chip. Sie stehen dort seit dem
- * 2026-09-01 auch im Ruhezustand, und die Bedingung des Auftraggebers war von
- * Anfang an „nur, wenn genug Platz dafuer ist".
+ * Bestellannahme und `circle-user` am Konto-Chip. Sie stehen dort auch im
+ * Ruhezustand, aber nur, wenn genug Platz dafuer ist.
  *
  * Die ganze Leiter, von weit nach schmal:
  *
@@ -133,10 +126,8 @@
 	/**
 	 * Ab wann der Hamburger übernimmt.
 	 *
-	 * Zwei: „mehr" bleibt einen Menüpunkt länger stehen, als es zuerst gebaut
-	 * war — erst wenn nur noch **einer** ausgeschrieben bliebe, übernimmt der
-	 * Hamburger. Entscheidung des Auftraggebers vom 2026-08-17, nachgeschärft
-	 * am selben Abend. Die Zahl steht hier und nicht als Breite im Stylesheet
+	 * Zwei: erst wenn nur noch **einer** ausgeschrieben bliebe, übernimmt der
+	 * Hamburger. Die Zahl steht hier und nicht als Breite im Stylesheet
 	 * — die Menüpunkte stehen im Kindtheme und sind vom Kunden änderbar, eine
 	 * Breite wäre morgen falsch.
 	 */
@@ -147,7 +138,7 @@
 	var KONTOICON = 'lotzwoo-kopf--kontoicon';
 
 	/*
-	 * AP-97: die Symbole am Konto-Chip und an der Bestellannahme fallen als
+	 * Die Symbole am Konto-Chip und an der Bestellannahme fallen als
 	 * **erstes**, noch vor dem ersten Menuepunkt. Sie sind das einzige im
 	 * Kopf, dessen Verlust keine Auskunft kostet — das Wort daneben sagt
 	 * dasselbe. Welche Symbole das betrifft, steht im Stylesheet; hier steht
@@ -174,10 +165,9 @@
 			return b.i - a.i;
 		});
 
-	// **Nicht `scrollWidth`.** Die Ist-Messung vom 2026-08-16 hat notiert, dass
-	// `scrollWidth > clientWidth` am Kopf auf *jeder* Breite um 12 px erfüllt
-	// war, auch dort, wo nichts überlief — eine Sonde, die darauf baute,
-	// meldete „161 von 161 Breiten mit Überlauf". Gefragt wird deshalb direkt:
+	// **Nicht `scrollWidth`.** `scrollWidth > clientWidth` ist am Kopf auf
+	// *jeder* Breite erfüllt, auch dort, wo nichts überläuft. Gefragt wird
+	// deshalb direkt:
 	// steht die rechte Kante des letzten Kindes rechts von der rechten Kante
 	// der Zeile? Bei `nowrap` und abgeschaltetem Schrumpfen ist das genau die
 	// Frage „passt das?", und sie hat keine zweite Auslegung.
@@ -264,7 +254,7 @@
 	 * gewandert, Bestellannahme gewandert, Hamburger uebernommen. Der Grund
 	 * ist derselbe, aus dem die Nummer vor ihm geht — sie hat einen zweiten
 	 * Weg (das Overlay), der Chip hat keinen: er ist der einzige Kontoweg im
-	 * Kopf, seit AP-48 Woos `customer-account` entfallen ist.
+	 * Kopf, weil Woos `customer-account` dort nicht steht.
 	 *
 	 * Gemessen wird, nicht geschwellt: der Name kommt aus dem Kundenkonto, und
 	 * „Musterfirma GmbH & Co KG" und „M. Muster" brauchen nicht dieselbe
@@ -309,7 +299,7 @@
 
 		// --- Die Symbole fallen zuerst ---------------------------------
 		//
-		// Vor jedem Menuepunkt, und das ist die Rangordnung des Auftrags:
+		// Vor jedem Menuepunkt, und das ist die Rangordnung:
 		// ein Symbol, das neben seinem Wort steht, sagt nichts, was das Wort
 		// nicht sagt. Ein Menuepunkt, der ins „mehr" wandert, kostet einen
 		// Klick; ein Symbol, das geht, kostet nichts.

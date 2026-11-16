@@ -10,8 +10,7 @@
  * Der Unterschied zum Kopf-Slot steht nicht hier, sondern in PHP: dort rendert
  * der `render_callback` den Anker `<div id="lotzwoo-cart-slot"></div>` statt der
  * leeren Zeichenkette, weil die Daten clientseitig in der Store-API-Cart liegen
- * und ein `render_block`-Filter beim Templaterendering nichts zu füllen hätte
- * (Ticket 15, Frage 1).
+ * und ein `render_block`-Filter beim Templaterendering nichts zu füllen hätte.
  *
  * Die Angaben doppeln bewusst `block.json`: der Editor bekommt sie aus dieser
  * Registrierung, der Server aus der Datei. Wer den Titel ändert, ändert beide.
