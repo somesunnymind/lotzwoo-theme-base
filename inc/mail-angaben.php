@@ -125,7 +125,13 @@ function lotzwoo_mail_schrift_gueltig(string $schrift): bool
 {
     $auswahl = \Automattic\WooCommerce\Internal\Email\EmailFont::class;
 
-    return !class_exists($auswahl) || isset($auswahl::$font[$schrift]);
+    // `property_exists()` zuerst: die Klasse ist intern, und ohne die Eigenschaft
+    // wäre der Zugriff ein Fatal auf jeder Seite.
+    if (!class_exists($auswahl) || !property_exists($auswahl, 'font') || !is_array($auswahl::$font)) {
+        return true;
+    }
+
+    return isset($auswahl::$font[$schrift]);
 }
 
 /**
