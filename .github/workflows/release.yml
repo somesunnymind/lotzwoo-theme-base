@@ -6,6 +6,9 @@ on:
     tags:
       - '[0-9]+.[0-9]+.[0-9]+*'
 
+# Schreibrecht braucht nur der letzte Schritt. Der Token liegt deshalb nicht
+# in der Arbeitskopie (`persist-credentials: false`) und erreicht nur diesen
+# Schritt, und dort laeuft keine fremde Action, sondern `gh`.
 permissions:
   contents: write
 
@@ -15,14 +18,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # node24-Laufzeit, siehe ci.yml.
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       # Torwaechter 1. Ein Tag, der dem Header widerspricht, liefert ein Update
       # aus, das jede Installation sieht und nie erfuellt: der Kern vergleicht
       # die Release-Version gegen den installierten Header, also laesst ein Tag
       # 9.9.9 auf `Version: 0.2.0` jede Site dauerhaft "Update verfuegbar"
-      # melden. Genau dieses Loch hatte das Plugin-Repo bis 2026-08-10.
+      # melden.
       - name: Tag gegen den Theme-Header pruefen
         run: |
           tag="${GITHUB_REF_NAME#v}"
@@ -61,6 +65,9 @@ jobs:
             lotzwoo-theme-base/style.css \
             lotzwoo-theme-base/theme.json \
             lotzwoo-theme-base/functions.php \
+            lotzwoo-theme-base/inc/updater.php \
+            lotzwoo-theme-base/LICENSE \
+            lotzwoo-theme-base/assets/fonts/OFL.txt \
             lotzwoo-theme-base/templates/index.html; do
             unzip -l lotzwoo-theme-base.zip "$required" > /dev/null \
               || { echo "Fehlt im ZIP: $required" >&2; exit 1; }
@@ -70,7 +77,7 @@ jobs:
             'lotzwoo-theme-base/.github/*' \
             'lotzwoo-theme-base/scripts/*' \
             'lotzwoo-theme-base/README.md' \
-            'lotzwoo-theme-base/AGENTS.md' \
+            'lotzwoo-theme-base/CONTRIBUTING.md' \
             'lotzwoo-theme-base/package.json' \
             'lotzwoo-theme-base/package-lock.json'; do
             if unzip -l lotzwoo-theme-base.zip "$excluded" > /dev/null 2>&1; then
@@ -97,9 +104,14 @@ jobs:
       - name: Gebautes ZIP gegen die Sperrliste pruefen
         run: node scripts/check-sperrliste.mjs --zip build/lotzwoo-theme-base.zip
 
-      # v3 ist genau der Sprung von node20 auf node24 -- die Release-Notiz
-      # nennt keine andere Aenderung, `files` und `permissions` bleiben.
+      # Legt das Release zum Tag an, falls es noch keines gibt, und haengt das
+      # ZIP an. Der Updater sucht genau den Asset-Namen `lotzwoo-theme-base.zip`.
       - name: ZIP an das Release haengen
-        uses: softprops/action-gh-release@v3
-        with:
-          files: build/lotzwoo-theme-base.zip
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          if ! gh release view "$TAG" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
+            gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --verify-tag --title "$TAG" --notes ""
+          fi
+          gh release upload "$TAG" build/lotzwoo-theme-base.zip --repo "$GITHUB_REPOSITORY" --clobber

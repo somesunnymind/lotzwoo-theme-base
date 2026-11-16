@@ -1,6 +1,6 @@
 name: Checks
 
-# Fuenf Pruefungen, alle **ohne** WordPress. Absichtlich kein Theme Check per
+# Alle Pruefungen laufen **ohne** WordPress. Absichtlich kein Theme Check per
 # `wp-env`: das faehrt ein ganzes WordPress in Docker hoch, um Regeln zu
 # pruefen, die fuer ein Verzeichnis gelten, in das dieses Theme nie eingereicht
 # wird.
@@ -10,34 +10,30 @@ on:
     branches: [main]
   pull_request:
 
+# Nur lesen. Keine Pruefung hier schreibt ins Repo.
+permissions:
+  contents: read
+
 jobs:
   checks:
     name: Theme-Pruefungen
     runs-on: ubuntu-latest
 
     steps:
-      # Beide Actions laufen ab diesen Hauptversionen auf der node24-Laufzeit.
-      # v4 lief auf node20 und meldete die Abkuendigung bei jedem Lauf.
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
-      # `node-version` ist eine andere Achse als die Laufzeit der Action: hier
-      # steht, womit die Pruefungen unten laufen, nicht womit setup-node selbst
-      # laeuft. Am 2026-08-12 von 20 auf 22 gehoben -- Node 20 ist seit April
-      # 2026 am Ende seiner Wartung, und die drei Pruefungen unten brauchen
-      # nichts, was sich zwischen den Fassungen geaendert haette (sie lesen
-      # JSON, HTML und Theme-Header). 22 statt 24, weil `engines` in der
-      # `package.json` nichts fordert und die Wahl damit die konservative ist:
-      # eine LTS-Fassung, die laenger getragen wird als die, die wir verlassen.
-      #
-      # Seit setup-node v5 wird automatisch zwischengespeichert, sobald
-      # `package.json` ein `packageManager`-Feld traegt. Dieses hier hat keines,
-      # also aendert sich am Verhalten nichts.
+      # `node-version` ist die Fassung, mit der die Pruefungen laufen, nicht
+      # die Laufzeit der Action. Eine LTS-Fassung; `engines` in der
+      # `package.json` fordert nichts.
       - uses: actions/setup-node@v7
         with:
           node-version: '22'
 
+      # `npm ci` installiert genau, was in `package-lock.json` steht.
       - name: Werkzeug installieren
-        run: npm install --no-audit --no-fund
+        run: npm ci --no-audit --no-fund
 
       # 1 + 2: theme.json gegen das versionierte Kernschema.
       - name: theme.json gegen das Kernschema
@@ -48,7 +44,7 @@ jobs:
       - name: Theme-Header
         run: npm run check:headers
 
-      # 4: PHP-Syntax. Eine Datei, aber sie laedt auf jeder Seite.
+      # 4: PHP-Syntax. `functions.php` laedt auf jeder Seite.
       - name: PHP-Syntax
         run: |
           shopt -s globstar nullglob
@@ -60,7 +56,11 @@ jobs:
       - name: Blockmarkup
         run: npm run check:blocks
 
-      # 6: keine Kunden- und Personennamen, Serverpfade, Ticket-Kürzel oder
+      # 6: keine Kunden- und Personennamen, Serverpfade, Arbeitskuerzel oder
       #    Datumsangaben im Repo.
       - name: Sperrliste
         run: npm run check:sperrliste
+
+      # 7: der Update-Weg, ohne WordPress und ohne Netz.
+      - name: Updater
+        run: php scripts/check-updater.php
