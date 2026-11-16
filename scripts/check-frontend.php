@@ -3,12 +3,11 @@
 /**
  * Prüft, dass keine Seite ungewollt auf einen Fallback fällt.
  *
- *     sg www-data -c "wp --path=/var/www/b2b eval-file <theme>/scripts/check-frontend.php"
+ *     sg www-data -c "wp --path=/pfad/zu/wordpress eval-file <theme>/scripts/check-frontend.php"
  *
- * Das ist die zweite Hälfte der Destination der Karte `theme-templates-und-repo`.
- * Die erste — jede Seite hat ihr Template — ist gebaut. Diese Datei ist der
- * Nachweis, und sie ersetzt sieben Messungen, die verstreut in Ticket-Antworten
- * stehen und die niemand wiederholen kann, ohne sie dort zusammenzusuchen.
+ * Jede Seite hat ihr Template. Diese Datei weist nach, dass es auch gewinnt,
+ * und hält die Messungen dazu an einer Stelle, an der jeder sie wiederholen
+ * kann.
  *
  * ## Warum ein Skript und keine Liste
  *
@@ -21,11 +20,10 @@
  *
  * `scripts/` ist in `.gitattributes` `export-ignore` und erreicht keinen
  * Kundenserver; daneben liegt mit `deploy-theme.sh` bereits ein Werkzeug, das
- * gegen eine laufende Installation arbeitet. Ticket 06 hat *WordPress in der
- * CI* ausgeschlossen (kein `wp-env`, kein Docker) — nicht ein Skript, das
- * jemand gegen eine echte Installation laufen lässt. Die CI prüft weiter fünf
- * Dinge ohne WordPress; diese Datei prüft das eine, das ohne WordPress nicht
- * zu prüfen ist.
+ * gegen eine laufende Installation arbeitet. Ausgeschlossen ist *WordPress in
+ * der CI* (kein `wp-env`, kein Docker) — nicht ein Skript, das jemand gegen
+ * eine echte Installation laufen lässt. Die CI prüft, was ohne WordPress geht;
+ * diese Datei prüft das eine, das ohne WordPress nicht zu prüfen ist.
  *
  * ## Zwei Ebenen, ungleich gewichtet
  *
@@ -34,18 +32,18 @@
  * gefüllten Warenkorb und keine Anmeldung.
  *
  * Dazu ein paar **HTTP-Abrufe** für das, was erst beim Rendern sichtbar wird:
- * hat die Seite Kopf und Fuß, steht kein Woo-Katalog darin. Die Auflösungsebene
- * hätte den fehlenden Kassen-Kopf aus Ticket 09 nie gefunden.
+ * hat die Seite Kopf und Fuß, steht kein Woo-Katalog darin. Ob ein Template den
+ * richtigen Kopf trägt, sieht die Auflösungsebene nicht.
  *
  * ## Der B2B-Riegel gehört zur Erwartung, nicht gegen sie
  *
- * Seit AP-46 antwortet das Plugin auf Produktseite, Produktarchiv, Produktsuche
- * und Produkt-Taxonomien mit **404**, sobald die Installation ein B2B-Shop ist
- * (`Product_Access_Gate`, gehängt an `template_redirect`); seit AP-49 hängt das
- * am Schalter `b2b_enabled`. Diese Prüfung fährt **anonym** — `wp_remote_get()`
- * schickt keinen Anmeldekeks —, und anonym kommt niemand durch den Riegel. Drei
- * Abrufe unten waren damit vom 2026-08-16 an bei jedem Theme-Deploy rot, ohne
- * dass am Theme etwas kaputt war.
+ * Das Plugin antwortet auf Produktseite, Produktarchiv, Produktsuche und
+ * Produkt-Taxonomien mit **404**, sobald die Installation ein B2B-Shop ist
+ * (`Product_Access_Gate`, gehängt an `template_redirect`, geschaltet über
+ * `b2b_enabled`). Diese Prüfung fährt **anonym** — `wp_remote_get()` schickt
+ * keinen Anmeldekeks —, und anonym kommt niemand durch den Riegel. Mit fester
+ * Erwartung 200 wären drei Abrufe unten bei jedem Theme-Deploy rot, ohne dass
+ * am Theme etwas kaputt ist.
  *
  * Die Erwartung ist deshalb an den Modus gekoppelt, statt die Messung
  * angemeldet zu fahren: ein Anmeldekeks wäre eine Schreiboperation, und der
@@ -79,27 +77,26 @@ if (!defined('ABSPATH')) {
  *
  * Jede Zeile trägt ihre Begründung mit. Das ist der Teil, der zählt: In der
  * Ausgabe steht dann nicht „single-product kommt vom Plugin", sondern warum das
- * richtig ist. Ein Inventar, das seine eigenen Entscheidungen mitführt — das,
- * was Ticket 01 von Hand war.
+ * richtig ist. Ein Inventar, das seine eigenen Entscheidungen mitführt.
  *
  * `theme`  — eine Datei dieses Themes (oder eines Kindthemes) muss gewinnen.
  * `plugin` — WooCommerce liefert, und zwar mit Absicht.
  */
 const LANDKARTE = [
     '404' => ['theme', 'Grundgerüst: eigene 404-Seite mit Kopf und Fuß'],
-    'archive-product' => ['theme', 'Ticket 12: kein Katalog, Hinweis aufs Sortiment. Trägt auch Kategorie, Schlagwort und Marke — Woo liefert für die drei keine eigene Datei'],
+    'archive-product' => ['theme', 'Kein Katalog, Hinweis aufs Sortiment. Trägt auch Kategorie, Schlagwort und Marke — Woo liefert für die drei keine eigene Datei'],
     'coming-soon' => ['plugin', 'Woos Vor-dem-Start-Modus; kein Teil des Kaufwegs und keine Seite, die ein Kunde je sieht'],
     'index' => ['theme', 'Grundgerüst: der Rückfall des Kerns gehört dem Theme'],
-    'order-confirmation' => ['plugin', 'Ticket 05: kein eigenes Template — die Bestätigung ist Woos Store-API-Fläche'],
-    'page' => ['theme', 'Grundgerüst, und zugleich das gesamte Konto: alle neun Woo-Endpunkte plus `nachbestellen` laufen hierüber (Ticket 01)'],
-    'page-cart' => ['theme', 'Ticket 15: doch ein eigenes Template — der Warenkorb-Slot muss zwischen Positionen und Summen stehen, und dafür führt die Datei den Cart-Block inline statt über `wp:post-content`'],
-    'page-checkout' => ['plugin', 'AD-1: der Austritt aus der Store API kostet die Zahlungsarten-Registrierung. Die Hülle kommt trotzdem von hier — siehe Kopplung 1'],
+    'order-confirmation' => ['plugin', 'Kein eigenes Template — die Bestätigung ist Woos Store-API-Fläche'],
+    'page' => ['theme', 'Grundgerüst, und zugleich das gesamte Konto: alle neun Woo-Endpunkte plus `nachbestellen` laufen hierüber'],
+    'page-cart' => ['theme', 'Eigenes Template — der Warenkorb-Slot muss zwischen Positionen und Summen stehen, und dafür führt die Datei den Cart-Block inline statt über `wp:post-content`'],
+    'page-checkout' => ['plugin', 'Kein eigenes Template: der Austritt aus der Store API kostet die Zahlungsarten-Registrierung. Die Hülle kommt trotzdem von hier — siehe Kopplung 1'],
     'page-full-width' => ['theme', 'Das Sortiment (Seite mit dem Kurzcode) läuft hierüber'],
-    'page-no-title' => ['theme', 'E1: die Überschrift lebt im Inhalt. Für redaktionelle Seiten, die ihre H1 selbst mitbringen — `page.html` behält `post-title`, weil es auch das Sortiment trägt'],
-    'product-search-results' => ['theme', 'Ticket 12: die Produktsuche zeigt den Hinweis, keinen Katalog'],
+    'page-no-title' => ['theme', 'Die Überschrift lebt im Inhalt. Für redaktionelle Seiten, die ihre H1 selbst mitbringen — `page.html` behält `post-title`, weil es auch das Sortiment trägt'],
+    'product-search-results' => ['theme', 'Die Produktsuche zeigt den Hinweis, keinen Katalog'],
     'single' => ['theme', 'Grundgerüst'],
-    'single-product' => ['plugin', 'AD-10: die Produktseite bekommt kein eigenes Template'],
-    'taxonomy-product_attribute' => ['theme', 'Ticket 12: braucht eine eigene Datei, weil Woo hierfür — anders als für Kategorie und Schlagwort — selbst eine mitliefert'],
+    'single-product' => ['plugin', 'Die Produktseite gehört nicht zum Kaufweg und bekommt kein eigenes Template'],
+    'taxonomy-product_attribute' => ['theme', 'Braucht eine eigene Datei, weil Woo hierfür — anders als für Kategorie und Schlagwort — selbst eine mitliefert'],
 ];
 
 /** Die beiden Teile, die auf jeder Seite dieses Themes stehen. */
@@ -109,24 +106,22 @@ const TEILE = [
 ];
 
 /**
- * Was dem Kindtheme seit AD-11 legitim gehört.
+ * Was dem Kindtheme legitim gehört.
  *
- * Vor dem 2026-08-12 war die Antwort „nichts": jede Datei im Kindtheme war ein
- * Verstoß gegen AD-8, und diese Prüfung meldete sie pauschal als Warnung. Seit
- * AD-11 ist die Seitenstruktur eines Kunden ausdrücklich dort zuhause — und
- * eine Prüfung, die genau das jedes Mal anmahnt, wird nach dem dritten Lauf
- * nicht mehr gelesen.
+ * Die Seitenstruktur eines Kunden ist ausdrücklich im Kindtheme zuhause. Eine
+ * Prüfung, die genau das jedes Mal anmahnt, wird nach dem dritten Lauf nicht
+ * mehr gelesen.
  *
- * Die Liste ist deshalb **abschließend**, nicht beispielhaft. Alles, was nicht
- * darauf steht, warnt weiter: ein `templates/page.html` im Kindtheme fehlt beim
- * nächsten Kunden, und daran hat AD-11 nichts geändert.
+ * Die Liste ist **abschließend**, nicht beispielhaft. Alles, was nicht darauf
+ * steht, warnt weiter: ein `templates/page.html` im Kindtheme fehlt beim
+ * nächsten Kunden.
  *
  * Der Schlüssel ist der Slug, der Wert die Begründung, die in der Ausgabe
  * mitläuft — dieselbe Form wie in der Landkarte oben und aus demselben Grund.
  */
 const KIND_EIGEN = [
-    'navigation' => 'AD-11: die Menüführung ist die Seitenstruktur des Kunden',
-    'footer-links' => 'AD-11: welche Rechtsseiten es gibt, entscheidet der Kunde',
+    'navigation' => 'Die Menüführung ist die Seitenstruktur des Kunden',
+    'footer-links' => 'Welche Rechtsseiten es gibt, entscheidet der Kunde',
 ];
 
 /**
@@ -224,11 +219,11 @@ foreach (LANDKARTE as $slug => [$erwartet, $grund]) {
     }
 
     // `custom` heißt: der Website-Editor hat eine Fassung in die Datenbank
-    // geschrieben. Kein Fehler, aber der Rahmenbefund der Karte — „null
-    // Templates in der Datenbank, jede Zeile kommt aus einer Datei" — gilt dann
-    // nicht mehr, und wer das liest, soll es merken.
+    // geschrieben. Kein Fehler, aber die Zusage „null Templates in der
+    // Datenbank, jede Zeile kommt aus einer Datei" gilt dann nicht mehr, und
+    // wer das liest, soll es merken.
     if ($template->source === 'custom') {
-        $zeile('warnung', "{$slug}: liegt in der **Datenbank**. Der Klon ist damit nicht mehr ohne Datenbank reproduzierbar");
+        $zeile('warnung', "{$slug}: liegt in der **Datenbank**. Die Installation ist damit nicht mehr ohne Datenbank reproduzierbar");
         continue;
     }
 
@@ -246,8 +241,8 @@ foreach (LANDKARTE as $slug => [$erwartet, $grund]) {
     // Kindtheme, das ein Template überschreibt, ist unerwünscht — aber es ist
     // kein *Fallback*, und das ist der Fehler, gegen den diese Prüfung antritt.
     //
-    // „Unerwünscht" gilt seit AD-11 nicht mehr pauschal: was auf KIND_EIGEN
-    // steht, gehört dorthin. Alles andere warnt weiter.
+    // „Unerwünscht" gilt nicht pauschal: was auf KIND_EIGEN steht, gehört
+    // dorthin. Alles andere warnt.
     $im_kind = get_stylesheet_directory() !== get_template_directory()
         && file_exists(get_stylesheet_directory() . "/templates/{$slug}.html");
 
@@ -257,7 +252,7 @@ foreach (LANDKARTE as $slug => [$erwartet, $grund]) {
     }
 
     if ($im_kind) {
-        $zeile('warnung', "{$slug}: aus dem **Kindtheme**, steht aber nicht auf der Liste der kundeneigenen Slugs (AD-11) — ein Template dort fehlt beim nächsten Kunden");
+        $zeile('warnung', "{$slug}: aus dem **Kindtheme**, steht aber nicht auf der Liste der kundeneigenen Slugs — ein Template dort fehlt beim nächsten Kunden");
         continue;
     }
 
@@ -299,11 +294,11 @@ foreach (TEILE as $slug => $zweck) {
 }
 
 /**
- * Kopplung 4: die zwei Parts, die dem Kundentheme gehören (AD-11).
+ * Kopplung 4: die zwei Parts, die dem Kundentheme gehören.
  *
  * `parts/navigation.html` und `parts/footer-links.html` sind die einzige Stelle,
  * an der die Seitenstruktur eines Kunden steht. Das Basis-Theme liefert je eine
- * Vorgabe für den Fall, dass kein Kindtheme etwas mitbringt.
+ * leere Vorgabe für den Fall, dass kein Kindtheme etwas mitbringt.
  *
  * Geprüft wird **nicht**, ob die Dateien existieren — das täte auch die
  * Auflösung oben. Geprüft wird, **wessen** Datei gewinnt, und zwar am
@@ -312,11 +307,11 @@ foreach (TEILE as $slug => $zweck) {
  * Verzeichnisse die Datei kam, und wäre hier eine Antwort, die immer stimmt.
  *
  * Der interessante Fall ist der **stille**: ein Kindtheme ist aktiv, bringt aber
- * keinen eigenen Part mit. Dann steht im Kopf die generische Seitenliste der
- * Basis, im Fuß gar nichts — die Seite ist heil, die Rechtslinks sind weg, und
- * niemand sucht danach. Genau dafür ist diese Prüfung da.
+ * keinen eigenen Part mit. Dann bleiben Menü und Fußlinks leer — die Seite ist
+ * heil, die Rechtslinks sind weg, und niemand sucht danach. Genau dafür ist
+ * diese Prüfung da.
  */
-$abschnitt('Die Parts des Kundenthemes (AD-11)');
+$abschnitt('Die Parts des Kundenthemes');
 
 $kind_aktiv = get_stylesheet_directory() !== get_template_directory();
 
@@ -329,7 +324,7 @@ foreach (KIND_EIGEN as $slug => $grund) {
     }
 
     if ($part->source === 'custom') {
-        $zeile('warnung', "parts/{$slug}.html: liegt in der **Datenbank**. Der Website-Editor hat eine Fassung gespeichert — die Datei im Kindtheme wird nicht mehr gelesen, und Ticket 13 gilt für diesen Part nicht mehr");
+        $zeile('warnung', "parts/{$slug}.html: liegt in der **Datenbank**. Der Website-Editor hat eine Fassung gespeichert — die Datei im Kindtheme wird nicht mehr gelesen");
         continue;
     }
 
@@ -359,7 +354,7 @@ foreach ($kind_aktiv ? (glob(get_stylesheet_directory() . '/parts/*.html') ?: []
         continue;
     }
 
-    $zeile('warnung', "parts/{$slug}.html: aus dem **Kindtheme**, steht aber nicht auf der Liste der kundeneigenen Slugs (AD-11) — ein Part dort erbt keine Verbesserung am Rahmen mehr");
+    $zeile('warnung', "parts/{$slug}.html: aus dem **Kindtheme**, steht aber nicht auf der Liste der kundeneigenen Slugs — ein Part dort erbt keine Verbesserung am Rahmen mehr");
 }
 
 /**
@@ -378,24 +373,25 @@ $kassenkopf = get_block_template('woocommerce/woocommerce//checkout-header', 'wp
 $eigenerkopf = get_block_template(get_stylesheet() . '//header', 'wp_template_part');
 
 if (!$kassenkopf instanceof WP_Block_Template) {
-    $zeile('fehler', 'Kassen-Kopf: `woocommerce/woocommerce//checkout-header` gibt es nicht mehr. WooCommerce hat den Part umbenannt — der Filter in functions.php trifft ins Leere (Ticket 09)');
+    $zeile('fehler', 'Kassen-Kopf: `woocommerce/woocommerce//checkout-header` gibt es nicht mehr. WooCommerce hat den Part umbenannt — der Filter in functions.php trifft ins Leere');
 } elseif (!$eigenerkopf instanceof WP_Block_Template) {
     $zeile('fehler', 'Kassen-Kopf: der eigene Kopf ist nicht auflösbar, es gibt nichts unterzuschieben');
 } elseif (md5((string) $kassenkopf->content) !== md5((string) $eigenerkopf->content)) {
-    $zeile('fehler', 'Kassen-Kopf: die Kasse bekommt **nicht** denselben Kopf wie der Rest. Der Filter aus Ticket 09 greift nicht');
+    $zeile('fehler', 'Kassen-Kopf: die Kasse bekommt **nicht** denselben Kopf wie der Rest. Der Filter in functions.php greift nicht');
 } else {
-    $zeile('ok', 'Kassen-Kopf: dieselbe Datei wie überall (Ticket 09)');
+    $zeile('ok', 'Kassen-Kopf: dieselbe Datei wie überall');
 }
 
-// Der Fuß auf der Kasse ist Absicht: Woos Kassen-Template hat gar keinen
-// Fuß-Part, und einen hineinzubekommen hieße, das Template zu übernehmen —
-// genau das, was AD-1 ausschließt. Geprüft wird deshalb, dass es so *bleibt*.
+// Der fehlende Fuß auf der Kasse ist Absicht: Woos Kassen-Template hat gar
+// keinen Fuß-Part, und einen hineinzubekommen hieße, das Template zu
+// übernehmen — und damit die Store API zu verlassen, was die
+// Zahlungsarten-Registrierung kostet. Geprüft wird deshalb, dass es so *bleibt*.
 $kasse = $gefunden['page-checkout'] ?? null;
 
 if ($kasse instanceof WP_Block_Template && str_contains((string) $kasse->content, '"slug":"footer"')) {
-    $zeile('warnung', 'Kasse: Woos Template zieht inzwischen einen Fuß-Part. AD-1 ging davon aus, dass es keinen gibt — die Entscheidung ist neu zu prüfen');
+    $zeile('warnung', 'Kasse: Woos Template zieht inzwischen einen Fuß-Part. Die Entscheidung gegen ein eigenes Kassen-Template ging davon aus, dass es keinen gibt — sie ist neu zu prüfen');
 } else {
-    $zeile('ok', 'Kasse: weiterhin ohne Fuß, wie AD-1 es beschreibt');
+    $zeile('ok', 'Kasse: weiterhin ohne Fuß, wie vorgesehen');
 }
 
 /**
@@ -404,15 +400,15 @@ if ($kasse instanceof WP_Block_Template && str_contains((string) $kasse->content
  * Das Theme registriert `lotzwoo/header-slot` und rendert die leere
  * Zeichenkette; das Plugin füllt ihn per `render_block`-Filter. Wer den Namen
  * auf einer der beiden Seiten ändert, bricht die andere, ohne dass irgendwo
- * etwas rot wird — die einzige Kopplung zwischen zwei Repos (Ticket 10).
+ * sonst etwas rot wird.
  */
 if (!WP_Block_Type_Registry::get_instance()->is_registered('lotzwoo/header-slot')) {
-    $zeile('fehler', 'Einhängestelle: der Block `lotzwoo/header-slot` ist nicht registriert (Ticket 10)');
+    $zeile('fehler', 'Einhängestelle: der Block `lotzwoo/header-slot` ist nicht registriert');
 } elseif ($eigenerkopf instanceof WP_Block_Template
     && !str_contains((string) $eigenerkopf->content, 'wp:lotzwoo/header-slot')) {
     $zeile('fehler', 'Einhängestelle: der Block ist registriert, steht aber nicht mehr in parts/header.html. Das Plugin hat dann keinen Ort im Kopf');
 } else {
-    $zeile('ok', 'Einhängestelle: `lotzwoo/header-slot` registriert und im Kopf verbaut (Ticket 10)');
+    $zeile('ok', 'Einhängestelle: `lotzwoo/header-slot` registriert und im Kopf verbaut');
 }
 
 /**
@@ -420,17 +416,16 @@ if (!WP_Block_Type_Registry::get_instance()->is_registered('lotzwoo/header-slot'
  *
  * Der Kopf-Slot führt eine Zeichenkette: den Blocknamen. Der Warenkorb-Slot
  * führt zwei — den Blocknamen **und** die Div-ID `lotzwoo-cart-slot`, auf die
- * `MOUNT_ID` in `assets/js/b2b-cart.js` zeigt (Ticket 15, Frage 1 und 6). Zwei
- * Namen brauchen zwei Prüfungen, plus die, dass der Block überhaupt registriert
- * ist.
+ * `MOUNT_ID` in `assets/js/b2b-cart.js` zeigt. Zwei Namen brauchen zwei
+ * Prüfungen, plus die, dass der Block überhaupt registriert ist.
  *
  * Die dritte Prüfung ruft den `render_callback` auf, statt die Datei nach der
  * ID zu durchsuchen: die ID steht in PHP-Code, nicht in einem Template, und
  * eine Textsuche in `functions.php` fände sie auch in einem Kommentar.
  *
  * Wird eine der beiden Zeichenketten umbenannt, ohne die Gegenseite
- * nachzuziehen, bleibt die Seite **heil** — das JS legt sich sein eigenes Div
- * neben den Cart-Block, wie vor Ticket 15. Genau darum braucht es diese
+ * nachzuziehen, bleibt die Seite **heil** — das JS legt sich dann ein eigenes
+ * Div neben den Cart-Block. Genau darum braucht es diese
  * Prüfung: das Symptom ist eine Sektion an der falschen Stelle, und die sieht
  * niemand, der sie nicht sucht.
  */
@@ -438,16 +433,16 @@ $slot_typ = WP_Block_Type_Registry::get_instance()->get_registered('lotzwoo/cart
 $warenkorb_template = $gefunden['page-cart'] ?? null;
 
 if (!$slot_typ instanceof WP_Block_Type) {
-    $zeile('fehler', 'Warenkorb-Slot: der Block `lotzwoo/cart-slot` ist nicht registriert (Ticket 15)');
+    $zeile('fehler', 'Warenkorb-Slot: der Block `lotzwoo/cart-slot` ist nicht registriert');
 } else {
-    $zeile('ok', 'Warenkorb-Slot: `lotzwoo/cart-slot` registriert (Ticket 15)');
+    $zeile('ok', 'Warenkorb-Slot: `lotzwoo/cart-slot` registriert');
 }
 
 if (!$warenkorb_template instanceof WP_Block_Template
     || !str_contains((string) $warenkorb_template->content, 'wp:lotzwoo/cart-slot')) {
-    $zeile('fehler', 'Warenkorb-Slot: der Block steht nicht in `templates/page-cart.html`. Das Plugin hängt seine Sektion dann wieder unter den Bestellknopf (Posten 6 der Nachbarkarte)');
+    $zeile('fehler', 'Warenkorb-Slot: der Block steht nicht in `templates/page-cart.html`. Das Plugin hängt seine Sektion dann wieder unter den Bestellknopf');
 } else {
-    $zeile('ok', 'Warenkorb-Slot: im Cart-Template verbaut, zwischen Positionen und Summen (Ticket 15, Frage 3)');
+    $zeile('ok', 'Warenkorb-Slot: im Cart-Template verbaut, zwischen Positionen und Summen');
 }
 
 $slot_ausgabe = $slot_typ instanceof WP_Block_Type && is_callable($slot_typ->render_callback)
@@ -455,7 +450,7 @@ $slot_ausgabe = $slot_typ instanceof WP_Block_Type && is_callable($slot_typ->ren
     : '';
 
 if (!str_contains($slot_ausgabe, 'id="lotzwoo-cart-slot"')) {
-    $zeile('fehler', 'Warenkorb-Slot: der `render_callback` liefert kein `id="lotzwoo-cart-slot"` — `MOUNT_ID` in b2b-cart.js findet den Anker nicht (Ticket 15, Frage 6)');
+    $zeile('fehler', 'Warenkorb-Slot: der `render_callback` liefert kein `id="lotzwoo-cart-slot"` — `MOUNT_ID` in b2b-cart.js findet den Anker nicht');
 } else {
     $zeile('ok', 'Warenkorb-Slot: der `render_callback` liefert den Anker `id="lotzwoo-cart-slot"` — dieselbe Zeichenkette wie `MOUNT_ID` im Plugin');
 }
@@ -464,15 +459,14 @@ if (!str_contains($slot_ausgabe, 'id="lotzwoo-cart-slot"')) {
  * Kopplung 5: der Weg ins Sortiment.
  *
  * Die dritte Zeichenkette, die sich zwei Repos teilen: `lotzwoo/sortiment-url`.
- * Das Theme wendet den Filter auf das `href` seiner fünf „Zum Sortiment"-Knöpfe
- * an, das Plugin beantwortet ihn mit der Seite, die `[lotzwoo_b2b_shop]` trägt.
+ * Das Theme wendet den Filter auf das `href` seiner „Zum Sortiment"-Knöpfe an,
+ * das Plugin beantwortet ihn mit der Seite, die `[lotzwoo_b2b_shop]` trägt.
  *
- * Geprüft wird **beides**, und aus dem teuersten Grund dieses Projekts: ein
- * Hook, der korrekt hängt und nie feuert, sieht von beiden Seiten aus wie der
- * Rückfall auf `/` — also wie der Zustand vor diesem Auftrag. Und dieser
- * Rückfall ist heute noch dazu **zufällig richtig**, weil `page_on_front` die
- * Sortimentsseite ist. Eine Prüfung, die nur die Ausgabe ansieht, wäre grün,
- * ohne etwas zu bedeuten.
+ * Geprüft wird **beides**: ein Hook, der korrekt hängt und nie feuert, sieht
+ * von beiden Seiten aus wie der Rückfall auf `/` — also wie ein Theme ohne
+ * Filter. Und ist `page_on_front` die Sortimentsseite, ist dieser Rückfall
+ * noch dazu **zufällig richtig**. Eine Prüfung, die nur die Ausgabe ansieht,
+ * wäre grün, ohne etwas zu bedeuten.
  *
  * Deshalb hängt sich die Prüfung selbst an den Filter, rendert einen
  * Musterknopf durch `do_blocks()` und sieht nach, ob **ihre eigene** Antwort im
@@ -487,22 +481,22 @@ if (!str_contains($slot_ausgabe, 'id="lotzwoo-cart-slot"')) {
 $abschnitt('Der Weg ins Sortiment (Kopplung 5)');
 
 /*
- * `parts/header.html` steht seit AP-48 (2026-08-17) **nicht** mehr in dieser
- * Liste. Der Knopf „Zum Sortiment" ist dort entfallen, und zwar absichtlich:
- * die Kopfzeile traegt seither zwei Bahnen, in der oberen sitzt der Konto-Chip
- * als einziger Kontoweg, und der Weg ins Sortiment liegt in der klebenden
- * Bahn darunter — der Kontextleiste, die auf jeder Kaufwegseite steht.
+ * `parts/header.html` steht absichtlich **nicht** in dieser Liste. Die
+ * Kopfzeile trägt keinen Knopf „Zum Sortiment": in ihrer oberen Bahn sitzt der
+ * Konto-Chip als einziger Kontoweg, und der Weg ins Sortiment liegt in der
+ * klebenden Bahn darunter — der Kontextleiste, die auf jeder Kaufwegseite
+ * steht.
  *
- * Die Pruefung darunter bleibt fuer die vier Vorlagen, die den Knopf weiter
- * tragen. Ihn hier stehen zu lassen hiesse, eine Entscheidung als Fehler zu
- * melden — und ein Pruefwerkzeug, das bei jedem Lauf einen bekannten Fehler
- * meldet, wird nach dem dritten Mal nicht mehr gelesen.
+ * Die Prüfung darunter gilt den vier Vorlagen, die den Knopf tragen. Den Kopf
+ * hier zu führen hieße, eine Entscheidung als Fehler zu melden — und ein
+ * Prüfwerkzeug, das bei jedem Lauf einen bekannten Fehler meldet, wird nach
+ * dem dritten Mal nicht mehr gelesen.
  */
 const SORTIMENT_KNOEPFE = [
-    'templates/archive-product.html' => 'Produktarchiv (Ticket 12)',
-    'templates/product-search-results.html' => 'Produktsuche (Ticket 12)',
-    'templates/taxonomy-product_attribute.html' => 'Attribut-Archiv (Ticket 12)',
-    'templates/page-cart.html' => 'Leerer Warenkorb (Ticket 15)',
+    'templates/archive-product.html' => 'Produktarchiv',
+    'templates/product-search-results.html' => 'Produktsuche',
+    'templates/taxonomy-product_attribute.html' => 'Attribut-Archiv',
+    'templates/page-cart.html' => 'Leerer Warenkorb',
 ];
 
 $inhalte = [
@@ -547,7 +541,7 @@ $gerendert = do_blocks(
 remove_filter('lotzwoo/sortiment-url', $antwort_sonde, 99);
 
 if (!str_contains($gerendert, 'href="' . $sonde . '"')) {
-    $zeile('fehler', 'Sortiment-Naht: der Filter `lotzwoo/sortiment-url` **feuert nicht**. Ein Musterknopf behält sein `href` aus dem Markup — alle fünf Knöpfe zeigen dann auf `/`, und weil dort heute das Sortiment liegt, sieht man es nirgends');
+    $zeile('fehler', 'Sortiment-Naht: der Filter `lotzwoo/sortiment-url` **feuert nicht**. Ein Musterknopf behält sein `href` aus dem Markup — alle Knöpfe ins Sortiment zeigen dann auf `/`, und liegt dort das Sortiment, sieht man es nirgends');
 } else {
     $zeile('ok', 'Sortiment-Naht: `lotzwoo/sortiment-url` feuert und schreibt das `href` — am Musterknopf gemessen, nicht am Code');
 }
@@ -557,7 +551,7 @@ if (!str_contains($gerendert, 'href="' . $sonde . '"')) {
 $aufgeloest = apply_filters('lotzwoo/sortiment-url', '/');
 
 if ($aufgeloest === '/') {
-    $zeile('hinweis', 'Sortiment: niemand beantwortet den Filter — die fünf Knöpfe zeigen auf `/`. Ohne das Plugin `lotzapp-for-woocommerce` ist genau das der vorgesehene Rückfall');
+    $zeile('hinweis', 'Sortiment: niemand beantwortet den Filter — die Knöpfe ins Sortiment zeigen auf `/`. Ohne das Plugin `lotzapp-for-woocommerce` ist genau das der vorgesehene Rückfall');
 } else {
     $zeile('ok', "Sortiment: aufgelöst auf {$aufgeloest}");
 }
@@ -568,12 +562,12 @@ if ($aufgeloest === '/') {
  * Dritter Slot, und er misst sich wie der erste plus eine Prüfung, die es beim
  * ersten nicht gab.
  *
- * Wie beim Kopf-Slot: der Block muss registriert sein und in `parts/header.html`
- * stehen. Die dritte Prüfung ist die neue und die wichtigere — der
+ * Wie beim Kopf-Slot: der Block muss registriert sein und an seinem Platz
+ * stehen (siehe unten). Die dritte Prüfung ist die wichtigere — der
  * `render_callback` muss die **leere Zeichenkette** liefern und nicht etwa ein
- * leeres `<div>`. Dieser Part wird von jeder Vorlage gezogen, also von jeder
- * Seite dieser Website; ein Anker-Div stünde leer auf der Startseite, unter
- * „Über uns" und in der 404. Wer den Rückgabewert versehentlich auf einen Anker
+ * leeres `<div>`. Der Block steht in jeder Vorlage mit Kopf, also auf jeder
+ * Seite der Website; ein Anker-Div stünde leer auf der Startseite, auf jeder
+ * Inhaltsseite und in der 404. Wer den Rückgabewert versehentlich auf einen Anker
  * umstellt, bricht nichts — er hinterlässt nur auf jeder Seite ein Element, das
  * niemand sucht. Genau dafür ist diese Zeile da.
  *
@@ -585,21 +579,21 @@ $abschnitt('Die Kontextleiste (Kopplung 6)');
 $kontext_typ = WP_Block_Type_Registry::get_instance()->get_registered('lotzwoo/context-slot');
 
 if (!$kontext_typ instanceof WP_Block_Type) {
-    $zeile('fehler', 'Kontextleiste: der Block `lotzwoo/context-slot` ist nicht registriert (AP-29)');
+    $zeile('fehler', 'Kontextleiste: der Block `lotzwoo/context-slot` ist nicht registriert');
 } else {
-    $zeile('ok', 'Kontextleiste: `lotzwoo/context-slot` registriert (AP-29)');
+    $zeile('ok', 'Kontextleiste: `lotzwoo/context-slot` registriert');
 }
 
 /*
- * Seit AP-32 steht der Block **nicht** mehr in `parts/header.html`, sondern in
- * jeder Vorlage, direkt hinter dem Kopf-Part. Der Grund ist gemessen und nicht
+ * Der Block steht **nicht** in `parts/header.html`, sondern in jeder Vorlage,
+ * direkt hinter dem Kopf-Part. Der Grund ist gemessen und nicht
  * geschmacklich: die Leiste soll beim Scrollen kleben, ein `position: sticky`
  * klebt nur innerhalb seines Containers, und WordPress legt um jeden
  * Template-Part ein Element (`<header class="wp-block-template-part">`). Im
  * Kopf-Part wäre der Container also genau so hoch wie der Kopf — die Leiste
  * klebte an nichts.
  *
- * Der Preis ist eine Zeile in zehn Vorlagen statt einer in einem Part, und
+ * Der Preis ist eine Zeile in jeder Vorlage statt einer in einem Part, und
  * genau deshalb steht die Prüfung hier: **jede Vorlage, die den Kopf zieht,
  * zieht auch die Leiste, und zwar genau einmal.** Eine neue Vorlage, die es
  * vergisst, ist damit ein Fehlschlag und keine stille Lücke.
@@ -622,9 +616,9 @@ foreach ($vorlagen as $vorlage) {
      * (`single-product`, `order-confirmation`), und die ziehen denselben
      * Kopf-Part — ändern kann sie dieses Theme nur, indem es sie überschreibt.
      * Beides ist hier ausdrücklich nicht gewollt: die Produktseite gehört
-     * laut AD-10 nicht zum Kaufweg, und auf der Danke-Seite stünde der
-     * *heutige* Kontext neben den eingefrorenen Werten der Bestellung
-     * (Ticket 15). Sie werden gezählt und genannt, nicht bemängelt.
+     * nicht zum Kaufweg, und auf der Danke-Seite stünde der *heutige*
+     * Kontext neben den eingefrorenen Werten der Bestellung. Sie werden
+     * gezählt und genannt, nicht bemängelt.
      */
     if (($vorlage->source ?? '') === 'plugin') {
         $fremd[] = $vorlage->slug;
@@ -648,18 +642,18 @@ if ($mit_kopf === 0) {
 } elseif ($doppelt !== []) {
     $zeile('fehler', 'Kontextleiste: doppelter Slot in ' . implode(', ', $doppelt) . ' — die Leiste stünde zweimal auf derselben Seite');
 } else {
-    $zeile('ok', "Kontextleiste: in allen {$mit_kopf} Vorlagen dieses Themes mit Kopf-Part verbaut, je genau einmal (AP-32)");
+    $zeile('ok', "Kontextleiste: in allen {$mit_kopf} Vorlagen dieses Themes mit Kopf-Part verbaut, je genau einmal");
 }
 
 if ($fremd !== []) {
-    $zeile('ok', 'Kontextleiste: ohne Leiste bleiben die Vorlagen fremder Plugins — ' . implode(', ', $fremd) . ' (Produktseite AD-10, Danke-Seite Ticket 15; dort wollte sie ohnehin niemand)');
+    $zeile('ok', 'Kontextleiste: ohne Leiste bleiben die Vorlagen fremder Plugins — ' . implode(', ', $fremd) . ' (die Produktseite gehört nicht zum Kaufweg, die Danke-Seite zeigt die eingefrorenen Werte der Bestellung)');
 }
 
 if ($eigenerkopf instanceof WP_Block_Template
     && str_contains((string) $eigenerkopf->content, 'wp:lotzwoo/context-slot')) {
-    $zeile('fehler', 'Kontextleiste: der Block steht (wieder) in `parts/header.html`. Dort kann er nicht kleben — WordPress legt um jeden Template-Part ein `<header>`, und ein sticky-Element klebt nur innerhalb seines Containers (AP-32)');
+    $zeile('fehler', 'Kontextleiste: der Block steht (wieder) in `parts/header.html`. Dort kann er nicht kleben — WordPress legt um jeden Template-Part ein `<header>`, und ein sticky-Element klebt nur innerhalb seines Containers');
 } elseif ($eigenerkopf instanceof WP_Block_Template) {
-    $zeile('ok', 'Kontextleiste: nicht im Kopf-Part — sie steht als eigene Bahn darunter und kann kleben (AP-32)');
+    $zeile('ok', 'Kontextleiste: nicht im Kopf-Part — sie steht als eigene Bahn darunter und kann kleben');
 }
 
 $kontext_ausgabe = $kontext_typ instanceof WP_Block_Type && is_callable($kontext_typ->render_callback)
@@ -669,9 +663,9 @@ $kontext_ausgabe = $kontext_typ instanceof WP_Block_Type && is_callable($kontext
 if ($kontext_ausgabe === null) {
     $zeile('fehler', 'Kontextleiste: kein `render_callback` — der Block rendert dann sein gespeichertes Markup, und das gibt es nicht');
 } elseif ($kontext_ausgabe !== '') {
-    $zeile('fehler', 'Kontextleiste: der `render_callback` liefert Markup statt der leeren Zeichenkette. Der Kopf-Part hängt an **jeder** Seite — das stünde dann auch auf der Startseite und in der 404 (AP-29, Phase A Frage 1)');
+    $zeile('fehler', 'Kontextleiste: der `render_callback` liefert Markup statt der leeren Zeichenkette. Der Kopf-Part hängt an **jeder** Seite — das stünde dann auch auf der Startseite und in der 404');
 } else {
-    $zeile('ok', 'Kontextleiste: der `render_callback` liefert die leere Zeichenkette — ohne Plugin bleibt auf keiner Seite ein Element zurück (AD-8)');
+    $zeile('ok', 'Kontextleiste: der `render_callback` liefert die leere Zeichenkette — ohne Plugin bleibt auf keiner Seite ein Element zurück');
 }
 
 // ---------------------------------------------------------------------------
@@ -708,7 +702,7 @@ $gewoehnliche = get_posts([
  * Gefragt wird die Klasse des Plugins und nicht die Option: `B2B_Mode::is_on()`
  * ist die eine Stelle, die diese Frage beantwortet, und der Filter
  * `lotzwoo/b2b_enabled` gehört dazu. Fehlt die Klasse — kein Plugin, oder eines
- * vor AP-49 —, bleibt die Erwartung die alte.
+ * ohne B2B-Schalter —, gilt die Erwartung ohne Riegel.
  *
  * Beide Prozesse lesen dieselbe Option: dieser hier und der, den `wp_remote_get()`
  * gleich anspricht. Auseinander liefen sie nur, wenn jemand den Filter allein im
@@ -719,7 +713,7 @@ $riegel_an = class_exists('Lotzwoo\\B2B\\Access\\B2B_Mode')
     && \Lotzwoo\B2B\Access\B2B_Mode::is_on();
 
 echo 'B2B-Modus: ' . ($riegel_an ? 'an' : 'aus') . ' — die Produktflächen werden anonym mit '
-    . ($riegel_an ? '404 erwartet (AP-46/AP-49)' : '200 erwartet') . "\n";
+    . ($riegel_an ? '404 erwartet' : '200 erwartet') . "\n";
 
 /**
  * Pfad · Zweck · kein Woo-Katalog erlaubt · Code ohne Riegel · vom Riegel gesperrt
@@ -735,7 +729,7 @@ $abrufe = [
     ['/', 'Startseite — hier das Sortiment (page-full-width)', true, 200, false],
     [wp_make_link_relative(wc_get_page_permalink('shop')), 'Woos Shop-Seite (archive-product)', false, 200, true],
     ['/?s=apfel&post_type=product', 'Produktsuche (product-search-results)', false, 200, true],
-    [wp_make_link_relative(wc_get_page_permalink('cart')), 'Warenkorb (eigenes Template mit dem Slot; Ticket 15)', true, 200, false],
+    [wp_make_link_relative(wc_get_page_permalink('cart')), 'Warenkorb (eigenes Template mit dem Slot)', true, 200, false],
     ['/diese-seite-gibt-es-nicht-' . substr(md5(get_stylesheet()), 0, 6) . '/', 'Eine Adresse ohne Seite (404)', true, 404, false],
 ];
 
@@ -778,13 +772,12 @@ foreach ($abrufe as [$pfad, $zweck, $katalog_verboten, $grundcode, $gesperrt]) {
     $html = wp_remote_retrieve_body($antwort);
 
     if ($code !== $erwarteter_code) {
-        // Beide Richtungen sagen, was sie meinen. Ein blosses „erwartet 200"
-        // hat am 2026-08-16 drei Stunden gekostet, weil niemand den Riegel
-        // dahinter vermutet hat.
+        // Beide Richtungen sagen, was sie meinen. Hinter einem bloßen
+        // „erwartet 200" vermutet niemand den Riegel.
         $warum = '';
 
         if ($unter_riegel) {
-            $warum = '. Der B2B-Modus steht **an** — der Riegel müsste diese Fläche anonym auf 404 setzen (AP-46/AP-49)';
+            $warum = '. Der B2B-Modus steht **an** — der Riegel müsste diese Fläche anonym auf 404 setzen';
         } elseif ($gesperrt) {
             $warum = '. Der B2B-Modus steht **aus** — diese Antwort kommt dann nicht vom Riegel';
         }
@@ -817,12 +810,12 @@ foreach ($abrufe as [$pfad, $zweck, $katalog_verboten, $grundcode, $gesperrt]) {
     ));
 
     if ($spuren !== []) {
-        $zeile('fehler', "{$pfad}: zeigt einen Woo-Katalog ({$spuren[0]}) — {$zweck}. Das ist die Tür an der Eligibility-Prüfung vorbei, gegen die Ticket 12 gebaut wurde");
+        $zeile('fehler', "{$pfad}: zeigt einen Woo-Katalog ({$spuren[0]}) — {$zweck}. Das ist die Tür an der Eligibility-Prüfung vorbei, die diese Vorlage schließen soll");
         continue;
     }
 
     $zeile('ok', $unter_riegel
-        ? "{$pfad}: 404 mit Kopf und Fuß, kein Katalog — der B2B-Riegel sperrt anonym, wie AP-46 es zusagt (ohne Riegel: {$zweck})"
+        ? "{$pfad}: 404 mit Kopf und Fuß, kein Katalog — der B2B-Riegel sperrt anonym, wie das Plugin es zusagt (ohne Riegel: {$zweck})"
         : "{$pfad}: Kopf und Fuß da, kein Katalog — {$zweck}");
 }
 
