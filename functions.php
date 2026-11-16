@@ -25,17 +25,12 @@ add_action('after_setup_theme', static function (): void {
         'flex-width' => true,
     ]);
 
-    // WooCommerce renders its cart, checkout and account through templates it
-    // ships, and this declaration does *not* change what it loads: measured on
-    // 2026-08-10, `woocommerce.css` is enqueued on every page either way.
+    // This declaration does *not* change what WooCommerce loads:
+    // `woocommerce.css` is enqueued on every page either way, because
     // `WC_Frontend_Scripts::get_styles()` never consults the support flag, and
-    // the "unsupported theme" compatibility layer is already off because this
-    // is a block theme. The line the comment used to carry — that declaring
-    // support stops Woo's fallback stylesheet — was simply wrong.
-    //
-    // It stays for now because it is the documented way to say "this theme
-    // handles Woo itself", and third-party extensions do read it. Whether it
-    // earns its place is a question for the template cut, not for a comment.
+    // the "unsupported theme" compatibility layer is already off for a block
+    // theme. It stays because it is the documented way to say "this theme
+    // handles Woo itself", and third-party extensions do read it.
     add_theme_support('woocommerce');
 
     load_theme_textdomain('lotzwoo-theme-base', get_template_directory() . '/languages');
@@ -50,15 +45,12 @@ add_action('after_setup_theme', static function (): void {
 const LOTZWOO_TOKEN_HANDLE = 'lotzwoo-b2b-tokens';
 
 /**
- * Die Zusage über die Reihenfolge, seit dem 2026-08-13.
+ * Die Zusage über die Reihenfolge.
  *
  * Theme und Plugin definieren dieselben Token auf derselben Selektorliste und
  * damit auf derselben Spezifität: **es gewinnt, was später im Dokument steht.**
- * Bis hierher war das der Zufall der Enqueue-Kette — gemessen stand das Plugin
- * im Dokument auf Position 7 und dieses Theme auf 13, aber zugesagt war es
- * nirgends. Solange die beiden Wurzellisten sich nur in zwei Flächen
- * überschnitten, entschied dieser Zufall über zwei Flächen; seit sie
- * übereinstimmen, entschiede er über alle sechs.
+ * Ohne diese Abhängigkeit entschiede der Zufall der Enqueue-Kette, und zwar
+ * über alle Flächen, weil beide Wurzellisten übereinstimmen.
  *
  * Die Richtung folgt dem Kopfkommentar von `style.css`: das Theme hängt am
  * Plugin, nie umgekehrt. Deshalb steht die Abhängigkeit hier und nicht in
@@ -114,7 +106,7 @@ add_action('wp_enqueue_scripts', static function (): void {
 });
 
 /**
- * Das Skript, das die Kopfzeile ihre Punkte verteilen lässt (AP-53).
+ * Das Skript, das die Kopfzeile ihre Punkte verteilen lässt.
  *
  * Im Fußbereich und ohne Abhängigkeiten: es liest den Kopf, den es vorfindet,
  * und braucht weder `wp-element` noch jQuery. Version aus der Dateizeit, aus
@@ -123,8 +115,7 @@ add_action('wp_enqueue_scripts', static function (): void {
  *
  * **Kein Riegel auf eine Seitenart.** Der Kopf steht auf jeder Seite, und die
  * Bestellannahme darin ausdrücklich auch auf Inhaltsseiten und für Abgemeldete.
- * Ein `is_singular()` davor wäre genau die Ausnahme, die dieser Auftrag im
- * Plugin herausgenommen hat, eine Etage höher wieder eingebaut.
+ * Ein `is_singular()` davor nähme ihn genau dort heraus.
  */
 add_action('wp_enqueue_scripts', static function (): void {
     $skript = get_template_directory() . '/assets/js/kopfleiste.js';
@@ -152,11 +143,8 @@ add_action('wp_enqueue_scripts', static function (): void {
  * die Seiten falsch, die gewöhnlicher Fließtext sind.
  *
  * Der Name wird aus dem Vorlagen-Slug **abgeleitet** statt je Vorlage
- * aufgezählt. Bis zum 2026-08-11 stand hier ein Vergleich gegen die
- * Zeichenkette `page-full-width`; mit der zweiten Vorlage (`page-no-title`)
- * wäre daraus eine zweite Bedingung geworden, und mit der dritten eine dritte.
- * `lotzwoo-page-full-width` heisst weiterhin genau so — die Regel in
- * `style.css` bleibt unberührt.
+ * aufgezählt, damit eine neue Vorlage keine neue Bedingung braucht:
+ * `page-full-width` wird zu `lotzwoo-page-full-width`.
  *
  * `sanitize_html_class()`, weil der Slug aus `_wp_page_template` kommt und das
  * ein Meta-Wert ist: er steht so in der Datenbank, wie ihn zuletzt jemand
@@ -206,8 +194,7 @@ add_filter('body_class', static function (array $classes): array {
  * Der Hook heißt `render_block_core/site-logo` — mit Schrägstrich, wie der
  * Blockname. `render_block_core_site_logo` sieht genauso plausibel aus, ist
  * aber der Name der Render-Funktion in WordPress und kein Filter: er lässt
- * sich ohne Fehler registrieren und feuert nie. Erste Fassung dieser Datei
- * hatte genau den, und nur der Blick auf die Ausgabe hat es gezeigt.
+ * sich ohne Fehler registrieren und feuert nie.
  */
 add_filter('render_block_core/site-logo', static function (string $content): string {
     if (trim($content) !== '') {
@@ -254,18 +241,10 @@ add_filter('render_block_woocommerce/customer-account', static function (string 
 }, 10, 1);
 
 /**
- * Woos Öffner behält sein Wort (AP-48, Punkt 5 — zurück seit AP-53).
+ * Woos Öffner behält sein Wort.
  *
- * **Warum das hier zweimal seine Meinung geändert hat, und wo sie jetzt steht.**
- * AP-48 hängte das Wort „Menü" an den Öffner. AP-53 nahm es zunächst heraus,
- * weil `overlayMenu: "never"` den Öffner überhaupt nicht mehr rendern ließ —
- * eine Regel auf ein Element, das es nicht gibt, ist kein harmloser Rest. Mit
- * der Klarstellung des Auftraggebers vom 2026-08-17 ist der Öffner zurück:
- * unterhalb der Stelle, an der nur noch zwei Menüpunkte ausgeschrieben
- * blieben, übernimmt der Hamburger. Damit ist auch die Begründung von AP-48
- * wieder gültig, und zwar unverändert:
- *
- * Der Öffner (`.wp-block-navigation__responsive-container-open`) enthält
+ * Unterhalb der Stelle, an der nur noch zwei Menüpunkte ausgeschrieben
+ * blieben, übernimmt der Hamburger. Der Öffner (`.wp-block-navigation__responsive-container-open`) enthält
  * ausschließlich ein `<svg>`. Ein Symbol allein sagt nicht, was dahinterliegt
  * — genau die Auskunft, die im Kopf am knappsten ist. Sein `aria-label`
  * („Menü öffnen") trägt sie für Vorlesewerkzeuge längst; sichtbar fehlte sie.
@@ -305,12 +284,11 @@ function lotzwoo_navi_oeffner_wort(string $content): string
 }
 
 /**
- * `mehr` — der Menüpunkt, hinter dem die Menüpunkte stehen (AP-53).
+ * `mehr` — der Menüpunkt, hinter dem die Menüpunkte stehen.
  *
  * **Wo `mehr` aufhört.** Es ersetzt die Menütaste **nicht** bis 320 px
  * hinunter. Unterhalb der Stelle, an der nur noch zwei Punkte ausgeschrieben
- * blieben, übernimmt der Hamburger, und dieser Eintrag verschwindet —
- * Klarstellung des Auftraggebers vom 2026-08-17. Eine Leiste aus zwei Punkten
+ * blieben, übernimmt der Hamburger, und dieser Eintrag verschwindet. Eine Leiste aus zwei Punkten
  * und einem „mehr", hinter dem vier liegen, ist keine Leiste mehr.
  *
  * Welche der beiden Darstellungen gilt, entscheidet `assets/js/kopfleiste.js`
@@ -378,14 +356,12 @@ add_filter('render_block_core/navigation', static function (string $content): st
 /**
  * „Shop" — der erste Menüpunkt, und er steht in jeder Navigation.
  *
- * Entscheidung des Auftraggebers vom 2026-09-24: der Weg ins Sortiment lief
- * bis dahin allein über das Logo, und das ist nicht für jeden ein Weg — wer
+ * Allein über das Logo ist der Weg ins Sortiment nicht für jeden einer — wer
  * nicht weiß, dass das Logo ein Link ist, findet von „Über uns" aus nicht
  * zurück in den Katalog. Ein Menüpunkt sagt es mit einem Wort.
  *
- * **Warum hier und nicht in `parts/navigation.html` des Kindthemes.** AD-11
- * gibt die Seitenstruktur eines Kunden dem Kindtheme, und dort steht sie
- * weiterhin. Das Sortiment ist aber keine Seite eines Kunden — jede
+ * **Warum hier und nicht in `parts/navigation.html` des Kindthemes.** Die
+ * Seitenstruktur eines Kunden gehört dem Kindtheme, und dort steht sie. Das Sortiment ist aber keine Seite eines Kunden — jede
  * Installation dieses Themes hat eins, und es liegt dort, wo das Plugin es
  * findet. Stünde der Punkt im Kindtheme, müsste ihn jeder Kunde von Hand
  * nachtragen, und genau der, der ihn vergisst, hat das Problem wieder.
@@ -471,10 +447,10 @@ add_filter('render_block_core/navigation', static function (string $content, arr
  * Die aktuelle Seite im Kopfbereich markieren.
  *
  * Die Navigation in `parts/header.html` steht **inline** — sechs
- * `core/navigation-link` ohne `ref` auf ein `wp_navigation`-Objekt. Das ist die
- * Entscheidung aus Ticket 13: jede Zeile des Themes kommt aus einer Datei, der
- * Klon bleibt ohne Datenbank reproduzierbar, und beim Themewechsel bleibt keine
- * verwaiste Menü-Zeile in der Datenbank des Kunden zurück.
+ * `core/navigation-link` ohne `ref` auf ein `wp_navigation`-Objekt: jede Zeile
+ * des Themes kommt aus einer Datei, eine Installation bleibt ohne Datenbank
+ * reproduzierbar, und beim Themewechsel bleibt keine verwaiste Menü-Zeile in
+ * der Datenbank des Kunden zurück.
  *
  * Der Preis steht in `wp-includes/blocks/navigation-link.php`:
  *
@@ -485,8 +461,8 @@ add_filter('render_block_core/navigation', static function (string $content, arr
  * Ein **eigener** Link hat kein `id` — er kann keines haben, ohne die
  * Beitrags-ID einer bestimmten Installation ins Theme zu schreiben. Damit ist
  * `$is_active` immer falsch, und der Kern vergibt weder `current-menu-item`
- * noch `aria-current="page"`. Die Fläche für die aktive Seite steht seit der
- * Markenarbeit in `style.css` und bekäme nie eine Zeile zu färben.
+ * noch `aria-current="page"`. Die Fläche für die aktive Seite in `style.css`
+ * bekäme nie eine Zeile zu färben.
  *
  * Verglichen wird deshalb der **Pfad**. `$wp->request` ist der Pfad der
  * laufenden Anfrage, ohne Schrägstriche an den Enden und ohne Abfrageteil —
@@ -496,9 +472,7 @@ add_filter('render_block_core/navigation', static function (string $content, arr
  *
  * Ein Link auf die Startseite (`/`) bleibt bewusst unmarkiert: sein Pfad ist
  * leer, und leer gegen leer träfe auf jeder Seite zu, die WordPress als
- * Startseite ausliefert — einschließlich der Shop-Seite dieser Installation.
- * Die Navigation trägt heute keinen solchen Eintrag; der Riegel steht, bevor
- * jemand einen einfügt.
+ * Startseite ausliefert — einschließlich einer Shop-Seite, die dort liegt.
  */
 add_filter('render_block_core/navigation-link', static function (string $content, array $block): string {
     $url = $block['attrs']['url'] ?? '';
@@ -539,18 +513,14 @@ add_filter('render_block_core/navigation-link', static function (string $content
 /**
  * Der Weg ins Sortiment — fünf Knöpfe, eine Auflösung.
  *
- * Fünf Stellen dieses Themes verlinken „Zum Sortiment", und bis zum 2026-08-12
- * stand in allen fünf hart `/`. Das stimmte, solange `page_on_front` die
- * Sortimentsseite ist — also **zufällig**. Stellt jemand die Startseite um,
- * zeigen alle fünf lautlos woanders hin, und niemand sieht einen Fehler.
+ * Fünf Stellen dieses Themes verlinken „Zum Sortiment". Ein festes `/` stimmt
+ * nur, solange `page_on_front` die Sortimentsseite ist — also **zufällig**.
+ * Stellt jemand die Startseite um, zeigen alle fünf lautlos woanders hin.
  *
- * `2debf23` hatte den Kopf-Knopf schon einmal umgeschrieben, damals auf
- * `wc_get_page_permalink('shop')`. Der Auftraggeber hat das am 2026-08-11
- * zurückgenommen (`47494eb`), und das war richtig: Woos Shop-Seite trägt seit
- * Ticket 12 „Kein Katalog an dieser Stelle" — der Weg ins Sortiment endete bei
- * einer Absage. Die Adresse der Seite mit dem Kurzcode `[lotzwoo_b2b_shop]`
- * stand damals nirgends. **Jetzt steht sie irgendwo**, und zwar hinter genau
- * einem Namen: `lotzwoo/sortiment-url`.
+ * `wc_get_page_permalink('shop')` ist ebenfalls falsch: Woos Shop-Seite trägt
+ * „Kein Katalog an dieser Stelle", der Weg ins Sortiment endete bei einer
+ * Absage. Die Adresse der Seite mit dem Kurzcode `[lotzwoo_b2b_shop]` steht
+ * hinter genau einem Namen: `lotzwoo/sortiment-url`.
  *
  * ## Warum ein Filter und kein Nachschlagen im Template
  *
@@ -566,7 +536,7 @@ add_filter('render_block_core/navigation-link', static function (string $content
  * Eingabewert zurück — also das `href` aus dem Markup, also `/`. Es gibt keinen
  * Zweig für „Plugin fehlt", weil es keinen braucht: das ist dieselbe Richtung
  * wie bei `lotzwoo/header-slot` und `lotzwoo/cart-slot`, die Abhängigkeit steht
- * im Theme und nie im Plugin (AD-8). Das Basis-Theme bleibt allein lauffähig.
+ * im Theme und nie im Plugin. Das Basis-Theme bleibt allein lauffähig.
  *
  * Auch das Plugin hängt an diesem Filter und ruft ihn nicht anders auf: die
  * beiden Kontoseiten gehen über `Sortiment_Locator::url()`, und die reicht
@@ -576,8 +546,6 @@ add_filter('render_block_core/navigation-link', static function (string $content
  * ## Woran die fünf zu erkennen sind
  *
  * An der Klasse `lotzwoo-shop-link`, die alle fünf Knöpfe im Markup tragen.
- * Der Kopf-Knopf hatte sie schon; die vier anderen haben sie mit diesem Auftrag
- * bekommen.
  *
  * Die Alternative wäre gewesen, jeden `core/button` mit `href="/"` und der
  * Beschriftung „Zum Sortiment" zu erwischen. Das erkennt einen Knopf an seinem
@@ -662,7 +630,7 @@ add_filter('render_block_core/button', static function (string $content, array $
  * Bedingung herausoperiert und dabei die Autoren- und Datumsabschaltung
  * mitnimmt.
  *
- * **Warum ein Filter und kein Schalter im Kindtheme:** AD-8 hält Kindthemes bei
+ * **Warum ein Filter und kein Schalter im Kindtheme:** Kindthemes bleiben bei
  * `style.css` und `theme.json` — kein PHP, keine Templates. Ein Schalter dort
  * bräche die Form, die das Basis-Theme über alle Kunden hinweg trägt. Der
  * natürliche Aufrufer ist das kundeneigene Site-Plugin.
@@ -680,8 +648,7 @@ add_filter('render_block_core/button', static function (string $content, array $
  * Beitragsschleife mit `inherit`, die auch eine Suche bedient. Sie sieht nicht
  * gut aus, aber sie funktioniert. `search.html`, `home.html` und `archive.html`
  * entstehen, wenn ein Kunde redaktionelle Inhalte wirklich mitbringt — gegen
- * eine echte Gestaltung statt gegen eine Vermutung. Notiert im Nebelabschnitt
- * der Karte `theme-templates-und-repo`.
+ * eine echte Gestaltung statt gegen eine Vermutung.
  *
  * Die Bedingung dafür ist **wörtlich dieselbe**, die WooCommerce selbst
  * benutzt, um dieses Template vorzuziehen (`ProductSearchResultsTemplate`:
@@ -700,11 +667,9 @@ add_filter('render_block_core/button', static function (string $content, array $
  *
  * Am selben Haken hängt `redirect_canonical` mit Priorität 10 — und es kommt
  * bei gleicher Priorität zuerst, weil der Kern es früher registriert. Bei
- * Priorität 10 gemessen: `/?author=1` antwortete **301** mit
- * `Location: /author/temp_setup/`. Das 404 kam danach zwar auch, aber der
- * Benutzername stand da schon im Antwortkopf — genau die Aufzählung, gegen die
- * diese Abschaltung gebaut ist. Vor `redirect_canonical` gesetzt, gibt es die
- * Umleitung nicht mehr.
+ * Priorität 10 antwortet `/?author=1` mit **301** auf `/author/<name>/`: der
+ * Benutzername stünde im Antwortkopf, bevor das 404 greift — genau die
+ * Aufzählung, gegen die diese Abschaltung gebaut ist.
  */
 add_filter('author_rewrite_rules', '__return_empty_array');
 add_filter('date_rewrite_rules', '__return_empty_array');
@@ -755,7 +720,7 @@ add_action('after_switch_theme', 'flush_rewrite_rules');
  *
  * **Die Zuständigkeit ist mit Absicht herum:** das Theme registriert den Block
  * und rendert ihn leer, das Plugin füllt ihn per `render_block`-Filter. Das ist
- * die Richtung, die AD-8 verlangt — die Abhängigkeit steht im Theme, nie im
+ * die Richtung dieses Themes — die Abhängigkeit steht im Theme, nie im
  * Plugin —, und sie hat drei Folgen: ohne Plugin rendert der Kopf **leer statt
  * kaputt**; das Plugin kann den Inhalt ändern, ohne das Theme anzufassen; und
  * schaltet jemand das Plugin ab, zeigt der Website-Editor keine Fehlerkachel.
@@ -766,8 +731,7 @@ add_action('after_switch_theme', 'flush_rewrite_rules');
  *
  * Der Gegenhaken im Plugin lautet
  * `add_filter('render_block_lotzwoo/header-slot', …)` — mit Schrägstrich, wie
- * der Blockname. Dokumentiert in beiden READMEs, weil er die einzige Kopplung
- * zwischen zwei Repos ist und sonst in einem Jahr ein Rätsel wäre.
+ * der Blockname. Dokumentiert im README unter „Vertrag mit dem Plugin".
  *
  * Verworfen, mit Grund: **Hooked Blocks** (WP 6.4/6.5) positionieren nur
  * relativ zu einem Ankerblock — „nach der Navigation" beschreibt die Stelle
@@ -788,7 +752,7 @@ add_action('init', static function (): void {
  * Zeile: der Rückgabewert ist der Anker `<div id="lotzwoo-cart-slot"></div>`
  * und nicht die leere Zeichenkette.
  *
- * Der Grund (Ticket 15, Frage 1): die zurückgehaltenen Positionen liegen
+ * Der Grund: die zurückgehaltenen Positionen liegen
  * **clientseitig**. `Store_Api_Bridge::data()` hängt sie als Cart-Extension an
  * die Store-API, `assets/js/b2b-cart.js` liest sie aus
  * `wp.data.select('wc/store/cart')` und zeichnet die Sektion selbst. Auf einer
@@ -843,33 +807,29 @@ add_action('init', static function (): void {
  * **Welche Seiten die Leiste tragen, entscheidet das Plugin**, nicht dieses
  * Theme. Der Block steht überall; wer ihn füllt, weiß als Einziger, was eine
  * B2B-Seite ist, wer angemeldet ist und ob es überhaupt einen Kontext gibt.
- * Das ist dieselbe Richtung wie bei den beiden anderen Slots (AD-8) und der
+ * Das ist dieselbe Richtung wie bei den beiden anderen Slots und der
  * Grund, warum eine Marketing-Seite ohne Plugin nicht anders aussieht als mit.
  *
- * Der Kopf-Slot bleibt, was er ist: er gehört Posten 3 der Karte
- * `plugin-flaechen-kaufweg` (Schnellsuche, Favoriten-Zähler, Kundenchip) und
- * ist ein Platz für Symbole in einer Zeile. Die Kontextleiste ist zwei
+ * Der Kopf-Slot bleibt, was er ist: ein Platz für Symbole in einer Zeile
+ * (Schnellsuche, Favoriten-Zähler, Kundenchip). Die Kontextleiste ist zwei
  * Beschriftungen, zwei Werte und ein Knopf breit und hätte ihn aufgebraucht.
  *
  * Verworfen wurde nichts neu — Hooked Blocks, `wp_body_open` und ein Shortcode
  * sind beim Kopf-Slot mit Gründen abgelehnt worden, die hier unverändert
  * gelten.
  *
- * ## Seit AP-32: der Block steht in den Vorlagen, nicht in `parts/header.html`
+ * ## Der Block steht in den Vorlagen, nicht in `parts/header.html`
  *
- * Der Auftraggeber hat am 2026-08-14 entschieden, dass die Leiste beim
- * Scrollen **kleben** soll — und ausdrücklich nicht, dass der ganze Kopf
- * klebt: der ist angemeldet 189 px hoch bei 1440 px und 341 px bei 390 px, und
- * das wäre auf dem Telefon ein Drittel des Bildes, dauerhaft belegt von Logo
- * und Navigation.
+ * Die Leiste **klebt** beim Scrollen, der ganze Kopf nicht: der wäre auf dem
+ * Telefon ein Drittel des Bildes, dauerhaft belegt von Logo und Navigation.
  *
  * Dafür musste der Block **aus dem Kopf-Part heraus**, und zwar aus einem
  * Grund, der zweimal gilt. Ein `position: sticky` klebt nur innerhalb seines
  * Containers. Der erste Container war die `constrained`-Gruppe des Kopfes; der
  * zweite ist WordPress' eigener: `render_block_core_template_part()` legt um
  * **jeden** Template-Part ein Element, für den Bereich „header" ein
- * `<header class="wp-block-template-part">`. Am Klon nachgesehen, nicht
- * angenommen — `<div class="wp-site-blocks"><header class="wp-block-template-part">`.
+ * `<header class="wp-block-template-part">`, also
+ * `<div class="wp-site-blocks"><header class="wp-block-template-part">`.
  * Ein sticky-Element darin klebte an einem Kasten, der genau so hoch ist wie
  * der Kopf, also an nichts.
  *
@@ -903,9 +863,7 @@ add_action('init', static function (): void {
  * Datei erwartet und ohne sie `_doing_it_wrong` auslöst — die entsteht in einem
  * Bauschritt, den dieses Repo nicht hat und für fünfzehn Zeilen nicht bekommt.
  *
- * Eine Schleife über die Slugs, seit es zwei sind: ein zweiter Block hätte
- * sonst einen zweiten Haken mit derselben Mechanik bedeutet, und ein dritter
- * einen dritten.
+ * Eine Schleife über die Slugs, damit jeder Slot dieselbe Mechanik nutzt.
  *
  * Version aus der Dateizeit, aus demselben Grund wie beim Stylesheet.
  */
@@ -930,33 +888,33 @@ add_action('enqueue_block_editor_assets', static function (): void {
 /**
  * Die fünf wiederkehrenden Bausteine als Block-Styles.
  *
- * Ticket 17. Das Importskript der Website baute dieselben fünf Bausteine an 45
- * Aufrufstellen aus Block-Attributen zusammen — Rahmen, Polsterung, Schriftgrad
- * je Aufruf ins `post_content` geschrieben. Jede Palettenänderung hätte damit 45
- * Stellen gehabt, und keine davon im Theme.
+ * Ohne sie baut eine Website dieselben Bausteine an vielen Stellen aus
+ * Block-Attributen zusammen — Rahmen, Polsterung, Schriftgrad je Aufruf ins
+ * `post_content` geschrieben. Jede Palettenänderung hätte dann viele Stellen,
+ * und keine davon im Theme.
  *
- * Ein Block-Style ist eine registrierte Klasse plus CSS: das Skript schreibt
+ * Ein Block-Style ist eine registrierte Klasse plus CSS: die Website schreibt
  * `is-style-…`, das Theme besitzt das Aussehen. **Eine** Quelle.
  *
- * Verworfen, mit Grund (entschieden 2026-08-12): **Patterns**. Ein
+ * Verworfen, mit Grund: **Patterns**. Ein
  * unsynchronisiertes Pattern wird beim Einfügen kopiert und ist konstruktions-
  * bedingt eine zweite Quelle, die lautlos auseinanderläuft; ein synchronisiertes
  * läge als `wp_block` in der Datenbank und widerspräche „das Repo ist die
  * Quelle, die Instanz das Abbild".
  *
  * Was ein Block-Style **nicht** trägt, ist die Zusammensetzung. `karte` ist
- * innen `h3` + `p`, `empfaenger` sind zwei Absätze — deren Aufbau bleibt im
- * Website-Repo. Hierher geht nur, wie sie aussehen.
+ * innen `h3` + `p`, `empfaenger` sind zwei Absätze — deren Aufbau bleibt bei
+ * der Website. Hierher geht nur, wie sie aussehen.
  *
  * Das CSS steht in `style.css` und nicht als `inline_style` an dieser Stelle:
  * wer eine Farbe oder eine Polsterung sucht, sucht sie im Stylesheet, und ein
- * zweiter Ort für CSS ist genau der Fehler, den dieses Ticket abstellt. Dass
- * der Website-Editor dasselbe Stylesheet bekommt, regelt der Haken auf
- * `enqueue_block_assets` weiter unten.
+ * zweiter Ort für CSS wäre wieder eine zweite Quelle. Dass der Website-Editor
+ * dasselbe Stylesheet bekommt, regelt der Haken auf `enqueue_block_assets`
+ * weiter unten.
  *
- * Die Namen sind eine Kopplung zum Website-Repo — `import-pages.py` schreibt
- * genau diese Zeichenketten. Wer einen umbenennt, muss dort nachziehen; hier
- * wird nichts rot.
+ * Die Namen sind eine Kopplung zu den Inhalten der Website, die `is-style-…`
+ * wörtlich speichern. Wer einen umbenennt, muss dort nachziehen; hier wird
+ * nichts rot.
  */
 add_action('init', static function (): void {
     $styles = [
@@ -991,16 +949,16 @@ add_action('init', static function (): void {
  *
  * Ohne das hier sind die fünf Block-Styles oben zwar **auswählbar**, zeigen im
  * Editor aber nichts — die Registrierung meldet den Namen an, das Aussehen
- * steht in `style.css`, und die Editor-Leinwand bekam bis hierher aus diesem
- * Theme überhaupt kein CSS. `add_theme_support('editor-styles')` allein ist nur
+ * steht in `style.css`, und die Editor-Leinwand bekäme ohne diesen Haken aus
+ * diesem Theme überhaupt kein CSS. `add_theme_support('editor-styles')` allein ist nur
  * die Erlaubnis, nicht die Zustellung. Derselbe Fehlerfall wie beim
  * `header-slot`: registriert ist nicht gleich sichtbar.
  *
  * `enqueue_block_assets` und nicht `add_editor_style()`, aus einem Grund, der
  * sich erst mit Kindtheme zeigt: `add_editor_style('style.css')` löst über
  * `get_theme_file_path()` auf, und das **bevorzugt das Kindtheme**. Bei
- * aktivem Kindtheme hätte der Editor also die 4 KB des Kindes
- * bekommen und die 54 KB des Elternteils nie. Ein voller URI umginge das,
+ * aktivem Kindtheme bekäme der Editor also das Stylesheet des Kindes und das
+ * des Elternthemes nie. Ein voller URI umginge das,
  * würde aber über `file_get_contents()` durchs Netz geladen.
  *
  * `enqueue_block_assets` läuft in beiden Welten; im Frontend hängt das
@@ -1057,7 +1015,7 @@ add_action('enqueue_block_assets', static function (): void {
  *
  * Geliefert wird **derselbe** `parts/header.html` wie überall. Ein eigener
  * Kassen-Kopf entsteht nicht, und Woos Kassen-Template wird nicht
- * überschrieben — AD-1 lässt den Inhalt der Kasse bei WooCommerce.
+ * überschrieben — der Inhalt der Kasse bleibt bei WooCommerce.
  *
  * Einen **Fuß** gibt es auf der Kasse weiterhin nicht. Woos Template hat gar
  * keinen Fuß-Part; einen hineinzubekommen hieße, das Template zu übernehmen.
@@ -1134,17 +1092,17 @@ add_filter('get_block_template', static function ($block_template, $id, $templat
  * Die Kontextleiste und die Seitenüberschrift auch an der Kasse — in Woos
  * eigener Vorlage.
  *
- * 2026-09-25, angefordert: Ort, Termin und Bestellschluss stehen an der Kasse,
- * wo der Kunde sie bestätigt. Das Plugin zeigt die Leiste dort **nur lesend**
+ * Ort, Termin und Bestellschluss stehen an der Kasse, wo der Kunde sie
+ * bestätigt. Das Plugin zeigt die Leiste dort **nur lesend**
  * (`Context_Bar::read_only()`); dieses Theme liefert den Ort dafür.
  *
- * **Kein eigenes `templates/page-checkout.html`.** AD-1 hält die Kassen-Vorlage
+ * **Kein eigenes `templates/page-checkout.html`.** Die Kassen-Vorlage bleibt
  * bei WooCommerce, und `scripts/check-frontend.php` prüft genau das
  * (`page-checkout` → `plugin`). Der Filter setzt deshalb nur den Slot hinter
  * Woos Kopf-Part in die Vorlage, die Woo liefert — die Quelle bleibt `plugin`.
  *
  * Nicht in den Kopf-Part hinein: dort stünde der Slot im `<header>`, und die
- * Leiste könnte nicht kleben (AP-32). Sie ist eine eigene Bahn darunter, wie in
+ * Leiste könnte nicht kleben (siehe `lotzwoo/context-slot`). Sie ist eine eigene Bahn darunter, wie in
  * `templates/page.html`.
  *
  * Eine im Website-Editor angepasste Kasse (`source` = `custom`) bleibt
@@ -1172,7 +1130,7 @@ add_filter('get_block_templates', static function ($templates, $query, $template
         );
 
         // Die Seitenüberschrift („Kasse"), wie „Warenkorb-Übersicht" über dem
-        // Warenkorb (2026-09-25, Block 5). Woos Vorlage hat keine; sie kommt
+        // Warenkorb. Woos Vorlage hat keine; sie kommt
         // vor den Inhalt, in dieselbe Hauptgruppe.
         if (is_string($content) && !str_contains($content, 'wp:post-title')) {
             $content = preg_replace(
