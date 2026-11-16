@@ -2,41 +2,42 @@
 #
 # Das Theme in eine WordPress-Installation ausliefern.
 #
-#   scripts/deploy-theme.sh [ZIEL-THEMES-VERZEICHNIS]
+#   scripts/deploy-theme.sh /pfad/zu/wordpress/wp-content/themes
 #
-# Standardziel ist die B2B-Entwicklungsinstallation.
+# Das Ziel ist Pflicht. Ein Standardziel wuerde bei einem vergessenen Argument
+# still auf eine Installation ausliefern, die der Aufrufer nicht gemeint hat.
 #
 # Ausgeliefert wird der verfolgte Baum von HEAD, ohne die `export-ignore`-Pfade
 # aus `.gitattributes`. Zwei Eigenschaften, auf die es dabei ankommt:
 #
-#   * Das Ziel ist der **Theme-Ordner**, nicht das Verzeichnis darueber. Ein
-#     frueherer Kopiervorgang hat die Repo-Wurzel nach `themes/` ausgeliefert;
-#     daher liegt dort bis heute eine verirrte `.gitignore`.
+#   * Ausgeliefert wird in `<themes>/lotzwoo-theme-base`, nicht in `<themes>`
+#     selbst: sonst landete die Repo-Wurzel neben den anderen Themes.
 #
 #   * `git archive` **loescht nie**. Das aktive Theme kann durch einen Deploy
 #     also nicht wegfallen. Die Kehrseite: eine im Repo geloeschte Datei bleibt
 #     im Ziel als Waise liegen — deshalb die Waisenpruefung am Ende.
 #
-# Was ein Deploy zerstoert: nichts. Anders als beim Plugin gibt es im Ziel keine
-# lokale Aenderung, die zurueckgestellt werden muesste (geprueft 2026-08-10).
-# Sobald das einmal nicht mehr stimmt, braucht auch das Theme seine eigene
-# Tabelle im Runbook.
+# Was ein Deploy zerstoert: nichts. Im Ziel gibt es keine lokale Aenderung, die
+# zurueckgestellt werden muesste.
 
 set -euo pipefail
 
 SLUG="lotzwoo-theme-base"
-THEMES_DIR="${1:-/var/www/b2b/wp-content/themes}"
+if [ $# -ne 1 ] || [ -z "$1" ]; then
+  echo "Aufruf: $0 /pfad/zu/wordpress/wp-content/themes" >&2
+  exit 2
+fi
+
+THEMES_DIR="${1%/}"
 TARGET="$THEMES_DIR/$SLUG"
 
 # Das Repo kommt aus dem **Skriptpfad**, nicht aus dem Arbeitsverzeichnis.
 #
-# Bis zum 2026-08-26 stand hier `git rev-parse --show-toplevel`. Damit kam
-# `SLUG` aus dem Skript und das Repo aus dem `cwd` — zwei Quellen, die
-# auseinanderlaufen koennen. Aus dem Plugin-Verzeichnis heraus mit absolutem
-# Pfad aufgerufen hat das Skript dann `git archive HEAD` des **Plugins** in den
-# **Theme**-Ordner entpackt, 325 fremde Dateien, und danach wahrheitsgemaess
-# "Deploy verifiziert" gemeldet: geprueft hatte es, dass die falschen Dateien
-# heil angekommen sind. Kommen beide aus dem Skript, ist der Fall zu.
+# Mit `git rev-parse --show-toplevel` kaeme `SLUG` aus dem Skript und das Repo
+# aus dem `cwd` — zwei Quellen, die auseinanderlaufen koennen. Aus einem anderen
+# Repo heraus aufgerufen, landete dessen `git archive HEAD` im Theme-Ordner, und
+# die Verifikation meldete trotzdem Erfolg: die falschen Dateien waeren heil
+# angekommen. Kommen beide aus dem Skript, ist der Fall zu.
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 REPO_ROOT="$(cd -- "$SCRIPT_DIR/.." && pwd -P)"
 cd "$REPO_ROOT"
@@ -47,7 +48,7 @@ cd "$REPO_ROOT"
 #   1. Das Skript muss in `<repo>/scripts/` liegen — sonst zeigt `..` nicht auf
 #      die Repo-Wurzel und `git archive` liefert einen fremden Baum.
 #   2. Ein Theme-Repo traegt eine `style.css` in der Wurzel, ein Plugin-Repo
-#      nicht. Genau daran waere der Unfall oben auch ohne 1. gescheitert.
+#      nicht. Daran scheitert der Fall oben auch ohne 1.
 if [ "$(git rev-parse --show-toplevel 2>/dev/null || true)" != "$REPO_ROOT" ]; then
   echo "$REPO_ROOT ist keine Repo-Wurzel — liegt dieses Skript in <repo>/scripts/?" >&2
   exit 1
@@ -137,7 +138,9 @@ if [ "$WP_ROOT" = "$THEMES_DIR" ] || [ ! -f "$WP_ROOT/wp-load.php" ]; then
 fi
 
 echo
-if sg www-data -c "wp --path=$WP_ROOT eval-file $CHECK"; then
+# `printf %q`, weil `sg -c` eine Zeichenkette an eine Shell gibt: ein Pfad mit
+# Leerzeichen oder Sonderzeichen wuerde sonst zerlegt.
+if sg www-data -c "wp --path=$(printf '%q' "$WP_ROOT") eval-file $(printf '%q' "$CHECK")"; then
   exit 0
 fi
 

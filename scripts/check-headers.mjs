@@ -2,9 +2,8 @@
 // und haelt die `$schema`-Version aus `theme.json` gegen `Requires at least`.
 //
 // Der zweite Teil ist der eigentliche Grund fuer diese Datei: `theme.json`
-// `"version": 3` gibt es erst ab WordPress 6.6. Stand bis 2026-08-10 im Header
-// 6.5, waere das Theme auf jeder 6.5-Installation stillschweigend halb
-// interpretiert worden.
+// `"version": 3` gibt es erst ab WordPress 6.6. Stuende im Header 6.5, waere
+// das Theme auf jeder 6.5-Installation stillschweigend halb interpretiert.
 import { readFileSync } from 'node:fs';
 
 const css = readFileSync('style.css', 'utf8');

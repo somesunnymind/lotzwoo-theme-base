@@ -9,9 +9,8 @@
 #
 # `git archive` beachtet diese Marken, und der Release-Workflow baut damit.
 # Der Ort ist der Punkt: wer eine Datei anlegt, die nicht ausgeliefert werden
-# soll, entscheidet das hier neben der Datei — und nicht in einer Ausschluss-
-# liste in einem YAML, das er nie aufmacht. Genau daran hat das Plugin-Repo
-# jahrelang `docs/` und `.hermes/` mitgeliefert.
+# soll, entscheidet das hier — und nicht in einer Ausschlussliste in einem YAML,
+# das er nie aufmacht.
 /.github        export-ignore
 /scripts        export-ignore
 /.gitattributes export-ignore
