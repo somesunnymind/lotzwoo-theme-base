@@ -1782,7 +1782,8 @@ p.is-style-kennzahl {
 
    Der Grund: die Leiste ist die tragende Auskunft des Kaufwegs — fuer
    welchen Ort und welchen Termin die Preise darunter gelten — und sie soll
-   auf allen Seiten gleich aussehen und sich deutlich vom Kopf abheben.
+   auf allen Seiten gleich aussehen. Die feine Fassung war geprueft und ist
+   bewusst verworfen.
 
    **Wer das zur Haarlinie „repariert", nimmt ihr genau diese Rolle.** Die
    Ausnahme gilt fuer diese eine Flaeche und fuer keine andere.
@@ -2450,8 +2451,8 @@ button.lotzwoo-contextbar__switch {
 }
 
 /* Der Kundenchip: kein Kasten, kein Wort darueber. Er nennt die Antwort
-   auf „fuer wen kaufe ich hier ein" — deshalb steht der Name fett und die
-   Preisklasse leise darunter. Ein Label „Kunde" darueber braucht es nicht;
+   auf „fuer wen kaufe ich hier ein" — deshalb steht der Name fett und
+   „Mein Konto" leise darunter. Ein Label „Kunde" darueber braucht es nicht;
    was es sagte, sagt das `aria-label` der Verknuepfung.
 
    `margin-inline-start: auto` steht **ohne Medienbedingung**. Der Chip
@@ -2630,10 +2631,6 @@ button.lotzwoo-contextbar__switch {
   white-space: nowrap;
 }
 
-/* Die Preisklasse steht unter dem Namen und ist die leiseste Zeile im
-   Kopf. Sie beantwortet die zweite Haelfte derselben Frage — zu welchen
-   Konditionen. */
-
 /* `position: relative`: die Zeile ist der Bezug fuer alles, was unter ihr
    aufklappt. */
 .lotzwoo-header-row {
@@ -2670,17 +2667,6 @@ button.lotzwoo-contextbar__switch {
   color: var(--wp--preset--color--ink-700);
 }
 
-/* Auf schmalen Schirmen schrumpft der Kundenchip, er verschwindet
-   nicht. Auf dem Telefon teilen sich Logo, Menuetaste, Suchknopf, Zaehler,
-   Konto und Warenkorb eine Zeile, und ein Firmenname wie
-   "Musterfirma Grosshandel GmbH" braucht davon allein die Haelfte —
-   also faellt weg, was den Kunden eine Antippbewegung entfernt auf der
-   Kontoseite erwartet (die Preisklasse). Was bleibt, ist die Antwort auf
-   die Frage: fuer wen.
-
-   Weggeblendet und nicht entfernt: beide Zeilen stehen weiter im
-   Markup und werden weiter vorgelesen. Ein Screenreader auf einem
-   Telefon hoert dasselbe wie einer auf einem Schreibtisch. */
 /* Keine Stufe bei 782 px: das ist Woos Admin-Bar-Grenze, nicht die dieses
    Kopfes. Das Verdichten uebernehmen die Verdichtungsstufen weiter unten,
    und die stehen an den Sprungstellen dieses Kopfes. */
@@ -2696,7 +2682,7 @@ button.lotzwoo-contextbar__switch {
    ausgeschrieben ist und die Aktionsgruppe schon umbricht.
 
      1040  zwei Menuepunkte
-      880  Menueleiste wird Taste, Preisklasse, Beschriftungen ueber Ort
+      880  Menueleiste wird Taste, Beschriftungen ueber Ort
            und Termin
       700  Ort auf die Kurzform, Leiste einzeilig
       480  Favoriten-Stern (der Warenkorb hat keinen zweiten Weg, der
