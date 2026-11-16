@@ -2,94 +2,186 @@
 
 Minimales Block-Theme für B2B-Großhandelsshops auf WooCommerce. Es trägt das Design-System in
 `theme.json` und sonst so wenig wie möglich: Kopfbereich, Fußbereich, zwei zuweisbare
-Seitenvorlagen. **Alles Kundenspezifische gehört in ein Kindtheme** — je Kunde eines, in einem eigenen privaten Repo.
+Seitenvorlagen. **Alles Kundenspezifische gehört in ein Kindtheme**, je Kunde eines.
 
-## Die Arbeitsteilung, in einem Absatz
+Theme-Slug: `lotzwoo-theme-base`. Kindthemes hängen per `Template: lotzwoo-theme-base` daran; der
+Slug ändert sich deshalb nie.
 
-Das Plugin `lotzapp-for-woocommerce` besitzt die B2B-Oberflächen — Sortiment, Warenkorb-Logik,
-Konto-Endpunkte — und bringt sein eigenes Design-System mit (`b2b-tokens.css`, 54 Custom Properties
-auf den Wurzeln `.lotzwoo-b2b-shop` und `.lotzwoo-reorder`). Dieses Theme liefert die Hülle und
-übersetzt in `style.css` die `--wp--preset--*` aus `theme.json` in die `--lwb-*` des Plugins.
+## Die Arbeitsteilung
 
-**Die Abhängigkeit steht im Theme, nie im Plugin.** Wer das Theme wechselt, bekommt die
-mitgelieferten Standardwerte des Plugins statt einer kaputten Oberfläche — jedes `var()` in der
-Brücke trägt denselben Wert als Fallback, den das Plugin ohnehin hat.
+Das Plugin [LotzApp for WooCommerce](https://github.com/LotzApp/lotzapp-for-woocommerce) besitzt
+die B2B-Oberflächen — Sortiment, Warenkorb-Logik, Konto-Endpunkte — und bringt sein eigenes
+Design-System mit (`b2b-tokens.css`, Custom Properties `--lwb-*`). Dieses Theme liefert die Hülle
+und übersetzt in `style.css` die `--wp--preset--*` aus `theme.json` in die `--lwb-*` des Plugins.
 
-## Prüfen
+**Die Abhängigkeit steht im Theme, nie im Plugin.** Das Theme läuft ohne Plugin: die Slots rendern
+leer, der Weg ins Sortiment fällt auf `/` zurück. Wer das Theme wechselt, bekommt die
+Standardwerte des Plugins statt einer kaputten Oberfläche — jedes `var()` in der Token-Brücke
+trägt denselben Wert als Rückfall, den das Plugin ohnehin hat.
 
-```bash
-npm install
-npm run check
-```
+## Installation
 
-Fünf Prüfungen, alle ohne WordPress: `theme.json` gegen das **versionierte** Kernschema, die
-Klammer zwischen `theme.json`-Version und `Requires at least`, Header-Vollständigkeit, `php -l` und
-Blockmarkup auf Wohlgeformtheit. Kein Theme Check per `wp-env` — das führt ein ganzes WordPress in
-Docker hoch, um Regeln zu prüfen, die für ein Verzeichnis gelten, in das dieses Theme nie
-eingereicht wird.
+1. ZIP `lotzwoo-theme-base.zip` aus dem neuesten
+   [Release](https://github.com/LotzApp/lotzwoo-theme-base/releases/latest) unter *Design → Themes →
+   Theme hinzufügen → Theme hochladen* installieren.
+2. Ein Kindtheme des Kunden installieren und aktivieren (siehe unten). Ohne Kindtheme läuft das
+   Theme auch, aber Menü und Fußlinks bleiben leer.
+3. Optional: das Plugin LotzApp for WooCommerce. Erst damit füllen sich die Slots.
 
-## Ausliefern
+Voraussetzungen: WordPress 6.6, PHP 8.1. WooCommerce ist nicht Pflicht, aber der Zweck.
 
-```bash
-scripts/deploy-theme.sh [ZIEL-THEMES-VERZEICHNIS]
-```
+## Kindtheme
 
-Standardziel ist `/var/www/b2b/wp-content/themes`. Ausgeliefert wird der verfolgte Baum von `HEAD`
-ohne die `export-ignore`-Pfade aus `.gitattributes`.
+Ein Kindtheme trägt nur `style.css`, `theme.json` und zwei Parts, kein PHP:
 
-Zwei Dinge, die das Skript ausdrücklich tut: es liefert in den **Theme-Ordner** aus und nicht in das
-Verzeichnis darüber (ein früherer Kopiervorgang hat die Repo-Wurzel nach `themes/` gelegt), und es
-prüft nach dem Auspacken jede Datei per `cmp` sowie auf Waisen — `git archive` überschreibt, aber
-löscht nie.
+| Datei | Inhalt |
+|---|---|
+| `style.css` | Header mit `Template: lotzwoo-theme-base`, eigene Regeln |
+| `theme.json` | Farben, Schriften, Abstände des Kunden |
+| `parts/navigation.html` | das Hauptmenü des Kunden |
+| `parts/footer-links.html` | die Linkspalte im Fuß |
+| `mail-angaben.json` | optional: Logo, Fußzeile und Schrift der Mails (siehe unten) |
 
-## Versionieren und veröffentlichen
+Die beiden Parts sind in der Basis **leer**: die Seitenstruktur eines Kunden gehört nicht hierher.
+Eine generische Seitenliste zöge alle Seiten aus der Datenbank in die Kopfzeile, auch „Warenkorb"
+und „Kasse". `scripts/check-frontend.php` warnt, wenn ein aktives Kindtheme seinen Part nicht
+mitbringt.
 
-Eine eigene Semver-Reihe, unabhängig vom Kindtheme. Ein Kindtheme, dessen Version steigt, weil das
-Elterntheme ein Template bekam, lügt über sich selbst.
+Der Rahmen drumherum — Logo, Slots, Konto, Warenkorb, der Knopf „Zum Sortiment", die rechte
+Spalte des Fußes — bleibt in der Basis und verbessert sich damit für alle Kunden zugleich.
 
-- **Erhöht wird**, wenn sich eine Datei ändert, die im ZIP landet — nicht bei jedem Commit. Die
-  Erhöhung gehört in den Release-Commit.
-- **`1.0.0`** ist erreicht, wenn jede Seite des B2B-Kaufwegs und des WordPress-Grundgerüsts ihr
-  eigenes Block-Template hat und keine ungewollt auf einen WooCommerce- oder Core-Fallback fällt.
-  Prüfbar, nicht Geschmack.
+**Ein Kindtheme, das die Schriftfamilie `sans` neu definiert, muss das `fontFace` mitbringen** —
+gleichnamige Preset-Listen ersetzen die des Elternthemes ganz. `file:./assets/fonts/inter-var.woff2`
+darf dort stehen bleiben: WordPress sucht die Datei zuerst im Kind, dann im Eltern.
 
-Ein Release entsteht durch einen Tag `X.Y.Z` (kein `v`-Präfix). Zwei Torwächter laufen davor: der
-Tag muss dem `Version:`-Header entsprechen, und das gebaute ZIP muss die
-`Theme_Upgrader::check_package()`-Bedingungen erfüllen.
+**Das Kindtheme aktualisiert sich nicht mit.** Der Kern führt jedes Stylesheet einzeln.
 
-**Ein Tag ist die Auslieferung an Kunden**, nicht ein Push. Installationen aktualisieren über den
-`Update URI`-Header gegen `releases/latest`.
+## Vertrag mit dem Plugin
+
+Diese Namen verbinden Theme und Plugin. Wer einen ändert, bricht die andere Seite, ohne dass hier
+etwas rot wird. Sie ändern sich deshalb nur gemeinsam.
+
+| Name | Art | Theme | Plugin |
+|---|---|---|---|
+| `lotzwoo/header-slot` | Block | registriert, rendert `''`; steht in `parts/header.html`, Attribut `bereich` (`telefon`, `kunde`) | füllt per `add_filter('render_block_lotzwoo/header-slot', …)` |
+| `lotzwoo/cart-slot` | Block | registriert, rendert `<div id="lotzwoo-cart-slot"></div>`; steht in `templates/page-cart.html` | — |
+| `lotzwoo-cart-slot` | Element-ID | Ausgabe des `cart-slot` | `assets/js/b2b-cart.js` hängt die zurückgehaltenen Positionen hinein (`MOUNT_ID`) |
+| `lotzwoo/context-slot` | Block | registriert, rendert `''`; steht in jeder Vorlage direkt hinter dem Kopf-Part, an der Kasse per Filter | füllt per `add_filter('render_block_lotzwoo/context-slot', …)` (Lieferort, Liefertermin) |
+| `lotzwoo/sortiment-url` | Filter | fragt ihn für den Menüpunkt „Shop" und jeden Knopf mit Klasse `lotzwoo-shop-link`; Rückfall `/` | liefert die Seite mit dem Kurzcode `[lotzwoo_b2b_shop]` |
+| `.lotzwoo-b2b-shop`, `.lotzwoo-reorder`, `.lotzwoo-heldback` | CSS-Wurzeln | Token-Brücke `--wp--preset--*` → `--lwb-*` in `style.css` | setzt die Wurzeln ins Markup |
+
+Dazu einige Namen im Kopf, die das Plugin setzt und das Theme liest: `data-lotzwoo-customer`
+(Konto-Chip), `data-lotzwoo-headerphone` (Bestellannahme), `lotzwoo-headerphone__ico`,
+`lotzwoo-headerphone__num`.
+
+### Warum drei Slots mit zwei Mechanismen
+
+- **Kopf und Kontextleiste** werden serverseitig gefüllt. Das Theme rendert die **leere
+  Zeichenkette** und kein leeres `<div>`: im Flex-Container des Kopfes schöbe ein leerer Kasten die
+  Nachbarn um eine Lücke, und auf Seiten ohne B2B-Bezug bliebe sonst ein leeres Element stehen.
+  Welche Seiten die Kontextleiste tragen, entscheidet das Plugin.
+- **Der Warenkorb** wird im Browser gefüllt. Die zurückgehaltenen Positionen liegen in der Store
+  API; beim Rendern der Vorlage gibt es sie noch nicht. Das Theme liefert deshalb keinen Inhalt,
+  sondern einen **Ort** — zwei Namen statt einem: Blockname und Element-ID. Ohne Plugin bleibt das
+  `div` leer und wird per `:empty` ausgeblendet.
+- **Die Kontextleiste steht in den Vorlagen, nicht im Kopf-Part.** Sie klebt beim Scrollen, und
+  `position: sticky` klebt nur in seinem Container. WordPress legt um jeden Template-Part ein
+  `<header>`, das genau so hoch ist wie der Kopf. Außerhalb davon ist der Container die ganze Seite.
+
+Das eigene `templates/page-cart.html` führt den Cart-Block **inline** statt über
+`wp:post-content`. Folgen: Woos innere Blockstruktur des Warenkorbs ist damit festgeschrieben;
+ändert Woo sie, fehlt hier, was Woo neu hineinlegt. Der Inhalt der Warenkorb-*Seite* wird nicht
+gerendert. Das Produktgitter des leeren Warenkorbs ist weg, weil es ein Katalog ohne
+Freigabeprüfung wäre; an seiner Stelle steht der Knopf „Zum Sortiment".
+
+Die Kasse behält die Vorlage von WooCommerce. Filter setzen dort nur den Kopf dieses Themes, die
+Kontextleiste (nur lesend) und die Seitenüberschrift ein.
+
+`scripts/check-frontend.php` prüft diese Kopplungen an einer laufenden Installation (siehe
+*Prüfen*).
 
 ## Updates
 
 Über den `Update URI`-Header (WordPress ≥ 6.1) und den Filter `update_themes_github.com` in
-`functions.php`. Der Kern übernimmt damit Versionsvergleich, `no_update`-Pflege und
-Kollisionsschutz.
+`inc/updater.php`. Der Kern übernimmt Versionsvergleich, `no_update`-Pflege und
+Kollisionsschutz. Das Theme fragt `releases/latest` des Repos `LotzApp/lotzwoo-theme-base` und
+bietet das Asset `lotzwoo-theme-base.zip` an. Antworten werden sechs Stunden zwischengespeichert.
 
-Zwei Dinge, die dabei leicht falsch verstanden werden:
+- **Öffentliches Repo:** nichts einzustellen.
+- **Privates Repo:** in der `wp-config.php` einen GitHub-Token mit Leserecht auf das Repo setzen:
 
-- Die URL im Header wird vom Kern **nie abgerufen**. Sie ist Kennung, nicht Endpunkt — das Paket
-  kommt aus `package` im Filterergebnis.
-- `update_themes_github.com` ist ein **geteilter** Namensraum. Jedes andere Theme, das denselben Weg
-  geht, hängt am selben Filter; der Callback prüft deshalb zuerst Stylesheet und `UpdateURI`.
+  ```php
+  define('LOTZWOO_GITHUB_TOKEN', 'github_pat_…');
+  ```
 
-**Das Kindtheme aktualisiert sich nicht mit.** Der Kern führt jedes Stylesheet einzeln.
-Ein Kindtheme hat bewusst keinen Update-Kanal und wird per Deploy-Skript ausgeliefert — so liegt
-in keiner Kundeninstallation ein Token.
+  Dieselbe Konstante liest das Plugin. Der Token geht nur an die API-Adressen dieses Repos und wird
+  bei der Weiterleitung zum Download-Speicher wieder abgenommen. Ohne Token gibt es bei einem
+  privaten Repo still kein Update.
+
+Zwei Dinge, die leicht falsch verstanden werden:
+
+- Die URL im Header wird vom Kern **nie abgerufen**. Sie ist Kennung, nicht Endpunkt.
+- `update_themes_github.com` ist ein **geteilter** Namensraum. Der Callback prüft deshalb zuerst
+  Slug und `Update URI` auf Gleichheit.
+
+## Prüfen
+
+```bash
+npm ci
+npm run check
+php scripts/check-updater.php
+```
+
+Ohne WordPress: `theme.json` gegen das **versionierte** Kernschema, die Klammer zwischen
+`theme.json`-Version und `Requires at least`, Header-Vollständigkeit, Blockmarkup, die Sperrliste
+(`scripts/paket-sperrliste.txt`: keine Kunden- und Personennamen, Serverpfade, Arbeitskürzel oder
+Datumsangaben) und der Updater. Die CI führt dazu `php -l` auf allen PHP-Dateien aus.
+
+Kein Theme Check per `wp-env` — das fährt ein ganzes WordPress in Docker hoch, um Regeln zu
+prüfen, die für ein Verzeichnis gelten, in das dieses Theme nie eingereicht wird.
+
+An einer laufenden Installation, nicht in der CI:
+
+```bash
+wp --path=/pfad/zu/wordpress eval-file scripts/check-frontend.php
+wp --path=/pfad/zu/wordpress eval-file scripts/check-mail-angaben.php [KINDTHEME-VERZEICHNIS]
+```
+
+## Ausliefern ohne Release
+
+```bash
+scripts/deploy-theme.sh /pfad/zu/wordpress/wp-content/themes
+```
+
+Das Ziel ist Pflicht. Ausgeliefert wird der verfolgte Baum von `HEAD` ohne die
+`export-ignore`-Pfade aus `.gitattributes`, in `<themes>/lotzwoo-theme-base`. Das Skript bricht bei
+unsauberer Arbeitskopie ab, prüft danach jede Datei per `cmp` und meldet Waisen — `git archive`
+überschreibt, löscht aber nie. Ist `wp` vorhanden, läuft danach `check-frontend.php`.
+
+## Versionieren und veröffentlichen
+
+Eine eigene Semver-Reihe, unabhängig von den Kindthemes.
+
+- **Erhöht wird**, wenn sich eine Datei ändert, die im ZIP landet — nicht bei jedem Commit. Die
+  Erhöhung gehört in den Release-Commit (`Version:` in `style.css`).
+- **`1.0.0`** ist erreicht, wenn jede Seite des B2B-Kaufwegs und des WordPress-Grundgerüsts ihr
+  eigenes Block-Template hat und keine ungewollt auf einen WooCommerce- oder Core-Fallback fällt.
+
+Ein Release entsteht durch einen Tag `X.Y.Z` (kein `v`-Präfix). Der Workflow
+`.github/workflows/release.yml` prüft: Tag gleich `Version:`-Header, das ZIP erfüllt
+`Theme_Upgrader::check_package()` (genau ein Ordner `lotzwoo-theme-base/`), und das ZIP besteht
+die Sperrliste. Dann hängt er `lotzwoo-theme-base.zip` an das Release.
+
+**Ein Tag ist die Auslieferung an Kunden.** Jede Installation sieht ihn bei der nächsten
+Update-Prüfung.
 
 ## Die Hausschrift — Inter, selbst ausgeliefert
 
-`assets/fonts/inter-var.woff2` ist Inter als variable Schrift (Gewicht 100–900, Achse `slnt`), die
-Datei, die WooCommerce 11.0.1 unter `assets/fonts/Inter-VariableFont_slnt,wght.woff2` mitbringt.
-Lizenz: SIL Open Font License 1.1 (rsms/inter). Eingebunden über `fontFace` in `theme.json`, ohne
-externe Quelle.
-
-Bis zum 2026-09-25 stand `Inter` nur als Name im Stapel und wurde nie geladen: jede Maschine zeigte
-ihre Ersatzschrift, und in Segoe UI war der Warenkorb-Knopf 18 px schmaler als in der Messung.
-
-**Ein Kindtheme, das `sans` neu definiert, muss das `fontFace` mitbringen** — gleichnamige
-Preset-Listen ersetzen die des Elterntheme ganz. `file:./assets/fonts/inter-var.woff2` darf dort
-stehen bleiben: WordPress sucht die Datei zuerst im Kind, dann im Eltern.
+`assets/fonts/inter-var.woff2` ist Inter als variable Schrift (Gewicht 100–900, Achse `slnt`),
+dieselbe Datei, die WooCommerce unter `assets/fonts/Inter-VariableFont_slnt,wght.woff2` mitbringt.
+Eingebunden über `fontFace` in `theme.json`, ohne externe Quelle. Ohne sie zeigte jede Maschine
+ihre Ersatzschrift, und Knopfbreiten wichen ab. Lizenz: SIL Open Font License 1.1,
+`assets/fonts/OFL.txt`.
 
 ## Die Schriftskala — eine Leiter, zwei Hälften
 
@@ -104,58 +196,32 @@ lesen. Sie steht deshalb hier.
 | `6xl` | `clamp(2.4rem, 5vw, 3.9rem)` | 38,4px | 62,4px | |
 
 Die untere Hälfte ist die Skala der **Oberfläche**: Bedienbeschriftungen, Tabellenzellen,
-Filtergruppen, der Fließtext. Sie ist fest, und das ist keine Nachlässigkeit — eine Bestellmaske,
-deren Zeilenhöhe mit der Fensterbreite wandert, ist an jeder Breite anders zu treffen.
+Filtergruppen, der Fließtext. Sie ist fest — eine Bestellmaske, deren Zeilenhöhe mit der
+Fensterbreite wandert, ist an jeder Breite anders zu treffen.
 
-Die obere Hälfte ist die Skala der **Drucksache**: Seitentitel, Kennzahlen, Abschnittsüberschriften.
-Die drei Werte sind wörtlich die des Entwurfs
-(ADR 004 im Website-Repo des ersten Kunden, `docs/mockups/richtung-entwurf/`) —
-`3.9rem` ist dort die `h1`, `3.2rem` die Kennzahl, `2.6rem` die `h2`.
+Die obere Hälfte ist die Skala der **Drucksache**: Seitentitel (`6xl`), Kennzahlen (`5xl`),
+Abschnittsüberschriften (`4xl`).
 
 ### Warum eigene `clamp()` und nicht `settings.typography.fluid`
 
-Zwei Messungen, beide am Klon mit `wp_get_typography_font_size_value()`.
-
 **Erstens: der Schalter greift die bestehenden Größen an.** Mit `"fluid": true` schreibt WordPress
-sie um — `base`, die 15px-Basis, auf der die gesamte B2B-Oberfläche steht:
+sie um. Auf 390px Breite wären das 14px statt 15px für den Fließtext (`base`), 14px statt 17px für
+`lg`, 19px statt 30px für `3xl` — der Shop verschöbe sich auf jedem Telefon. Zurückzuhalten wäre
+das nur mit `"fluid": false` an jeder bestehenden Größe, und die nächste neue Größe wäre eine Falle.
 
-```
-base  0.9375rem -> clamp(0.875rem, 0.875rem + ((1vw - 0.2rem) * 0.063), 0.938rem)
-lg    1.0625rem -> clamp(0.875rem, …, 1.063rem)
-3xl   1.875rem  -> clamp(1.185rem, …, 1.875rem)
-```
+**Zweitens: die Maschine kann den Entwurf nicht sagen.** Ihr Bezugsrahmen ist fest 320–1600px,
+global. Die drei redaktionellen Größen sind aber bei verschiedenen Breiten ausgewachsen; ein
+Rahmen, der einer passt, ist für die beiden anderen falsch.
 
-Auf 390px Breite sind das **14,0px statt 15px** für den Fließtext, 14px statt 17px für `lg`, 19px
-statt 30px für `3xl`. Der Shop verschöbe sich auf jedem Telefon. Zurückzuhalten wäre das nur mit
-`"fluid": false` an jeder der acht bestehenden Größen — acht Ausnahmen, damit eine Regel gilt, und
-eine Falle für die neunte, die jemand später hinzufügt.
+Deshalb bleibt `settings.typography.fluid` auf `false`, und die Fluidität steht als `clamp()` im
+Wert. Bei `false` fasst WordPress die Werte gar nicht an.
 
-**Zweitens: die Maschine kann den Entwurf nicht sagen.** Ihr Bezugsrahmen ist fest 320–1600px. Für
-die `h1` mit `min: 2.4rem`, `max: 3.9rem` liefert sie:
+### Was diese Skala nicht tut
 
-```
-clamp(2.4rem, 2.4rem + ((1vw - 0.2rem) * 1.5), 3.9rem)   ->  1440px: 55,2px
-```
-
-Der Entwurf will dort 62,4px. Der Grund ist nicht die Formel, sondern der Rahmen: die `h1` des
-Entwurfs ist bei **1248px** ausgewachsen, die Kennzahl bei **1280px**, die `h2` bei **1300px** — und
-ihre unteren Knicke liegen bei 768px, 880px und 850px. Drei Bänder. `minViewportWidth` und
-`maxViewportWidth` gibt es nur **einmal**, global; ein Rahmen, der einer der drei Größen passt, ist
-für die beiden anderen falsch.
-
-Deshalb: `settings.typography.fluid` bleibt `false`, und die Fluidität steht als `clamp()` im Wert.
-Bei `false` fasst WordPress die Werte gar nicht an — sie stehen unverändert im generierten
-Stylesheet. Die acht bestehenden Größen können sich damit nicht verschieben, weil an ihnen nichts
-gerechnet wird.
-
-### Was diese Skala noch nicht tut
-
-Sie ist **Vorrat**, keine Zuweisung. `styles.elements.heading` bleibt unberührt: eine `h1` global auf
-`6xl` zu setzen träfe auch die `h1` des Sortiments und jede `h2` der Filtergruppen — die sind
-Bedienbeschriftungen und keine Drucksache (dieselbe Grenze zieht schon die Schriftfamilien-Regel in
-`style.css`). Welcher Block welche Größe trägt, entscheidet die Seite über
-`has-4-xl-font-size` … `has-6-xl-font-size`. **Achtung beim Slug:** WordPress entstellt `4xl` zu
-`4-xl`, wie schon bei `3xl` → `has-3-xl-font-size`.
+Sie ist **Vorrat**, keine Zuweisung. `styles.elements.heading` bleibt unberührt: eine `h1` global
+auf `6xl` zu setzen träfe auch die `h1` des Sortiments und jede `h2` der Filtergruppen. Welcher
+Block welche Größe trägt, entscheidet die Seite über `has-4-xl-font-size` … `has-6-xl-font-size`.
+**Achtung beim Slug:** WordPress macht aus `4xl` ein `4-xl`, wie bei `3xl` → `has-3-xl-font-size`.
 
 ## Die zwei zuweisbaren Seitenvorlagen
 
@@ -165,152 +231,40 @@ Neben `templates/page.html` — der Vorgabe für jede Seite — stehen zwei Vorl
 
 | Slug (`_wp_page_template`) | Titel im Editor | Wozu |
 |---|---|---|
-| `page-full-width` | Seite — volle Breite | Hebt die 960px des Inhaltsbereichs auf. Die Seite mit dem Kurzcode `[lotzwoo_b2b_shop]` läuft hierüber — ein Katalog in 960px ist unlesbar. |
+| `page-full-width` | Seite — volle Breite | Hebt die 960px des Inhaltsbereichs auf. Für die Seite mit dem Kurzcode `[lotzwoo_b2b_shop]` — ein Katalog in 960px ist unlesbar. |
 | `page-no-title` | Seite — ohne Titelzeile | Rendert **keinen** `post_title`. Für Seiten, deren Überschrift im Inhalt steht. |
 
-`page-no-title` ist die Umsetzung von **E1**: die H1 lebt im Inhalt, `post_title` bleibt Verwaltungs-
-und Menütitel. Ohne sie steht die Überschrift auf redaktionellen Seiten doppelt — „Kontakt" über
-einem Absatz „Kontakt" —, und eine Startseite heißt „Startseite" statt das zu sagen, wofür sie da
-ist.
-
-**`post-title` aus `page.html` zu entfernen wäre der falsche Weg** und ist deshalb nicht geschehen:
-dieselbe Vorlage trägt die Sortimentsseite und das gesamte Konto — alle neun WooCommerce-Endpunkte
-plus `nachbestellen`. Die bekämen dann gar keine Überschrift mehr. Eine zuweisbare Vorlage trifft
-genau die Seiten, die es angeht.
+Ohne `page-no-title` stünde die Überschrift auf redaktionellen Seiten doppelt — „Kontakt" über
+einem Absatz „Kontakt". `post-title` aus `page.html` zu entfernen wäre falsch: dieselbe Vorlage
+trägt die Sortimentsseite und das ganze Kundenkonto, die dann keine Überschrift mehr hätten.
 
 Beide Vorlagen schreiben ihren Slug als Body-Klasse (`lotzwoo-page-full-width`,
-`lotzwoo-page-no-title`) — der `body_class`-Filter in `functions.php` leitet den Namen aus dem Slug
-ab. Nur die erste wird heute in `style.css` gelesen; die zweite ist der Haken, den ein Kindtheme
-oder ein Site-Plugin braucht, wenn eine Kundenseite doch einmal anders aussehen soll.
+`lotzwoo-page-no-title`).
 
-## Die Namen, die zwei Repos verbinden
+## Die Block-Styles
 
-```
-lotzwoo/header-slot
-lotzwoo/cart-slot   +   id="lotzwoo-cart-slot"
-```
-
-`parts/header.html` enthält diesen Platzhalter-Block, den **dieses Theme registriert und leer
-rendert** und den **das Plugin per `render_block`-Filter füllt** (Schnellsuche, Favoriten-Zähler,
-Kundenchip). Ohne Plugin rendert der Kopf leer statt kaputt.
-
-| | |
-|---|---|
-| Blockname | `lotzwoo/header-slot` |
-| Registrierung | `blocks/header-slot/block.json`, `render_callback` gibt `''` zurück |
-| Editor-Seite | `blocks/header-slot/index.js`, ohne Bauschritt |
-| Ort im Markup | `parts/header.html`, erstes Kind von `.lotzwoo-header-actions`, links von Konto-Symbol und Mini-Warenkorb |
-| Haken im Plugin | `add_filter('render_block_lotzwoo/header-slot', …)` — mit Schrägstrich, wie der Blockname |
-
-Der Rückgabewert des Themes ist die leere Zeichenkette und **kein leeres `<div>`**: die
-Aktionsgruppe ist ein Flex-Container mit `blockGap`, und ein leerer Kasten darin schöbe die
-Nachbarn um eine Lücke.
-
-### Die zwei Symbole im Kopf — und die Klassennamen, an denen sie hängen (AP-97, 2026-09-01)
-
-Seit dem 2026-09-01 tragen die Bestellannahme und der Konto-Chip ein Lucide-Symbol, **und nur
-solange die Zeile Platz dafür hat**. Das Markup kommt vom Plugin, die Entscheidung „jetzt weg"
-trifft `assets/js/kopfleiste.js` — dieselbe Arbeitsteilung wie bei allem anderen im Kopf.
-
-Damit sind es drei Klassennamen mehr, die beide Repos kennen müssen:
-
-| Name | Wer setzt ihn | Wer liest ihn |
-|---|---|---|
-| `lotzwoo-headerphone__ico` | Plugin (`templates/header-areas.php`) | dieses Theme, `style.css` — blendet ihn in der mittleren Bahn weg |
-| `lotzwoo-headerphone__num` | Plugin | dieses Theme — die Auslassungspunkte sitzen an ihm, seit der Link ein Flex-Kasten ist |
-| `lotzwoo-kopf--ohne-symbole` | dieses Theme (`kopfleiste.js`) | dieses Theme (`style.css`) |
-
-Die Leiter, von weit nach schmal: **Symbole** → Menüpunkte ins „mehr" → die Nummer hinterher →
-Hamburger → der Chip wird selbst zum Symbol. Die Symbole gehen zuerst, weil sie das einzige im Kopf
-sind, dessen Verlust keine Auskunft kostet; in der letzten Stufe kehrt das Konto-Symbol zurück,
-weil es dort der Knopf ist und nicht mehr die Zierde. Die Begründung je Symbol steht im Plugin-Repo
-unter `docs/plans/2026-09-01-konto-symbole.md`.
-
-### Der Warenkorb-Slot — derselbe Vertrag, anderer Mechanismus
-
-Ticket 15 hat den zweiten Slot geschnitten. Er sieht aus wie der erste und funktioniert anders:
-
-| | Kopf (`lotzwoo/header-slot`) | Warenkorb (`lotzwoo/cart-slot`) |
-|---|---|---|
-| Registrierung | Theme, `register_block_type` | Theme, `register_block_type` — **gleich** |
-| Render-Ausgabe | `''` | `<div id="lotzwoo-cart-slot"></div>` — **anders** |
-| Füllung | Plugin, PHP-`render_block`-Filter | Plugin, JS `mountPoint()` in `assets/js/b2b-cart.js` — **anders** |
-| Kopplung | Blockname | Blockname **und** Div-ID — **zwei Namen** |
-| Ort im Markup | `parts/header.html` | `templates/page-cart.html`, zwischen `cart-items-block` und `cart-totals-block` |
-| Ohne Plugin | leerer String | leeres Div, per `:empty` ausgeblendet, Höhe 0 |
-
-Der Grund für den anderen Mechanismus: die zurückgehaltenen Positionen liegen **clientseitig**. Das
-Plugin hängt sie als Cart-Extension an die Store API, sein JavaScript liest sie aus
-`wp.data.select('wc/store/cart')`. Auf einer Block-Seite feuert `woocommerce_after_cart_table` nie,
-und ein `render_block`-Filter hätte beim Templaterendering nichts zum Füllen — die Daten gibt es zu
-diesem Zeitpunkt noch nicht. Das Theme liefert deshalb keinen Inhalt, sondern einen **Ort**.
-
-Das kostet ein eigenes `templates/page-cart.html`, das den Cart-Block **inline** führt statt über
-`wp:post-content`. Drei Folgen, alle in Ticket 15 abgewogen:
-
-- Woos innere Blockstruktur des Warenkorbs ist damit pflichtig. Ändert Woo sie, ändert sich diese
-  Datei nicht mit — der Warenkorb funktioniert weiter, verliert aber, was Woo neu hineingelegt hat.
-- Der Inhalt der Warenkorb-**Seite** wird nicht mehr gerendert. Wer dort im Seiteneditor etwas
-  ergänzt, sieht es nicht. (Woos Warnung dafür greift nicht: sie prüft nur Templates aus der
-  Datenbank, nicht aus einer Datei.)
-- Die drei Cross-Sells von Woo bleiben, weil Ticket 15 sie als Teil der übernommenen Struktur nennt.
-  Das Produktgitter „Neu im Sortiment" des **leeren** Warenkorbs ist dagegen weg: es ist ein Katalog
-  ohne Freigabeprüfung, und Ticket 12 hat dieselbe Tür in drei Archiv-Templates zugemacht. An seiner
-  Stelle steht derselbe Knopf „Zum Sortiment" wie dort.
-
-Die Kasse bekommt **keinen** Slot (Ticket 15, Frage 5, Entscheidung A): AD-1 lässt ihr Template bei
-WooCommerce, und ohne Template gibt es keine kontrollierbare Stelle. FR-CTX-06b wird auf dem
-Warenkorb erfüllt.
-
-**Der Zwischenzustand, bis das Plugin nachzieht:** dort heißt `MOUNT_ID` noch
-`lotzwoo-heldback-blocks`. Das JS findet den Anker also nicht und hängt seine Sektion wie bisher
-neben den Cart-Block. Das ist dokumentiert und kein Fehler; er verschwindet, wenn `MOUNT_ID` auf
-`lotzwoo-cart-slot` steht und die Checkout-Selektoren aus `MOUNT_TARGETS` fallen.
-
-Die Sektion selbst (`.lotzwoo-heldback` und ihre Kinder) wird von **diesem** Theme gestaltet — im
-Plugin hat sie keine einzige Regel. `.lotzwoo-heldback` ist dafür die dritte Wurzel der
-Token-Brücke; findet das Plugin später eigene Regeln, stehen die Farben des Kundenthemes schon dort.
-
-Diese Namen sind die einzigen harten Kopplungen zwischen Theme- und Plugin-Repo. Sie stehen deshalb
-in beiden READMEs. Wer einen ändert, ändert beide — und für den Warenkorb sind es zwei auf einmal.
-`scripts/check-frontend.php` prüft den Kopf-Slot mit zwei Tests und den Warenkorb-Slot mit drei; der
-dritte ruft den `render_callback` auf und sucht `id="lotzwoo-cart-slot"` in seiner Ausgabe.
-
-## Die fünf Block-Styles — und der dritte Name, der aus dem Haus zeigt
-
-Ticket 17. Das Import-Skript der ersten Kunden-Website baute fünf wiederkehrende Bausteine an **45
-Aufrufstellen** aus Block-Attributen zusammen; jede Palettenänderung hätte 45 Stellen gehabt, und
-keine davon im Theme. Seit `register_block_style()` schreibt das Skript nur noch die Klasse, das
-Aussehen gehört hierher.
+Wiederkehrende Bausteine als `register_block_style()`: die Website schreibt nur die Klasse, das
+Aussehen gehört hierher. Eine Palettenänderung hat damit eine Stelle, im Theme.
 
 | Klasse | Blocktyp | Was sie trägt |
 |---|---|---|
 | `is-style-label` | `core/paragraph` | Versalien, `brand-500`, Grad `sm`, Gewicht 600, Sperrung `.13em` |
 | `is-style-kennzahl` | `core/paragraph` | Grad `5-xl`, Serifenschrift des Kindthemes, Gewicht 500 |
+| `is-style-zweispaltig` | `core/list` | zwei Spalten |
 | `is-style-karte` | `core/group` | Rahmen 1px `ink-200`, Polsterung `spacing--50` |
 | `is-style-abgesetzt` | `core/group` | Polsterung `spacing--70` oben/unten, `spacing--50` seitlich |
 | `is-style-empfaenger` | `core/group` | Kante 3px `ink-200` am Textanfang, Polsterung `40`/`50` |
+| `is-style-zeitleiste-schritt` | `core/group` | ein Schritt einer Zeitleiste |
+| `is-style-lesebreite` | `core/group` | begrenzte Lesebreite |
 
-Drei Dinge, die dabei leicht falsch gemacht werden:
+- **Der Hintergrund von `abgesetzt` bleibt Attribut.** Er wechselt je Seite und ist damit Inhalt.
+- **`karte` und `empfaenger` sind innen mehrteilig** (`h3` + `p`, bzw. zwei Absätze). Ein
+  Block-Style trägt Aussehen, nicht Zusammensetzung.
+- **Klasse *statt* Attribut, nie zusätzlich.** Bleiben Inline-Styles stehen, gewinnen sie.
 
-- **Der Hintergrund von `abgesetzt` bleibt Attribut.** Er wechselt je Aufrufer zwischen `surface-2`
-  und keinem Hintergrund und ist damit Inhalt der Seite, nicht des Bausteins.
-- **`karte` und `empfaenger` sind innen mehrteilig** (`h3` + `p`, bzw. zwei Absätze). Ein Block-Style
-  trägt Aussehen, nicht Zusammensetzung — deren Aufbau bleibt im Website-Repo. Wer später eine Karte
-  umbaut, findet die Hälfte davon dort.
-- **Klasse *statt* Attribut, nie zusätzlich.** Bleiben die Inline-Styles stehen, gewinnen sie, und
-  das CSS hier läuft ins Leere. Es sieht dann funktionierend aus und ist es nicht.
-
-Die Namen sind eine Kopplung zum **Website**-Repo — dieselbe Art Vertrag wie `lotzwoo/header-slot`
-zum Plugin, nur ohne Prüfskript: wer hier umbenennt, muss `import-pages.py` nachziehen, und hier
-wird nichts rot.
-
-`register_block_style()` macht die Styles im Website-Editor **auswählbar**, nicht sichtbar. Das
-Aussehen steht in `style.css`, und die Editor-Leinwand bekam aus diesem Theme bis Ticket 17
-überhaupt kein CSS — `add_theme_support('editor-styles')` ist die Erlaubnis, nicht die Zustellung.
-Zugestellt wird über `enqueue_block_assets` und nicht über `add_editor_style()`: letzteres löst über
-`get_theme_file_path()` auf und **bevorzugt das Kindtheme**, hätte im Editor also die vier Kilobyte
-des Kindes geliefert und die des Elternteils nie.
+Die Namen sind eine Kopplung zu den Inhalten der Website: wer hier umbenennt, muss die Seiten
+nachziehen. Im Editor sichtbar werden die Styles über `enqueue_block_assets` (nicht
+`add_editor_style()`, das bei aktivem Kindtheme nur dessen Stylesheet lädt).
 
 ## Die Mail-Angaben des Kindthemes
 
@@ -332,7 +286,7 @@ Datei `mail-angaben.json` liegt neben seiner `theme.json`:
 | `font_family` | `woocommerce_email_font_family` | Ein Eintrag aus Woos Schriftauswahl |
 
 **Was im Woo-Feld steht, gewinnt.** Das Kindtheme füllt nur ein leeres Feld. Ein neu installiertes
-WooCommerce legt Fußzeile und Schrift aber mit eigenen Standardwerten an; dort greift das Kindtheme
+WooCommerce legt Fußzeile und Schrift mit eigenen Standardwerten an; dort greift das Kindtheme
 erst, wenn die Felder geleert sind:
 
 ```bash
@@ -345,25 +299,16 @@ Woo dabei mit seinem Standard neu anlegen.
 Das Formular zeigt den Wert des Kindthemes. Unverändert gespeichert wird daraus keine Eingabe, die
 Zeile bleibt leer. Zwei Folgen: Ein geleertes Feld, auch „Logo entfernen", bringt den Wert des
 Kindthemes zurück; „keine Fußzeile" gibt es damit nicht. Und wer genau den Wert des Kindthemes
-eingibt, bindet sich nicht daran: die Zeile wird leer und folgt künftigen Änderungen der Datei.
-
-Die Gründe stehen in `inc/mail-angaben.php`, die Messung liefert:
-
-```bash
-wp eval-file scripts/check-mail-angaben.php [KINDTHEME-VERZEICHNIS]
-```
-
-`wp option get` zeigt nach dem Deploy den gefüllten Wert. Die gespeicherte Zeile zeigt
-`wp option list --search=woocommerce_email_footer_text`.
+eingibt, bindet sich nicht daran. Die Gründe stehen in `inc/mail-angaben.php`.
 
 ## Flächen, die dieses Theme abschaltet
 
-Ein B2B-Portal ist kein Blog. Das Theme schaltet drei Flächen ab, die WordPress sonst bedient:
+Ein B2B-Portal ist kein Blog:
 
 | Fläche | Zustand | schaltbar? |
 |---|---|---|
 | Autorenarchiv (`/author/…`, `?author=1`) | 404 | **nein** — zählt Benutzernamen auf |
-| Datumsarchiv (`/2026/08/`, `?m=202608`) | 404 | **nein** |
+| Datumsarchiv (`/JJJJ/MM/`, `?m=JJJJMM`) | 404 | **nein** |
 | Website-Suche ohne `post_type=product` | 404 | **ja**, siehe unten |
 
 Die Produktsuche bleibt und bekommt `templates/product-search-results.html`.
@@ -374,22 +319,9 @@ Die Produktsuche bleibt und bekommt `templates/product-search-results.html`.
 add_filter('lotzwoo_theme_site_search_enabled', '__return_true');
 ```
 
-Standardwert ist `false`. Der Filter gehört ins Site-Plugin des Kunden, nicht ins Kindtheme — dort
-liegen nach AD-8 nur `style.css` und `theme.json`, kein PHP.
+Der Filter gehört in ein Site-Plugin des Kunden, nicht ins Kindtheme — das trägt kein PHP.
 
-Ein eigenes Template braucht der Rückweg nicht: `templates/index.html` trägt eine Beitragsschleife
-mit `inherit`, die auch eine Suche bedient. `search.html`, `home.html` und `archive.html` entstehen,
-wenn ein Kunde redaktionelle Inhalte wirklich mitbringt.
+## Lizenz
 
-Nicht abgeschaltet und deshalb hier nicht aufgeführt: Beitragsindex, Kategorie- und
-Schlagwortarchiv. Sie laufen heute schon über `templates/index.html` — unauffällig, aber
-funktionsfähig.
-
-## Wo die Entscheidungen stehen
-
-Karten, Architekturentscheidungen (`AD-*`) und Befunde liegen im Plugin-Repo
-[`somesunnymind/lotzapp-for-woocommerce`](https://github.com/somesunnymind/lotzapp-for-woocommerce)
-unter `.hermes/wayfinder/` und `docs/`. Hier liegt kein `docs/` und kein `.hermes/` — ein Theme-Repo
-ist kein Planungsort.
-
-Der Zuschnitt dieses Repos ist Ticket 06 der Karte `theme-templates-und-repo`.
+GPL-2.0-or-later, siehe `LICENSE`. Die Schrift Inter steht unter der SIL Open Font License 1.1
+(`assets/fonts/OFL.txt`). Symbole aus [Lucide](https://lucide.dev), ISC-Lizenz.

@@ -1,60 +1,41 @@
-# Agenten-Kontext — lotzwoo-theme-base
+# AGENTS.md
 
-Dieses Repo trägt **nur** das Basis-Theme. Alles Planerische — Wayfinder-Karten, `AD-*`-Entscheidungen,
-Befunde, Runbooks — liegt im Plugin-Repo `somesunnymind/lotzapp-for-woocommerce`.
+Hinweise für Menschen und Programmier-Agenten, die an diesem Repo arbeiten. Kurz gehalten; Details
+stehen im [README](README.md) und in [CONTRIBUTING.md](CONTRIBUTING.md).
 
-**Lies dessen `AGENTS.md`, bevor du hier arbeitest.** Die Regeln stehen dort und werden hier
-absichtlich nicht wiederholt: Regeln an zwei Stellen laufen auseinander, und genau das hat dieses
-Projekt bei AD-1 schon einmal bezahlt — drei Fassungen, eine davon einen Tag lang nirgends.
+## Projekt
 
-Was hier gilt und dort nicht steht:
+WordPress-Block-Theme `lotzwoo-theme-base`: die Basis für B2B-Shops auf WooCommerce mit dem Plugin
+LotzApp for WooCommerce. PHP ≥ 8.1, WordPress ≥ 6.6, kein Bauschritt. Node braucht nur die CI.
 
-- **Ein Branch: `main`.** Keine Feature-Branches, keine Worktrees.
-- **Committen ja, pushen nur auf ausdrückliche Zusage.** Ein Tag ist die Auslieferung an Kunden und
-  ein eigenes Gate — siehe README.
-- **Vor jeder Änderung**: `git status --short`. Das Deploy-Skript bricht bei unsauberer Arbeitskopie
-  ab, weil es `HEAD` ausliefert und nicht, was hier liegt.
-- **Prüfen vor dem Commit:** `npm run check`.
+## Befehle
 
-## Die drei Kopplungen nach außen
+```bash
+npm ci && npm run check          # theme.json, Header, Blockmarkup, Sperrliste
+php scripts/check-updater.php    # Update-Weg, ohne WordPress
+php -l functions.php inc/*.php   # PHP-Syntax
+```
 
-1. **Der Platzhalter-Block in `parts/header.html`** — dieses Theme registriert ihn, das Plugin füllt
-   ihn. Wer ihn umbenennt, bricht das Plugin, ohne dass hier etwas rot wird.
-2. **Der Anker im Warenkorb** — `lotzwoo/cart-slot` in `templates/page-cart.html`, dessen
-   `render_callback` `<div id="lotzwoo-cart-slot"></div>` liefert. Zwei Zeichenketten statt einer:
-   Blockname **und** Div-ID, letztere gegen `MOUNT_ID` in `assets/js/b2b-cart.js`. Ticket 15.
-3. **Die Token-Brücke in `style.css`** — sie übersetzt `--wp--preset--*` in die `--lwb-*` des
-   Plugins, auf den Wurzeln `.lotzwoo-b2b-shop`, `.lotzwoo-reorder` und `.lotzwoo-heldback`. Die
-   Richtung ist Absicht (AD-8): das Theme hängt am Plugin, nie umgekehrt.
+`scripts/check-frontend.php` und `scripts/check-mail-angaben.php` brauchen eine laufende
+Installation (`wp eval-file`).
 
-4. **Die zwei Parts, die dem Kundentheme gehören** — `parts/navigation.html` und
-   `parts/footer-links.html`. AD-11: die Seitenstruktur eines Kunden ist kundenspezifisch und darf
-   hier nicht stehen. **Beide Dateien sind leer**, und das ist die Vorgabe für eine Installation
-   ohne Kindtheme: die Basis hat zur Seitenstruktur eines Kunden keine Meinung. Eine generische
-   `core/page-list` stand hier kurz als Rückfall und ist am 2026-08-12 wieder herausgeflogen — sie
-   zieht die Seiten aus der **Datenbank** und lieferte auf dieser Installation prompt „Über uns",
-   „Produkte", „Cart", „Checkout" und „Sample Page" in die Kopfzeile. Kundenspezifisch bleibt
-   kundenspezifisch, auch wenn es nicht im Theme steht.
+## Harte Regeln
 
-   Dass ein leerer Part **lautlos** leer ist, fängt `scripts/check-frontend.php` ab: es warnt, wenn
-   ein Kindtheme aktiv ist und seinen Part nicht mitbringt. Der Rahmen drumherum — Logo,
-   `lotzwoo/header-slot`, Konto,
-   Warenkorb, der Knopf „Zum Sortiment", die Rechtsspalte des Fußes — bleibt hier und verbessert
-   sich damit für alle Kunden zugleich.
+- **Slug und Vertragsnamen bleiben.** `lotzwoo-theme-base`, `lotzwoo/header-slot`,
+  `lotzwoo/cart-slot` + `id="lotzwoo-cart-slot"`, `lotzwoo/context-slot`, Filter
+  `lotzwoo/sortiment-url`, Token-Wurzeln `.lotzwoo-b2b-shop`, `.lotzwoo-reorder`,
+  `.lotzwoo-heldback`. Tabelle im README unter „Vertrag mit dem Plugin".
+- **Das Theme darf das Plugin kennen, das Plugin nie das Theme.** Das Theme ruft keine Funktion des
+  Plugins auf und läuft ohne es.
+- **Nichts Kundenspezifisches.** Menü, Fußlinks, Farben und Mail-Angaben eines Kunden gehören in
+  sein Kindtheme. `parts/navigation.html` und `parts/footer-links.html` bleiben hier leer.
+- **Kommentare beschreiben den Code, wie er ist:** das Warum, ohne Vorgangsnummern, Daten, Namen von
+  Kunden oder Personen, Serverpfade. `scripts/paket-sperrliste.txt` prüft das.
+- Keine Zugangsdaten ins Repo.
+- Datei, die nicht ins Release-ZIP gehört: `export-ignore` in `.gitattributes`.
 
-   Wer hier einen Menüpunkt einträgt, den ein bestimmter Kunde braucht, hat den Fehler gemacht, den
-   Ticket 16 gefunden hat.
+## Fertig heißt
 
-5. **`mail-angaben.json` im Kindtheme** — Logo, Fußzeile und Schrift der Mails. `inc/mail-angaben.php`
-   liest sie und füllt nur leere Woo-Felder. Die Basis selbst liefert keine: hier stehen keine
-   Firmendaten. Prüfung: `scripts/check-mail-angaben.php`.
-
-`scripts/check-frontend.php` deckt 1 mit zwei, 2 mit drei und 4 mit zwei Prüfungen ab. Es braucht
-eine laufende Installation und läuft nicht in der CI. Dasselbe gilt für
-`scripts/check-mail-angaben.php`.
-
-## Was hier nicht hingehört
-
-Kein `docs/`, kein `.hermes/`, kein `CHANGELOG.md`, kein `composer.json`, kein PHPCS, kein
-`.pot`-Bau. Die Begründung je Posten steht in Ticket 06 der Karte `theme-templates-und-repo`,
-Abschnitt 13.
+- `npm run check` und `php scripts/check-updater.php` grün, CI grün.
+- Bei Kommentar-Änderungen: Code ohne Kommentare vorher gleich nachher.
+- README nachgezogen, wenn sich Verhalten oder der Vertrag mit dem Plugin ändert.
